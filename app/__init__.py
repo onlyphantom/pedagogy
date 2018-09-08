@@ -1,7 +1,12 @@
 from flask import Flask
 from flask_admin import Admin
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
 
 app = Flask(__name__)
-admin = Admin(app, name='pedagogy')
+app.config.from_object(Config)
 
-from app import routes
+admin = Admin(app, name='pedagogy')
+db = SQLAlchemy(app)
+
+from app import routes, models
