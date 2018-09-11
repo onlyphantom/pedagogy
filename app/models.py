@@ -31,14 +31,14 @@ class Employee(db.Model):
 
 class Workshop(db.Model):
     workshop_id = db.Column(db.Integer, primary_key=True)
-    workshop_name = db.Column(db.String(32))
+    workshop_name = db.Column(db.String(64))
     workshop_category = db.Column(db.Enum(
         "Academy", "DSS", "Corporate", "Others", name="workshop_category"), nullable=False)
     workshop_instructor = db.Column(db.Integer, db.ForeignKey(
         'employee.employee_id'), nullable=False)
     workshop_start = db.Column(db.DateTime, default=datetime.utcnow)
     workshop_hours = db.Column(db.Integer)
-    workshop_venue = db.Column(db.String(32))
+    workshop_venue = db.Column(db.String(64))
     class_size = db.Column(db.Integer)
     responses = db.relationship('Response', backref='workshop', lazy='dynamic')
 
