@@ -16,7 +16,7 @@ class Employee(db.Model):
     join_date = db.Column(db.Date)
     active = db.Column(db.Boolean, default=True, nullable=False)
     degree = db.Column(db.String(32))
-    university = db.Column(db.String(32))
+    university = db.Column(db.String(64))
     assigned_ta = db.relationship(
         'Workshop',
         secondary=ta_assignment,
