@@ -1,8 +1,9 @@
-<html>
-    <head>
-        <title>{{ title }}</title>
-    </head>
-    <body>
-        <h1>Welcome to Pedagogy.</h1>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Welcome to Pedagogy.</h1>
+    {% for workshop in workshops %}
+            <h3>{{ workshop.name }}: {{ workshop.instructor  }}</h3> <br/>
+    {% endfor %}
+
+{% endblock %}
