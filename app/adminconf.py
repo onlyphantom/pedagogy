@@ -28,9 +28,27 @@ class EmployeeView(ModelView):
     column_filters = ['active', 'join_date']
 
 class WorkshopView(ModelView):
+    def is_accessible(self):
+        return (current_user.is_authenticated and
+                current_user.leadership is True)
+
+    def inaccessible_callback(self, name, **kwargs):
+        # redirect to login page if user doesn't have access
+        return redirect(url_for('login', next=request.url))
+
     create_modal = True
     edit_modal = True
     can_export = True
+
+class ResponseView(ModelView):
+    def is_accessible(self):
+        return (current_user.is_authenticated and
+                current_user.email == 'samuel@algorit.ma')
+
+    def inaccessible_callback(self, name, **kwargs):
+        # redirect to login page if user doesn't have access
+        return redirect(url_for('login', next=request.url))
+
 
 class AnalyticsView(BaseView):
     @expose('/')
@@ -40,5 +58,5 @@ class AnalyticsView(BaseView):
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(EmployeeView(Employee, db.session))
 admin.add_view(WorkshopView(Workshop, db.session))
-admin.add_view(ModelView(Response, db.session))
+admin.add_view(ResponseView(Response, db.session))
 admin.add_view(AnalyticsView(name='Analytics', endpoint='analytics'))
