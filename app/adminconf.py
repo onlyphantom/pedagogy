@@ -3,10 +3,14 @@ from app import admin, db
 from app.models import Employee, Workshop, Response
 from app.users import User
 from flask_admin import BaseView, expose
+from flask_admin.form import SecureForm
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 
 class AdminModelView(ModelView):
+    # uses the WTForm SessionCSRF class to generate and validate tokens
+    form_base_class = SecureForm
+
     def is_accessible(self):
         return (current_user.is_authenticated and
                 current_user.email == 'samuel@algorit.ma')
@@ -51,6 +55,14 @@ class ResponseView(ModelView):
 
 
 class AnalyticsView(BaseView):
+    def is_accessible(self):
+        return (current_user.is_authenticated and
+                current_user.leadership is True)
+
+    def inaccessible_callback(self, name, **kwargs):
+        # redirect to login page if user doesn't have access
+        return redirect(url_for('login', next=request.url))
+
     @expose('/')
     def index(self):
         return self.render('admin/analytics_index.html', user=current_user)

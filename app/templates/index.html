@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Welcome to Pedagogy.</h1>
+    <h1>Welcome to Pedagogy!</h1>
+
+    {% if current_user.is_authenticated %}
+        <h3>You're currently logged in as {{ current_user.email }}</h3>
+    {% endif %}
+    
     {% for workshop in workshops %}
-            <h3>{{ workshop.name }}: {{ workshop.instructor  }}</h3> <br/>
+            <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
     {% endfor %}
 
 {% endblock %}
