@@ -52,5 +52,15 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Welcome to Pedagogy. You\'re now registered. Please log in.')
+        return redirect(url_for('login'))
+
     return render_template('register.html', form=form)
