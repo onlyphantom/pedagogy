@@ -27,9 +27,10 @@ class EmployeeView(ModelView):
         # redirect to login page if user doesn't have access
         return redirect(url_for('login', next=request.url))
 
-    column_searchable_list = ['name', 'degree', 'university']
-    column_editable_list = ['active', 'degree', 'university', 'assigned_ta']
-    column_filters = ['active', 'join_date']
+    column_searchable_list = ['name', 'email', 'degree', 'university']
+    column_editable_list = ['email','active', 'degree', 'university', 'assigned_ta']
+    column_filters = ['email', 'active', 'join_date']
+
 
 class WorkshopView(ModelView):
     def is_accessible(self):

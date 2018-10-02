@@ -6,6 +6,9 @@ from app import db, login
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), index=True, unique=True)
+    employee_email = db.relationship(
+        'Employee', backref=db.backref('sigin_email')
+    )
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     leadership = db.Column(db.Boolean, default=False, nullable=False)
