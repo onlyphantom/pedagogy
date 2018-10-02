@@ -28,7 +28,7 @@ class EmployeeView(ModelView):
         return redirect(url_for('login', next=request.url))
 
     column_searchable_list = ['name', 'email', 'degree', 'university']
-    column_editable_list = ['email','active', 'degree', 'university', 'assigned_ta']
+    column_editable_list = ['email', 'active', 'degree', 'university', 'assigned_ta']
     column_filters = ['email', 'active', 'join_date']
 
 

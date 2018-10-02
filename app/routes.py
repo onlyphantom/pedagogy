@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from app.analytics import data_bar
+from app.analytics import mediumos, studentprof
 from app.users import User
 from app.forms import LoginForm, RegistrationForm
 from datetime import datetime
@@ -26,7 +26,9 @@ def index():
 @app.route('/analytics')
 @login_required
 def analytics():
-    return render_template('analytics.html', data_bar=data_bar)
+    return render_template('analytics.html',
+                           studentprof=studentprof,
+                           mediumos=mediumos)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

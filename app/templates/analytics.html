@@ -9,7 +9,9 @@
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script> -->
 
     <div id="vis"></div>
-    <div class="bar"></div>
+    <div class="bar1" id="vis1"></div>
+    <div class="bar2" id="vis2"></div>
+
     <div class="container">
 
         <!--<div class="waterfall" id="waterfall"></div><hr>
@@ -30,11 +32,12 @@
             }; 
         //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
     
-            vegaEmbed('#vis', url, opt).then(function(result) {
+            vegaEmbed(div, url, opt).then(function(result) {
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
-        parse("/data/bar", "bar")
+        parse("/data/mediumos", "#vis1")
+        parse("/data/studentprof", "#vis2")
     </script>
 
 {% endblock %}
