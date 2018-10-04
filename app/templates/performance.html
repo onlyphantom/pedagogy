@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>You're looking at performance metrics for ({{ employee.id }}): 
+        {{ employee.email }}, <br/>
+        joined on {{ employee.join_date }}</p>
+
+    {% for workshop in workshops %}
+            {{ workshop.workshop_name }}: <b> {{ workshop.workshop_category }}</b> <br/>
+    {% endfor %}
+    
+
+{% endblock %}

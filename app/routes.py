@@ -3,6 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
 from app.analytics import mediumos, studentprof
 from app.users import User
+from app.models import Employee, Workshop
 from app.forms import LoginForm, RegistrationForm
 from datetime import datetime
 
@@ -22,6 +23,15 @@ def index():
          'instructor':'Tiara'}
     ]
     return render_template('index.html', workshops=workshops)
+
+print(current_user)
+@app.route('/performance')
+@login_required
+def performance():
+    employee = Employee.query.filter_by(email=current_user.email).one()
+    workshops = Workshop.query.filter_by(workshop_instructor=employee.id)
+    return render_template('performance.html',
+                           employee=employee, workshops=workshops)
 
 @app.route('/analytics')
 @login_required

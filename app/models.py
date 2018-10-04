@@ -1,3 +1,4 @@
+
 from app import db
 from datetime import datetime
 # association table
@@ -27,7 +28,7 @@ class Employee(db.Model):
         backref=db.backref('instructor'))
 
     def __repr__(self):
-        return '<Employee {}, join date: {}>'.format(self.name, self.join_date)
+        return '{}'.format(self.name)
 
 class Workshop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,6 +42,9 @@ class Workshop(db.Model):
     workshop_venue = db.Column(db.String(64))
     class_size = db.Column(db.Integer)
     responses = db.relationship('Response', backref='workshop', lazy='dynamic')
+
+    def __repr__(self):
+        return '{} on {}'.format(self.workshop_name, self.workshop_start)
 
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)
