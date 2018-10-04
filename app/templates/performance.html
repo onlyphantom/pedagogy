@@ -8,6 +8,13 @@
     {% for workshop in workshops %}
             {{ workshop.workshop_name }}: <b> {{ workshop.workshop_category }}</b> <br/>
     {% endfor %}
+
+    <hr>
+
+    {% for response in responses %}
+            {{ response.satisfaction_score }} | {{ response.comments }}<br/>
+    {% endfor %}
+    
     
 
 {% endblock %}

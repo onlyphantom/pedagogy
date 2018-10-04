@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
 from app.analytics import mediumos, studentprof
 from app.users import User
-from app.models import Employee, Workshop
+from app.models import Employee, Workshop, Response
 from app.forms import LoginForm, RegistrationForm
 from datetime import datetime
 
@@ -28,10 +28,16 @@ print(current_user)
 @app.route('/performance')
 @login_required
 def performance():
-    employee = Employee.query.filter_by(email=current_user.email).one()
+    employee = Employee.query.filter_by(email=current_user.email).first()
+    # handle case of employee not found in database
+    if employee is None:
+        flash('Not registered as a Product team member yet. Check back later!')
+        return redirect(url_for('index'))
+
     workshops = Workshop.query.filter_by(workshop_instructor=employee.id)
+    responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     return render_template('performance.html',
-                           employee=employee, workshops=workshops)
+                           employee=employee, workshops=workshops, responses=responses)
 
 @app.route('/analytics')
 @login_required
@@ -48,7 +54,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).one()
+        user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
