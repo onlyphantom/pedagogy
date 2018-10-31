@@ -6,6 +6,7 @@ from app.users import User
 from app.models import Employee, Workshop, Response
 from app.forms import LoginForm, RegistrationForm
 from datetime import datetime
+from sqlalchemy import func
 
 @app.before_request
 def before_request():
@@ -35,9 +36,17 @@ def performance():
         return redirect(url_for('index'))
 
     workshops = Workshop.query.filter_by(workshop_instructor=employee.id)
+    grped = dict()
+    for gr in workshops:
+        category = gr.workshop_category
+        if category not in grped:
+            grped[category] = {'count': 0, 'students': 0}
+        grped[category]['count'] += 1
+        grped[category]['students'] += gr.class_size
+
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     return render_template('performance.html',
-                           employee=employee, workshops=workshops, responses=responses)
+                           employee=employee, workshops=workshops, responses=responses, grped=grped)
 
 @app.route('/analytics')
 @login_required

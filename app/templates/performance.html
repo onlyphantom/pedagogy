@@ -15,6 +15,16 @@
             {{ response.satisfaction_score }} | {{ response.comments }}<br/>
     {% endfor %}
     
+    <hr>
+    <h2>Category Breakdown</h2>
+
+    {% for gr in grped %}
+        {{ gr }}: {{ grped[gr]['count'] }} | {{ (grped[gr]['students']) }} students. <br>
+    {% endfor %}
+
+
     
+
+
 
 {% endblock %}
