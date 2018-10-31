@@ -35,7 +35,8 @@ def performance():
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
 
-    workshops = Workshop.query.filter_by(workshop_instructor=employee.id)
+    workshops = Workshop.query.filter_by(
+        workshop_instructor=employee.id).order_by(Workshop.workshop_start.desc())
     grped = dict()
     for gr in workshops:
         category = gr.workshop_category
