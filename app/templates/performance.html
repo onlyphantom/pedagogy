@@ -1,12 +1,19 @@
 {% extends "base.html" %}
 
-
 {% block content %}
-    <p>You're looking at performance metrics for ({{ employee.id }}): 
-        {{ employee.email }}, <br/> joined on {{ employee.join_date }}</p>
+    <p>You're looking at performance metrics for: 
+        {{ employee.email }}, joined on {{ employee.join_date }}</p>
 
-    <h2>Category Breakdown</h2>
+    <h2>Students</h2>
+    <h4>Total Number of Students:</h4>    
+    {{ totalstud }}
+    
+    <h4>Total Number of Hours:</h4>    
+    {{ totalhours }}
+    <hr>
+    
 
+    <h4>Category Breakdown</h4>
     {% for gr in grped %}
         {{ gr }}: {{ grped[gr]['count'] }} | {{ (grped[gr]['students']) }} students. <br>
     {% endfor %}
@@ -18,7 +25,7 @@
         <div>
             {{ workshop.workshop_start }}<br>    
             {{ workshop.workshop_name }}: <b> {{ workshop.workshop_category }}</b> <br/>
-            <small> {{ workshop.workshop_venue }} | {{ workshop.class_size }} </small>
+            <small> {{ workshop.workshop_venue }} | {{ workshop.class_size }} students | {{ workshop.workshop_hours }} hours </small>
         </div>
         <br>
     {% endfor %}
@@ -31,9 +38,5 @@
     {% endfor %}
     
     <hr>
-
-    
-
-
 
 {% endblock %}

@@ -38,16 +38,24 @@ def performance():
     workshops = Workshop.query.filter_by(
         workshop_instructor=employee.id).order_by(Workshop.workshop_start.desc())
     grped = dict()
+    totalstud = 0
+    totalhours = 0
     for gr in workshops:
         category = gr.workshop_category
         if category not in grped:
-            grped[category] = {'count': 0, 'students': 0}
+            grped[category] = {'count': 0, 'students': 0, 'hours': 0}
         grped[category]['count'] += 1
         grped[category]['students'] += gr.class_size
+        grped[category]['hours'] += gr.workshop_hours
+        totalhours += gr.workshop_hours
+        totalstud += gr.class_size
 
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     return render_template('performance.html',
-                           employee=employee, workshops=workshops, responses=responses, grped=grped)
+                           employee=employee, 
+                           workshops=workshops.limit(10), 
+                           responses=responses, grped=grped,
+                           totalstud=totalstud, totalhours=totalhours)
 
 @app.route('/analytics')
 @login_required
