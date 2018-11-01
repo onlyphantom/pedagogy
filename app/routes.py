@@ -26,9 +26,9 @@ def index():
     return render_template('index.html', workshops=workshops)
 
 print(current_user)
-@app.route('/performance')
+@app.route('/accomplishment')
 @login_required
-def performance():
+def accomplishment():
     employee = Employee.query.filter_by(email=current_user.email).first()
     # handle case of employee not found in database
     if employee is None:
@@ -51,7 +51,7 @@ def performance():
         totalstud += gr.class_size
 
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
-    return render_template('performance.html',
+    return render_template('accomplishment.html',
                            employee=employee, 
                            workshops=workshops.limit(10), 
                            responses=responses, grped=grped,

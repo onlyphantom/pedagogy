@@ -11,7 +11,7 @@
     <div>Pedagogy: 
         <a href="{{ url_for('index') }}">Home</a>
         <a href="{{  url_for('analytics') }}">Analytics</a>
-        <a href="{{ url_for('performance') }}">Performance</a>
+        <a href="{{ url_for('accomplishment') }}">Accomplishment</a>
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('logout') }}">Logout</a> 
         {% else %}
