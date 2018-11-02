@@ -9,6 +9,9 @@ df = pd.read_sql_query("SELECT * FROM workshop", conn, index_col='id')
 df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
 # TODO: change to compare to current user instead of hardcoded to Samuel
 df['this_user'] = df['workshop_instructor'] == 1
+melted = pd.melt(df[df['workshop_instructor'] == 1], 
+              id_vars=['mnth_yr', 'workshop_category'], 
+              value_vars=['workshop_hours', 'class_size'])
 
 @app.route('/data/class_size_vs')
 def class_size_vs():
@@ -22,6 +25,18 @@ def class_size_vs():
             'this_user',
             scale=alt.Scale(range=['#000000', '#62092f'])
         )
+    )
+    return chart.to_json()
+
+@app.route('/data/class_size_hours')
+def class_size_hours():
+    chart = alt.Chart(melted).mark_bar().encode(
+        column='variable',
+        x=alt.X("sum(value)"),
+        y=alt.Y('mnth_yr'),
+        color=alt.Color('workshop_category')
+    ).properties(
+        width=250
     )
     return chart.to_json()
 

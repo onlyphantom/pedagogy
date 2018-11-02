@@ -17,6 +17,8 @@
     <h4>Total Number of Hours:</h4>    
     {{ totalhours }}
     <hr>
+
+    <div class="plot" id="vis_accomp_2"></div>
     
 
     <h4>Category Breakdown</h4>
@@ -58,6 +60,7 @@
             }).catch(console.error);
         }
         parse("/data/class_size_vs", "#vis_accomp_1")
+        parse("/data/class_size_hours", "#vis_accomp_2")
     </script>
 
 {% endblock %}
