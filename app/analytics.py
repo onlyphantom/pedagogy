@@ -20,12 +20,10 @@ def before_request():
             id_vars=['mnth_yr', 'workshop_category'], 
             value_vars=['workshop_hours', 'class_size'])
 
-        df2 = df.copy()
-        df2['workshop_category'] = df2['workshop_category'].astype('category')
-        df2['workshop_category'] = pd.Categorical(df2['workshop_category']).codes
-        print(df.head())
-        print(df2.head())
-        g.dat = df2.set_index('workshop_start').resample('W').sum()
+        g.df2 = df.copy()
+        g.df2['workshop_category'] = g.df2['workshop_category'].astype('category')
+        g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
+        g.dat = g.df2.set_index('workshop_start').resample('W').sum()
         g.accum = pd.melt(g.dat.reset_index(), 
             id_vars=['workshop_start','workshop_category'], 
             value_vars=['workshop_hours', 'class_size'])
@@ -73,10 +71,10 @@ def accum():
 
 @app.route('/data/punchcode')
 def punchcode():
-    df['workshop_category'] = df['workshop_category'].apply(lambda x:x if x == 'Corporate' else 'Public' )
-    df['contrib'] = df['workshop_hours'] * df['class_size']
+    g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )
+    g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
 
-    chart = alt.Chart(df).mark_circle().encode(
+    chart = alt.Chart(g.df2).mark_circle().encode(
         x='mnth_yr:O',
         y='workshop_instructor:O',
         size='sum(contrib):Q',
