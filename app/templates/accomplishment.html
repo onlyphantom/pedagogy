@@ -29,6 +29,7 @@
     <hr>
 
     <h2>Workshop Timeline</h2>
+    <div class="plot" id="vis_accomp_3"></div>
     {% for workshop in workshops %}
         <div>
             {{ workshop.workshop_start }}<br>    
@@ -61,6 +62,7 @@
         }
         parse("/data/class_size_vs", "#vis_accomp_1")
         parse("/data/class_size_hours", "#vis_accomp_2")
+        parse("/data/accum_personal", "#vis_accomp_3")
     </script>
 
 {% endblock %}

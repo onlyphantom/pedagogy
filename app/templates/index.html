@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <script src=" {{ url_for('static', filename='js/vega.min.js') }} "></script>
+    <script src=" {{ url_for('static', filename='js/vega-lite.js') }} "></script>
+    <script src=" {{ url_for('static', filename='js/vega-embed.min.js') }} "></script>
+
     <h1>Welcome to Pedagogy!</h1>
+
+    <div class="plot" id="vis_home_1"></div>
 
     {% if current_user.is_authenticated %}
         <h3>You're currently logged in as {{ current_user.email }}</h3>
@@ -10,5 +16,21 @@
     {% for workshop in workshops %}
             <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
     {% endfor %}
+
+    <script type="text/javascript">
+        function parse(url, div) {
+            var opt = {
+              mode: "vega-lite",
+              renderer: "svg",
+              actions: {export: true, source: false, editor: false}
+            }; 
+        //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
+    
+            vegaEmbed(div, url, opt).then(function(result) {
+              // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+            }).catch(console.error);
+        }
+        parse("/data/punchcode", "#vis_home_1")
+    </script>
 
 {% endblock %}
