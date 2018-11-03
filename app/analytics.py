@@ -6,7 +6,8 @@ import pandas as pd
 from app import app
 from config import conn
 
-df = pd.read_sql_query("SELECT * FROM workshop", conn, index_col='id')
+df = pd.read_sql_query(
+    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop LEFT JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
 # convert datetime to '2018-09' month and year format
 df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
 
@@ -69,6 +70,7 @@ def accum():
     )
     return chart.to_json()
 
+# TODO: LEFT JOIN with names instead of instructor ID
 @app.route('/data/punchcode')
 def punchcode():
     g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )
@@ -76,7 +78,7 @@ def punchcode():
 
     chart = alt.Chart(g.df2).mark_circle().encode(
         x='mnth_yr:O',
-        y='workshop_instructor:O',
+        y='name:O',
         size='sum(contrib):Q',
         column='workshop_category:O'
     ).properties(
