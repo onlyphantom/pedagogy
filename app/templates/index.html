@@ -5,11 +5,33 @@
     <script src=" {{ url_for('static', filename='js/vega-lite.js') }} "></script>
     <script src=" {{ url_for('static', filename='js/vega-embed.min.js') }} "></script>
 
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-md-7 col-lg-7">
+                <h1 class="display-4">2443 Students</h1>
+                <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+            </div>
+            <div class="col-md-5 col-lg-5">
+                <div class="plot" id="vis_home_jumbo"></div>
+            </div>
+        </div>
+
+        <!-- TODO: If registered as product team, show accomplishment button -->
+        {% if current_user.is_authenticated %}
+        <div>
+            <hr class="my-4 col-md-12">
+            <p>You're currently logged in as {{ current_user.email }}</p>
+            <a class="btn btn-primary btn-sm" href="#" role="button">Accomplishment</a>
+            <a class="btn btn-secondary btn-sm" href="#" role="button">Analytics</a>
+        </div>
+        {% endif %}        
+    </div>
+
+    <h2>Most Recent Workshops:</h2>
+
     <div class="plot" id="vis_home_1"></div>
 
-    {% if current_user.is_authenticated %}
-        <h3>You're currently logged in as {{ current_user.email }}</h3>
-    {% endif %}
+
     
     {% for workshop in workshops %}
             <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
@@ -21,7 +43,7 @@
             var opt = {
               mode: "vega-lite",
               renderer: "svg",
-              actions: {export: true, source: false, editor: false}
+              actions: {export: false, source: false, editor: false}
             }; 
         //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
     
@@ -29,6 +51,7 @@
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
+        parse("/data/accum_global_line", "#vis_home_jumbo")
         parse("/data/punchcode", "#vis_home_1")
         parse("/data/accum_global", "#vis_home_2")
     </script>

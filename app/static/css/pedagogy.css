@@ -1,0 +1,12 @@
+/* Navigation */
+.navbar-brand {
+    margin-left: 1%;
+    font-size: 1.5rem;
+}
+.navbar-brand > small {
+    font-size: 50%;
+}
+
+/* Iconography */
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }

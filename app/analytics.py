@@ -31,6 +31,11 @@ def before_request():
         g.accum['workshop_category'] = g.accum['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
         g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum().fillna(0)
 
+        g.accumtotal = pd.melt(g.dat.reset_index(),
+                    id_vars=['workshop_start'], 
+                    value_vars=['class_size'])    
+        g.accumtotal['cumsum'] = g.accumtotal.groupby(['variable']).cumsum().fillna(0)
+
         g.df3 = df[df['this_user'] == True].copy()
         g.df3['workshop_category'] = pd.Categorical(g.df3['workshop_category']).codes
         g.dat2 = g.df3.set_index('workshop_start').resample('W').sum()
@@ -76,6 +81,18 @@ def accum_global():
         color=alt.Color("variable")
     ).properties(
         width=250
+    )
+    return chart.to_json()
+
+@app.route('/data/accum_global_line')
+def accum_global_line():
+    chart = alt.Chart(g.accumtotal).mark_line(
+        color='#212529'
+    ).encode(
+        x=alt.X("workshop_start", axis=alt.Axis(title='')),
+        y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students'))
+    ).properties(
+        width=380
     )
     return chart.to_json()
 
