@@ -5,8 +5,6 @@
     <script src=" {{ url_for('static', filename='js/vega-lite.js') }} "></script>
     <script src=" {{ url_for('static', filename='js/vega-embed.min.js') }} "></script>
 
-    <h1>Welcome to Pedagogy!</h1>
-
     <div class="plot" id="vis_home_1"></div>
 
     {% if current_user.is_authenticated %}
@@ -16,6 +14,7 @@
     {% for workshop in workshops %}
             <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
     {% endfor %}
+    <div class="plot" id="vis_home_2"></div>
 
     <script type="text/javascript">
         function parse(url, div) {
@@ -31,6 +30,7 @@
             }).catch(console.error);
         }
         parse("/data/punchcode", "#vis_home_1")
+        parse("/data/accum_global", "#vis_home_2")
     </script>
 
 {% endblock %}

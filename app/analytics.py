@@ -10,26 +10,35 @@ df = pd.read_sql_query(
     "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop LEFT JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
 # convert datetime to '2018-09' month and year format
 df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
+df['workshop_category'] = df['workshop_category'].astype('category')
 
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
         employee = Employee.query.filter_by(email=current_user.email).first()
         df['this_user'] = df['workshop_instructor'] == employee.id
-        g.melted = pd.melt(
+        g.user_melted = pd.melt(
             df[df['this_user'] == True],
             id_vars=['mnth_yr', 'workshop_category'], 
-            value_vars=['workshop_hours', 'class_size'])
+            value_vars=['workshop_hours', 'class_size'])       
 
         g.df2 = df.copy()
-        g.df2['workshop_category'] = g.df2['workshop_category'].astype('category')
         g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
         g.dat = g.df2.set_index('workshop_start').resample('W').sum()
         g.accum = pd.melt(g.dat.reset_index(), 
             id_vars=['workshop_start','workshop_category'], 
             value_vars=['workshop_hours', 'class_size'])
-        g.accum['workshop_category'] = g.accum['workshop_category'].apply(lambda x: 'Public' if (x == 0 | x == 2) else 'Corporate')
+        g.accum['workshop_category'] = g.accum['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
         g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum().fillna(0)
+
+        g.df3 = df[df['this_user'] == True].copy()
+        g.df3['workshop_category'] = pd.Categorical(g.df3['workshop_category']).codes
+        g.dat2 = g.df3.set_index('workshop_start').resample('W').sum()
+        g.accum_personal = pd.melt(g.dat2.reset_index(), 
+            id_vars=['workshop_start','workshop_category'], 
+            value_vars=['workshop_hours', 'class_size'])
+        g.accum_personal['workshop_category'] = g.accum_personal['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
+        g.accum_personal['cumsum'] = g.accum_personal.groupby(['variable','workshop_category']).cumsum().fillna(0)
 
 @app.route('/data/class_size_vs')
 def class_size_vs():  
@@ -48,7 +57,7 @@ def class_size_vs():
 
 @app.route('/data/class_size_hours')
 def class_size_hours():
-    chart = alt.Chart(g.melted).mark_bar().encode(
+    chart = alt.Chart(g.user_melted).mark_bar().encode(
         column='variable',
         x=alt.X("sum(value)"),
         y=alt.Y('mnth_yr'),
@@ -58,8 +67,8 @@ def class_size_hours():
     )
     return chart.to_json()
 
-@app.route('/data/accum_personal')
-def accum():
+@app.route('/data/accum_global')
+def accum_global():
     chart = alt.Chart(g.accum).mark_area().encode(
         column='workshop_category',
         x=alt.X("workshop_start"),
@@ -70,7 +79,18 @@ def accum():
     )
     return chart.to_json()
 
-# TODO: LEFT JOIN with names instead of instructor ID
+@app.route('/data/accum_personal')
+def accum_personal():
+    chart = alt.Chart(g.accum_personal).mark_area().encode(
+        column='workshop_category',
+        x=alt.X("workshop_start"),
+        y=alt.Y("sum(cumsum):Q"),
+        color=alt.Color("variable")
+    ).properties(
+        width=250
+    )
+    return chart.to_json()
+
 @app.route('/data/punchcode')
 def punchcode():
     g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )

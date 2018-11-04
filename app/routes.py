@@ -16,6 +16,7 @@ def before_request():
 
 @app.route('/')
 @app.route('/index')
+@login_required
 def index():
     workshops = [
         {'name': 'BCA Cohort 3 Visualization',
