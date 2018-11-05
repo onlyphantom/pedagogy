@@ -7,11 +7,20 @@
 
     <div class="jumbotron">
         <div class="row">
-            <div class="col-md-7 col-lg-7">
-                <h1 class="display-4">2443 Students</h1>
+            <div class="col-md-10 col-lg-6 col-sm-10">
+                <h1 class="display-4">{{ stats['students'] }} Students</h1>
                 <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+                <ul>
+                    <li>Conducted <span class="badge badge-dark">{{ stats['workshops'] }}</span> workshops</li>
+                    <li>Clocked <span class="badge badge-dark">{{ stats['studenthours'] }}</span> hours of training</li>
+                    <li>Employed by <span class="badge badge-dark">{{ stats['companies'] }}</span> companies for training</li>
+                    <li>A task force of <span class="badge badge-dark">{{ stats['instructors'] }}</span> emphathetic instructors</li>
+                </ul>
+                <!-- <div class="progress progress-dark mt-2">
+                    <div class="progress-bar bg-dark" role="progressbar" aria-valuemin="0" aria-valuemax="100">{{ stats['progress'] }}%</div>
+                </div> -->
             </div>
-            <div class="col-md-5 col-lg-5">
+            <div class="col-md-10 col-lg-5 offset-lg-1 col-sm-10  mt-2">
                 <div class="plot" id="vis_home_jumbo"></div>
             </div>
         </div>
@@ -21,22 +30,35 @@
         <div>
             <hr class="my-4 col-md-12">
             <p>You're currently logged in as {{ current_user.email }}</p>
-            <a class="btn btn-primary btn-sm" href="#" role="button">Accomplishment</a>
+            <a class="btn btn-dark btn-sm" href="#" role="button">Accomplishment</a>
             <a class="btn btn-secondary btn-sm" href="#" role="button">Analytics</a>
         </div>
         {% endif %}        
     </div>
-
-    <h2>Most Recent Workshops:</h2>
-
-    <div class="plot" id="vis_home_1"></div>
-
-
+    <div class="row">
+            <div class="col-md-10 col-lg-5 col-sm-10">
+                <h2>Leaderboard:</h2>
     
-    {% for workshop in workshops %}
+                {% for workshop in workshops %}
+                <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
+                {% endfor %}
+            </div>
+            <div class="col-md-10 col-lg-7 col-sm-10">
+                <div class="plot" id="vis_home_1"></div>
+            </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-lg-5 col-sm-10">
+            <h2>Most Recent Workshops:</h2>
+
+            {% for workshop in workshops %}
             <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
-    {% endfor %}
-    <div class="plot" id="vis_home_2"></div>
+            {% endfor %}
+        </div>
+        <div class="col-md-10 col-lg-7 col-sm-10">
+            <div class="plot" id="vis_home_2"></div>
+        </div>
+    </div>
 
     <script type="text/javascript">
         function parse(url, div) {

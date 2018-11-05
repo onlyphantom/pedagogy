@@ -1,7 +1,17 @@
 import os
+import pymysql
 
-# /Users/Samuel/Dropbox/Projects/Python/Pedagogy
-basedir = os.path.abspath(os.path.dirname(__file__))
+host = os.getenv('MYSQL_HOST')
+user = os.getenv('MYSQL_USER')
+password = os.getenv('MYSQL_PASSWORD')
+database = os.getenv('MYSQL_DATABASE')
+
+conn = pymysql.connect(
+    host=host,
+    port=int(3306),
+    user=user,
+    passwd=password,
+    db=database)
 
 # create the configuration class
 class Config():
@@ -12,4 +22,4 @@ class Config():
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False

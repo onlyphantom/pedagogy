@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from app.analytics import mediumos, studentprof
+from app.analytics import mediumos, studentprof, global_total_stats
 from app.users import User
 from app.models import Employee, Workshop, Response
 from app.forms import LoginForm, RegistrationForm
@@ -24,7 +24,8 @@ def index():
         {'name': 'Academy Neural Network',
          'instructor':'Tiara'}
     ]
-    return render_template('index.html', workshops=workshops)
+    stats=global_total_stats()
+    return render_template('index.html', workshops=workshops, stats=stats)
 
 print(current_user)
 @app.route('/accomplishment')

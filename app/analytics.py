@@ -78,21 +78,65 @@ def accum_global():
         column='workshop_category',
         x=alt.X("workshop_start"),
         y=alt.Y("sum(cumsum):Q"),
-        color=alt.Color("variable")
+        color=alt.Color("variable", legend=alt.Legend(orient="left"))
     ).properties(
         width=250
     )
     return chart.to_json()
 
+# @app.route('/data/accum_global_line')
+# def accum_global_line():
+#     chart = alt.Chart(g.accumtotal).mark_line(
+#         color='#212529'
+#     ).encode(
+#         x=alt.X("workshop_start", axis=alt.Axis(title='')),
+#         y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students'))
+#     )
+#     return chart.to_json()
+
 @app.route('/data/accum_global_line')
 def accum_global_line():
-    chart = alt.Chart(g.accumtotal).mark_line(
-        color='#212529'
-    ).encode(
-        x=alt.X("workshop_start", axis=alt.Axis(title='')),
-        y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students'))
-    ).properties(
-        width=380
+    brush = alt.selection(type='interval', encodings=['x'])
+    # Create a selection that chooses the nearest point & selects based on x-value
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['workshop_start'], empty='none')
+    line = alt.Chart().mark_line(color='#212529', interpolate='basis').encode(
+            x=alt.X("workshop_start:T", axis=alt.Axis(title='', grid=False),scale={'domain': brush.ref()}),
+            y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students', grid=False))
+    )
+    selectors = alt.Chart(g.accumtotal).mark_point().encode(
+        x=alt.X("workshop_start:T"),
+        opacity=alt.value(0)
+    ).add_selection(
+        nearest
+    )
+    points = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
+    text = line.mark_text(align='left', dx=-20, dy=-5).encode(
+        text=alt.condition(nearest, 'sum(cumsum):Q', alt.value(' '))
+    )
+    rules = alt.Chart().mark_rule(color='gray').encode(
+        x=alt.X("workshop_start:T"),
+    ).transform_filter(
+        nearest
+    )
+
+    upper = alt.layer(line, selectors, points, rules, text, data=g.accumtotal, width=350)
+    lower = alt.Chart().mark_area(color='#6c757d').encode(
+            x=alt.X("workshop_start:T", axis=alt.Axis(title=''), scale={
+                'domain':brush.ref()
+            }),
+            y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title=''))
+        ).properties(
+        height=30,
+        width=350
+    ).add_selection(
+        brush
+    )
+
+    chart = alt.vconcat(upper,lower, data=g.accumtotal).configure_view(
+        strokeWidth=0
     )
     return chart.to_json()
 
@@ -116,7 +160,7 @@ def punchcode():
     chart = alt.Chart(g.df2).mark_circle().encode(
         x='mnth_yr:O',
         y='name:O',
-        size='sum(contrib):Q',
+        size=alt.Size('sum(contrib):Q', legend=None),
         column='workshop_category:O'
     ).properties(
         width=250
@@ -150,3 +194,14 @@ def studentprof():
         domainWidth=0.8
     )
     return chart.to_json()
+
+# TODO: use pandas to query and return
+def global_total_stats():
+    stats = {
+        'students': df['class_size'].sum(),
+        'workshops': df.shape[0],
+        'studenthours': sum(df['workshop_hours'] * df['class_size']),
+        'companies': sum(df['workshop_category'] == 'Corporate'),
+        'instructors': len(df['workshop_instructor'].unique())
+    }
+    return stats
