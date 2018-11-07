@@ -37,17 +37,16 @@
     </div>
     <div class="row">
             <div class="col-md-10 col-lg-5 col-sm-10">
-                <h2>Leaderboard:</h2>
-    
-                {% for workshop in workshops %}
-                <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
-                {% endfor %}
+                <h2>Most prolific instructors:</h2>
+                <div class="mt-4">
+                    {{ stats['topten'] | safe }}
+                </div>
             </div>
             <div class="col-md-10 col-lg-7 col-sm-10">
                 <div class="plot" id="vis_home_1"></div>
             </div>
     </div>
-    <div class="row">
+    <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
             <h2>Most Recent Workshops:</h2>
 

@@ -163,7 +163,7 @@ def punchcode():
         size=alt.Size('sum(contrib):Q', legend=None),
         column='workshop_category:O'
     ).properties(
-        width=250
+        width=250, height=360
     )
     return chart.to_json()
 
@@ -202,6 +202,11 @@ def global_total_stats():
         'workshops': df.shape[0],
         'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
-        'instructors': len(df['workshop_instructor'].unique())
+        'instructors': len(df['workshop_instructor'].unique()),
+        'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(
+            'name').sum().sort_values(
+                by='workshop_hours', 
+                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover'])
     }
+
     return stats
