@@ -14,27 +14,14 @@ df['workshop_category'] = df['workshop_category'].astype('category')
 
 @app.before_request
 def before_request():
-    if current_user.is_authenticated:
+    employee = Employee.query.filter_by(email=current_user.email).first()
+    if current_user.is_authenticated and employee is not None:
         employee = Employee.query.filter_by(email=current_user.email).first()
         df['this_user'] = df['workshop_instructor'] == employee.id
         g.user_melted = pd.melt(
             df[df['this_user'] == True],
             id_vars=['mnth_yr', 'workshop_category'], 
             value_vars=['workshop_hours', 'class_size'])       
-
-        g.df2 = df.copy()
-        g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
-        g.dat = g.df2.set_index('workshop_start').resample('W').sum()
-        g.accum = pd.melt(g.dat.reset_index(), 
-            id_vars=['workshop_start','workshop_category'], 
-            value_vars=['workshop_hours', 'class_size'])
-        g.accum['workshop_category'] = g.accum['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
-        g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum().fillna(0)
-
-        g.accumtotal = pd.melt(g.dat.reset_index(),
-                    id_vars=['workshop_start'], 
-                    value_vars=['class_size'])    
-        g.accumtotal['cumsum'] = g.accumtotal.groupby(['variable']).cumsum().fillna(0)
 
         g.df3 = df[df['this_user'] == True].copy()
         g.df3['workshop_category'] = pd.Categorical(g.df3['workshop_category']).codes
@@ -44,6 +31,20 @@ def before_request():
             value_vars=['workshop_hours', 'class_size'])
         g.accum_personal['workshop_category'] = g.accum_personal['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
         g.accum_personal['cumsum'] = g.accum_personal.groupby(['variable','workshop_category']).cumsum().fillna(0)
+    
+    g.df2 = df.copy()
+    g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
+    g.dat = g.df2.set_index('workshop_start').resample('W').sum()
+    g.accum = pd.melt(g.dat.reset_index(), 
+        id_vars=['workshop_start','workshop_category'], 
+        value_vars=['workshop_hours', 'class_size'])
+    g.accum['workshop_category'] = g.accum['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
+    g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum().fillna(0)
+    g.accumtotal = pd.melt(g.dat.reset_index(),
+                id_vars=['workshop_start'], 
+                value_vars=['class_size'])    
+    g.accumtotal['cumsum'] = g.accumtotal.groupby(['variable']).cumsum().fillna(0)
+
 
 @app.route('/data/class_size_vs')
 def class_size_vs():  
@@ -76,12 +77,16 @@ def class_size_hours():
 def accum_global():
     chart = alt.Chart(g.accum).mark_area().encode(
         column='workshop_category',
-        x=alt.X("workshop_start"),
-        y=alt.Y("sum(cumsum):Q"),
-        color=alt.Color("variable", legend=alt.Legend(orient="left"))
-    ).properties(
-        width=250
-    )
+        x=alt.X("workshop_start", title="Date"),
+        y=alt.Y("sum(cumsum):Q", title="Cumulative"),
+        color=alt.Color("variable", 
+            scale=alt.Scale(
+                range=['#6c757d', '#343a40']),
+            legend=alt.Legend(
+                orient="left",
+                title="Measurement")
+        )
+    ).properties(width=250)
     return chart.to_json()
 
 # @app.route('/data/accum_global_line')
@@ -157,13 +162,13 @@ def punchcode():
     g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )
     g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
 
-    chart = alt.Chart(g.df2).mark_circle().encode(
+    chart = alt.Chart(g.df2).mark_circle(color='#6c757d').encode(
         x='mnth_yr:O',
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),
         column='workshop_category:O'
     ).properties(
-        width=250, height=360
+        width=250, height=320
     )
     return chart.to_json()
 
@@ -206,7 +211,7 @@ def global_total_stats():
         'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(
             'name').sum().sort_values(
                 by='workshop_hours', 
-                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover'])
+                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
     }
 
     return stats

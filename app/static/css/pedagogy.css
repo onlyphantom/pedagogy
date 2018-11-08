@@ -15,6 +15,10 @@
     height: 25px;
 }
 
+.table-striped tbody tr:nth-of-type(odd){
+    background-color: #e8ecef;
+}
+
 /* Iconography */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }

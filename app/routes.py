@@ -1,7 +1,7 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, g
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from app.analytics import mediumos, studentprof, global_total_stats
+from app.analytics import global_total_stats
 from app.users import User
 from app.models import Employee, Workshop, Response
 from app.forms import LoginForm, RegistrationForm
@@ -12,6 +12,7 @@ from sqlalchemy import func
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
+        g.employee = Employee.query.filter_by(email=current_user.email).first()
         db.session.commit()
 
 @app.route('/')
@@ -31,14 +32,13 @@ print(current_user)
 @app.route('/accomplishment')
 @login_required
 def accomplishment():
-    employee = Employee.query.filter_by(email=current_user.email).first()
     # handle case of employee not found in database
-    if employee is None:
+    if g.employee is None:
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
 
     workshops = Workshop.query.filter_by(
-        workshop_instructor=employee.id).order_by(Workshop.workshop_start.desc())
+        workshop_instructor=g.employee.id).order_by(Workshop.workshop_start.desc())
     grped = dict()
     totalstud = 0
     totalhours = 0
@@ -54,7 +54,7 @@ def accomplishment():
 
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     return render_template('accomplishment.html',
-                           employee=employee, 
+                           employee=g.employee, 
                            workshops=workshops.limit(10), 
                            responses=responses, grped=grped,
                            totalstud=totalstud, totalhours=totalhours)
@@ -62,9 +62,7 @@ def accomplishment():
 @app.route('/analytics')
 @login_required
 def analytics():
-    return render_template('analytics.html',
-                           studentprof=studentprof,
-                           mediumos=mediumos)
+    return render_template('analytics.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

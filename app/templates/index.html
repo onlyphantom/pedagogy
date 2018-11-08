@@ -24,16 +24,15 @@
                 <div class="plot" id="vis_home_jumbo"></div>
             </div>
         </div>
-
         <!-- TODO: If registered as product team, show accomplishment button -->
-        {% if current_user.is_authenticated %}
-        <div>
-            <hr class="my-4 col-md-12">
-            <p>You're currently logged in as {{ current_user.email }}</p>
-            <a class="btn btn-dark btn-sm" href="#" role="button">Accomplishment</a>
-            <a class="btn btn-secondary btn-sm" href="#" role="button">Analytics</a>
-        </div>
-        {% endif %}        
+        <hr class="mt-4 col-md-12">
+        {% if g.employee is none %}
+            <small>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as a Product team member.</small>
+        {% else %}
+            <p> You're currently logged in as {{ g.employee.email }}</p>
+            <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
+            <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
+        {% endif %}                
     </div>
     <div class="row">
             <div class="col-md-10 col-lg-5 col-sm-10">
@@ -48,13 +47,28 @@
     </div>
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
-            <h2>Most Recent Workshops:</h2>
-
-            {% for workshop in workshops %}
-            <p>{{ workshop.name }}: {{ workshop.instructor  }}</p> <br/>
-            {% endfor %}
+            <div class="jumbotron">
+                <h2><i class="large material-icons">lock</i> Personal Statistics</h2>
+                {% if g.employee is none %}
+                <div>
+                    <p>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as a Product team member. </p>
+                    <p>As a registered member, you unlock detailed performance statistics under the Accomplishment page:</p>        
+                    <ul>
+                        <li>Personal Accomplishments</li>
+                        <li>Accumulative Statistics</li>
+                        <li>Key Milestones</li>
+                        <li>Performance Indicators</li>
+                        <li>Student Reviews</li>
+                    </ul>
+                </div>
+                {% else %}
+                    <p>You're currently logged in as {{ g.employee.email }}</p>
+                    <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
+                    <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
+                {% endif %} 
+            </div>
         </div>
-        <div class="col-md-10 col-lg-7 col-sm-10">
+        <div class="col-md-10 col-lg-7 col-sm-10 mt-4">
             <div class="plot" id="vis_home_2"></div>
         </div>
     </div>
