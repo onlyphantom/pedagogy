@@ -27,7 +27,7 @@
         <!-- TODO: If registered as product team, show accomplishment button -->
         <hr class="mt-4 col-md-12">
         {% if g.employee is none %}
-            <small>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as a Product team member.</small>
+            <small>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as an instructor.</small>
         {% else %}
             <p> You're currently logged in as {{ g.employee.email }}</p>
             <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
@@ -51,7 +51,7 @@
                 <h2><i class="large material-icons">lock</i> Personal Statistics</h2>
                 {% if g.employee is none %}
                 <div>
-                    <p>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as a Product team member. </p>
+                    <p>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as an instructor. </p>
                     <p>As a registered member, you unlock detailed performance statistics under the Accomplishment page:</p>        
                     <ul>
                         <li>Personal Accomplishments</li>

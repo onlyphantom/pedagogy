@@ -14,24 +14,24 @@ df['workshop_category'] = df['workshop_category'].astype('category')
 
 @app.before_request
 def before_request():
-    employee = Employee.query.filter_by(email=current_user.email).first()
-    if current_user.is_authenticated and employee is not None:
+    if current_user.is_authenticated:
         employee = Employee.query.filter_by(email=current_user.email).first()
-        df['this_user'] = df['workshop_instructor'] == employee.id
-        g.user_melted = pd.melt(
-            df[df['this_user'] == True],
-            id_vars=['mnth_yr', 'workshop_category'], 
-            value_vars=['workshop_hours', 'class_size'])       
-
-        g.df3 = df[df['this_user'] == True].copy()
-        g.df3['workshop_category'] = pd.Categorical(g.df3['workshop_category']).codes
-        g.dat2 = g.df3.set_index('workshop_start').resample('W').sum()
-        g.accum_personal = pd.melt(g.dat2.reset_index(), 
-            id_vars=['workshop_start','workshop_category'], 
-            value_vars=['workshop_hours', 'class_size'])
-        g.accum_personal['workshop_category'] = g.accum_personal['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
-        g.accum_personal['cumsum'] = g.accum_personal.groupby(['variable','workshop_category']).cumsum().fillna(0)
+        if employee is not None:
+            df['this_user'] = df['workshop_instructor'] == employee.id
+            g.user_melted = pd.melt(
+                df[df['this_user'] == True],
+                id_vars=['mnth_yr', 'workshop_category'], 
+                value_vars=['workshop_hours', 'class_size'])       
     
+            g.df3 = df[df['this_user'] == True].copy()
+            g.df3['workshop_category'] = pd.Categorical(g.df3['workshop_category']).codes
+            g.dat2 = g.df3.set_index('workshop_start').resample('W').sum()
+            g.accum_personal = pd.melt(g.dat2.reset_index(), 
+                id_vars=['workshop_start','workshop_category'], 
+                value_vars=['workshop_hours', 'class_size'])
+            g.accum_personal['workshop_category'] = g.accum_personal['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
+            g.accum_personal['cumsum'] = g.accum_personal.groupby(['variable','workshop_category']).cumsum().fillna(0)
+        
     g.df2 = df.copy()
     g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
     g.dat = g.df2.set_index('workshop_start').resample('W').sum()
