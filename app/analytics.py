@@ -205,7 +205,8 @@ def global_total_stats():
     stats = {
         'students': df['class_size'].sum(),
         'workshops': df.shape[0],
-        'studenthours': sum(df['workshop_hours'] * df['class_size']),
+        'studenthours': sum(df['workshop_hours']),
+        # 'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
         'instructors': len(df['workshop_instructor'].unique()),
         'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(

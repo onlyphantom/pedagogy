@@ -48,8 +48,8 @@
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
             <div class="jumbotron">
-                <h2><i class="large material-icons">lock</i> Personal Statistics</h2>
                 {% if g.employee is none %}
+                <h2><i class="large material-icons">lock</i> Personal Statistics</h2>  
                 <div>
                     <p>You're signed in as <b>{{ current_user.email }}</b> but you're not currently registered as an instructor. </p>
                     <p>As a registered member, you unlock detailed performance statistics under the Accomplishment page:</p>        
@@ -62,6 +62,7 @@
                     </ul>
                 </div>
                 {% else %}
+                <h2><i class="large material-icons">insert_chart_outlined</i> Personal Statistics</h2>
                     <p>You're currently logged in as {{ g.employee.email }}</p>
                     <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
                     <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
