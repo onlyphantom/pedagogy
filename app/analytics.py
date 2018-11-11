@@ -54,12 +54,12 @@ def class_size_vs():
     interpolate='monotone'
     ).encode(
         alt.X("mnth_yr:O", axis=alt.Axis(title='')),
-        alt.Y('sum(workshop_hours)'),
+        alt.Y('sum(workshop_hours)', axis=alt.Axis(title='Workshop Hours')),
         alt.Color(
             'workshop_category',
             scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2'])
         )
-    )
+    ).properties(width=250)
     return chart.to_json()
 
 @app.route('/data/class_size_hours')
@@ -89,16 +89,6 @@ def accum_global():
         )
     ).properties(width=250)
     return chart.to_json()
-
-# @app.route('/data/accum_global_line')
-# def accum_global_line():
-#     chart = alt.Chart(g.accumtotal).mark_line(
-#         color='#212529'
-#     ).encode(
-#         x=alt.X("workshop_start", axis=alt.Axis(title='')),
-#         y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students'))
-#     )
-#     return chart.to_json()
 
 @app.route('/data/accum_global_line')
 def accum_global_line():
@@ -176,7 +166,6 @@ def punchcode():
 @app.route('/data/mediumos')
 def mediumos():
     home = pd.read_csv('data/home.csv')
-    # home = home[home['Medium'].notnull()]
     chart = alt.Chart(home).mark_bar().encode(
         x='Medium',
         y='count()',
@@ -201,7 +190,7 @@ def studentprof():
     )
     return chart.to_json()
 
-# TODO: use pandas to query and return
+
 def global_total_stats():
     stats = {
         'students': df['class_size'].sum(),
@@ -215,5 +204,31 @@ def global_total_stats():
                 by='workshop_hours', 
                 ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
     }
+    return stats
 
+def person_total_stats():
+    workshops = Workshop.query.filter_by(
+        workshop_instructor=g.employee.id).order_by(Workshop.workshop_start.desc())
+    grped = dict()
+    totalstud = 0
+    totalhours = 0
+    for gr in workshops:
+        category = gr.workshop_category
+        if category not in grped:
+            grped[category] = {'count': 0, 'students': 0, 'hours': 0}
+        grped[category]['count'] += 1
+        grped[category]['students'] += gr.class_size
+        grped[category]['hours'] += gr.workshop_hours
+        totalhours += gr.workshop_hours
+        totalstud += gr.class_size
+
+    responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
+    stats = {
+        'employee': g.employee,
+        'workshops': workshops.limit(10),
+        'responses': responses,
+        'grped': grped,
+        'totalstud': totalstud,
+        'totalhours': totalhours
+    }
     return stats
