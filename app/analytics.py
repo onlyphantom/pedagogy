@@ -47,16 +47,17 @@ def before_request():
 
 
 @app.route('/data/class_size_vs')
-def class_size_vs():  
-    chart = alt.Chart(df).mark_area(
-        opacity=0.75,
-        interpolate='step'
+def class_size_vs():
+    chart = alt.Chart(df[df['this_user'] == True]).mark_area(
+    clip=True,
+    opacity=0.75,
+    interpolate='monotone'
     ).encode(
-        alt.X("class_size:Q", bin=alt.Bin(maxbins=12)),
-        alt.Y('count()', stack=None),
+        alt.X("mnth_yr:O", axis=alt.Axis(title='')),
+        alt.Y('sum(workshop_hours)'),
         alt.Color(
-            'this_user',
-            scale=alt.Scale(range=['#000000', '#62092f'])
+            'workshop_category',
+            scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2'])
         )
     )
     return chart.to_json()
@@ -163,7 +164,7 @@ def punchcode():
     g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
 
     chart = alt.Chart(g.df2).mark_circle(color='#6c757d').encode(
-        x='mnth_yr:O',
+        x=alt.X('mnth_yr:O', axis=alt.Axis(title='')),
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),
         column='workshop_category:O'

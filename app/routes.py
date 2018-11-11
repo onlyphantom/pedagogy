@@ -26,7 +26,7 @@ def index():
          'instructor':'Tiara'}
     ]
     stats=global_total_stats()
-    return render_template('index.html', workshops=workshops, stats=stats)
+    return render_template('index.html', employee=g.employee, workshops=workshops, stats=stats)
 
 print(current_user)
 @app.route('/accomplishment')
