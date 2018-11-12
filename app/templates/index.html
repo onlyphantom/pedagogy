@@ -66,6 +66,9 @@
                     <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
                     <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
                 {% endif %} 
+                <hr>
+                <div class="plot" id="vis_home_3"></div>
+                <p >When you sign in as an instructor, you'll see deeper personal statistics.</p>
             </div>
         </div>
         <div class="col-md-10 col-lg-7 col-sm-10 mt-4">
@@ -89,6 +92,7 @@
         parse("/data/accum_global_line", "#vis_home_jumbo")
         parse("/data/punchcode", "#vis_home_1")
         parse("/data/accum_global", "#vis_home_2")
+        parse('/data/category_bars', '#vis_home_3')
     </script>
 
 {% endblock %}

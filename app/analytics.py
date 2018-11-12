@@ -59,7 +59,7 @@ def class_size_vs():
             'workshop_category',
             scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2'])
         )
-    ).properties(width=250)
+    ).properties(width=400)
     return chart.to_json()
 
 @app.route('/data/class_size_hours')
@@ -160,6 +160,14 @@ def punchcode():
         column='workshop_category:O'
     ).properties(
         width=250, height=320
+    )
+    return chart.to_json()
+
+@app.route('/data/category_bars')
+def category_bars():
+    chart = alt.Chart(df).mark_bar(color='#6c757d').encode(
+        x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
+        y=alt.Y('workshop_category:O', title='')
     )
     return chart.to_json()
 
