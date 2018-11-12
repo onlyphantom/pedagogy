@@ -171,6 +171,42 @@ def category_bars():
     )
     return chart.to_json()
 
+@app.route('/data/instructor_breakdown')
+def instructor_breakdown():
+    multi = alt.selection_multi(fields=['name'], on='mouseover', nearest=True)
+    brush = alt.selection(type='interval')
+    color = alt.condition(multi, alt.Color('name:N',  legend=None), alt.value('lightgray'))
+
+    bar = alt.Chart(df).mark_bar().encode(
+        x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
+        y=alt.Y('workshop_category:O', title=''),
+        color=alt.Color('name:N', legend=None),
+    ).transform_filter(
+        brush
+    ).transform_filter(
+        multi
+    )
+    points = alt.Chart(df).mark_point().encode(
+        x=alt.X('class_size:Q', bin=alt.Bin(maxbins=10)),
+        y=alt.Y('workshop_hours:Q', bin=alt.Bin(maxbins=10)),
+        color=alt.Color('name:N', legend=None)
+    ).transform_filter(
+        multi
+    ).add_selection(
+        brush
+    ).properties(
+        height=150
+    )
+    picker = alt.Chart(df).mark_rect().encode(
+        y='name:N',
+        color=color
+    ).add_selection(
+        multi
+    )
+    chart = alt.hconcat(picker, alt.vconcat(points, bar))
+    return chart.to_json()
+
+
 @app.route('/data/mediumos')
 def mediumos():
     home = pd.read_csv('data/home.csv')
@@ -198,6 +234,11 @@ def studentprof():
     )
     return chart.to_json()
 
+
+
+# ================ Non-Chart Section ================
+# Return Stats, usually in the form of Dictionary
+# ===================================================
 
 def global_total_stats():
     stats = {

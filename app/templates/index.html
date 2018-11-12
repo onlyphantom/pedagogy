@@ -47,6 +47,9 @@
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
             <div class="jumbotron">
+                <h2>Hours by Category</h2>
+                <div class="plot" id="vis_home_3"></div>
+                <hr>
                 {% if g.employee is none %}
                 <h2><i class="large material-icons">lock</i> Personal Statistics</h2>  
                 <div>
@@ -65,10 +68,7 @@
                     <p>You're currently logged in as {{ g.employee.email }}</p>
                     <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
                     <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
-                {% endif %} 
-                <hr>
-                <div class="plot" id="vis_home_3"></div>
-                <p >When you sign in as an instructor, you'll see deeper personal statistics.</p>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-10 col-lg-7 col-sm-10 mt-4">
