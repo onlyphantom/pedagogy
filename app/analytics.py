@@ -167,7 +167,8 @@ def punchcode():
 def category_bars():
     chart = alt.Chart(df).mark_bar(color='#6c757d').encode(
         x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
-        y=alt.Y('workshop_category:O', title='')
+        y=alt.Y('workshop_category:O', title=''),
+        tooltip=['sum(workshop_hours):Q', 'workshop_category:O']
     )
     return chart.to_json()
 
