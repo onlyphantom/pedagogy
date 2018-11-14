@@ -48,18 +48,26 @@ def before_request():
 
 @app.route('/data/class_size_vs')
 def class_size_vs():
-    chart = alt.Chart(df[df['this_user'] == True]).mark_area(
+    brush = alt.selection(type='interval', encodings=['x'])
+    upper = alt.Chart(df[df['this_user'] == True]).mark_area(
     clip=True,
     opacity=0.75,
     interpolate='monotone'
     ).encode(
-        alt.X("mnth_yr:O", axis=alt.Axis(title='')),
-        alt.Y('sum(workshop_hours)', axis=alt.Axis(title='Workshop Hours')),
-        alt.Color(
+        x=alt.X("mnth_yr:T", axis=alt.Axis(title=''), scale={'domain':brush.ref()}),
+        y=alt.Y('sum(workshop_hours)', axis=alt.Axis(title='Workshop Hours')),
+        color=alt.Color(
             'workshop_category',
             scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2'])
-        )
+        ),
+        tooltip=['workshop_category']
     ).properties(width=400)
+    lower = alt.Chart(df[df['this_user'] == True]).mark_rect(color='#91989e').encode(
+        x=alt.X("mnth_yr:T", axis=alt.Axis(title='Interval Selector'), scale={'domain':brush.ref()})
+    ).add_selection(
+        brush
+    )
+    chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True])
     return chart.to_json()
 
 @app.route('/data/class_size_hours')
@@ -68,10 +76,14 @@ def class_size_hours():
         column='variable',
         x=alt.X("sum(value)"),
         y=alt.Y('mnth_yr'),
-        color=alt.Color('workshop_category')
-    ).properties(
-        width=250
-    )
+        color=alt.Color(
+            'workshop_category',
+            scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2']),legend=None),
+            tooltip=['workshop_category', 'sum(value)']
+        ).properties(
+            width=250
+        )
+        
     return chart.to_json()
 
 @app.route('/data/accum_global')
@@ -154,7 +166,7 @@ def punchcode():
     g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
 
     chart = alt.Chart(g.df2).mark_circle(color='#6c757d').encode(
-        x=alt.X('mnth_yr:O', axis=alt.Axis(title='')),
+        x=alt.X('mnth_yr:T', axis=alt.Axis(title='')),
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),
         column='workshop_category:O'
@@ -182,6 +194,7 @@ def instructor_breakdown():
         x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
         y=alt.Y('workshop_category:O', title=''),
         color=alt.Color('name:N', legend=None),
+        tooltip=['sum(workshop_hours):Q', 'workshop_category:O']
     ).transform_filter(
         brush
     ).transform_filter(
@@ -190,7 +203,8 @@ def instructor_breakdown():
     points = alt.Chart(df).mark_point().encode(
         x=alt.X('class_size:Q', bin=alt.Bin(maxbins=10)),
         y=alt.Y('workshop_hours:Q', bin=alt.Bin(maxbins=10)),
-        color=alt.Color('name:N', legend=None)
+        color=alt.Color('name:N', legend=None),
+        tooltip=['workshop_category:O', 'class_size:Q']
     ).transform_filter(
         multi
     ).add_selection(
@@ -273,12 +287,16 @@ def person_total_stats():
         totalstud += gr.class_size
 
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
+    fullstar = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.satisfaction_score + Response.knowledge >= 9).count()
+    # 165
     stats = {
         'employee': g.employee,
-        'workshops': workshops.limit(10),
+        'workshops': workshops.limit(5),
         'responses': responses,
         'grped': grped,
         'totalstud': totalstud,
-        'totalhours': totalhours
+        'totalhours': totalhours,
+        'fullstar': fullstar,
+        'responsecount': len(responses)
     }
     return stats

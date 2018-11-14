@@ -36,12 +36,6 @@ def accomplishment():
     if g.employee is None:
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
-
-    # return render_template('accomplishment.html',
-    #                        employee=g.employee, 
-    #                        workshops=workshops.limit(10), 
-    #                        responses=responses, grped=grped,
-    #                        totalstud=totalstud, totalhours=totalhours)
     personstats=person_total_stats()
     return render_template('accomplishment.html', personstats=personstats)
 
