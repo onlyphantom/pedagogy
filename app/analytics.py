@@ -186,10 +186,22 @@ def category_bars():
 
 @app.route('/data/instructor_breakdown')
 def instructor_breakdown():
-    multi = alt.selection_multi(fields=['name'], on='mouseover', nearest=True)
+    multi = alt.selection_multi(fields=['name'], on='click')
     brush = alt.selection(type='interval')
     color = alt.condition(multi, alt.Color('name:N',  legend=None), alt.value('lightgray'))
-
+    color2 = alt.condition(brush, alt.Color('name:N',  legend=None), alt.value('lightgray'))
+    point = alt.Chart(df).mark_circle(size=60).encode(
+        x=alt.X('workshop_start:T', axis=alt.Axis(title='')),
+        y=alt.Y('sum(class_size)', axis=alt.Axis(title='Class Size', grid=False)),
+        color=alt.Color('name:N', legend=None),
+        tooltip=['workshop_name','monthdate(workshop_start)', 'name','sum(class_size)']
+    ).transform_filter(
+        multi
+    ).transform_filter(
+        brush
+    ).properties(
+        width=600
+    ).interactive()
     bar = alt.Chart(df).mark_bar().encode(
         x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
         y=alt.Y('workshop_category:O', title=''),
@@ -200,11 +212,12 @@ def instructor_breakdown():
     ).transform_filter(
         multi
     )
-    points = alt.Chart(df).mark_point().encode(
-        x=alt.X('class_size:Q', bin=alt.Bin(maxbins=10)),
-        y=alt.Y('workshop_hours:Q', bin=alt.Bin(maxbins=10)),
-        color=alt.Color('name:N', legend=None),
-        tooltip=['workshop_category:O', 'class_size:Q']
+    box = alt.Chart(df).mark_rect().encode(
+        x=alt.X('class_size:Q', bin=alt.Bin(maxbins=15)),
+        y=alt.Y('workshop_hours:Q', bin=alt.Bin(maxbins=15)),
+        color=color2,
+        size=alt.Size('sum(workshop_hours):Q', legend=None),
+        tooltip=['workshop_name:O', 'class_size:Q']
     ).transform_filter(
         multi
     ).add_selection(
@@ -218,7 +231,7 @@ def instructor_breakdown():
     ).add_selection(
         multi
     )
-    chart = alt.hconcat(picker, alt.vconcat(points, bar))
+    chart = alt.hconcat(picker,point, alt.vconcat(box, bar))
     return chart.to_json()
 
 
@@ -288,7 +301,6 @@ def person_total_stats():
 
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     fullstar = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.satisfaction_score + Response.knowledge >= 9).count()
-    # 165
     stats = {
         'employee': g.employee,
         'workshops': workshops.limit(5),
