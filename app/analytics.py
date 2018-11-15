@@ -58,7 +58,8 @@ def class_size_vs():
         y=alt.Y('sum(workshop_hours)', axis=alt.Axis(title='Workshop Hours')),
         color=alt.Color(
             'workshop_category',
-            scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2'])
+            scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2']),
+            legend=None
         ),
         tooltip=['workshop_category']
     ).properties(width=400)
@@ -194,7 +195,7 @@ def instructor_breakdown():
         x=alt.X('workshop_start:T', axis=alt.Axis(title='')),
         y=alt.Y('sum(class_size)', axis=alt.Axis(title='Class Size', grid=False)),
         color=alt.Color('name:N', legend=None),
-        tooltip=['workshop_name','monthdate(workshop_start)', 'name','sum(class_size)']
+        tooltip=['workshop_name','monthdate(workshop_start)', 'name','class_size']
     ).transform_filter(
         multi
     ).transform_filter(

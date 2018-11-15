@@ -7,6 +7,38 @@
     font-size: 50%;
 }
 
+/* Common Elements customization */
+.statcards {
+    margin: 1% 0;
+    background-color: #e8ecef;
+    padding:2.5% 1.5% 1% 1.5%;
+    border-radius: 5px
+}
+
+.statcards-header{
+    font-size:0.55em;
+    color: #343a40;
+    font-weight: bolder; 
+    text-transform:uppercase  
+}
+
+.statcards-count {
+    font-size: 1.4em;
+    margin: 5% 3% 5% 0;
+}
+
+.statcards-count-p {
+    margin-left: 3%;
+    font-size: 1.8em
+}
+
+.statsupport {
+    font-size:0.55em;
+    line-height: 0;
+    font-weight: 300;
+    margin-left: 11%
+}
+
 
 /* Home Page customization */
 .progress.progress-dark {
@@ -22,3 +54,4 @@
 /* Iconography */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+
