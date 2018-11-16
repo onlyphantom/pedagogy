@@ -24,33 +24,47 @@
    </div> 
    <div class="row mt-2">
        <div class="col-md-12 col-lg-5 col-sm-12">
-            <h4>Category Breakdown</h4>
+            <h4><code>summary()</code></h4>
             <div>
                 {% for gr in personstats['grped'] %}
                 <div class="statcards row">
-                    <div class="col-lg-4 col-sm-4 col-md-4">
+                    <div class="col-4 col-sm-12 col-md-12 col-lg-12">
                         <h4 class="statcards-header">{{ gr }}</h4>
+                    </div>
+                    <div class="col-4 col-sm-4 col-md-4 col-lg-4">
                         <span class="statcards-count"><i class="material-icons">school</i></span><span class="statcards-count-p">{{ personstats['grped'][gr]['count'] }}</span>
                         <p class="statsupport">workshops</p> 
                     </div>
-                    <div class="col-lg-4 col-sm-4 col-md-4 mt-3">
-                        <span class="statcards-count"><i class="material-icons">school</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['students']) }}</span>
+                    <div class=" col-4 col-sm-4 col-md-4 col-lg-4">
+                        <span class="statcards-count"><i class="material-icons">people</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['students']) }}</span>
                         <p class="statsupport">Students</p> 
                     </div>
-                    <div class="col-lg-4 col-sm-4 col-md-4 mt-3">
-                        <span class="statcards-count"><i class="material-icons">school</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['hours']) }}</span>
+                    <div class="col-4 col-sm-4 col-md-4 col-lg-4">
+                        <span class="statcards-count"><i class="material-icons">av_timer</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['hours']) }}</span>
                         <p class="statsupport">Hours</p> 
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            <div class="statcards row">
+                <div class="col-sm-4 col-4 col-md-4 col-lg-4">
+                    <h4 class="statcards-header">Ratings</h4>
+                    <span class="statcards-count"><i class="material-icons">star</i></span><span class="statcards-count-p">{{ personstats['fullstar'] }}</span>
+                    <p class="statsupport">Ecstatic Ratings</p>  
+                </div>
+                <div class="col-sm-4 col-4 col-md-4 col-lg-4 mt-3">
+                        <span class="statcards-count"><i class="material-icons">thumb_up</i></span><span class="statcards-count-p">{{ (personstats['fullstar']/personstats['responsecount']*100) | round(2) }}</span>
+                        <p class="statsupport">Ecstactic Ratings %</p> 
+                    </div>
+                <div class="col-sm-4 col-4 col-md-4 col-lg-4 mt-3">
+                    <span class="statcards-count"><i class="material-icons">rate_review</i></span><span class="statcards-count-p">{{  personstats['responsecount'] }}</span>
+                    <p class="statsupport">All Ratings</p> 
+                </div>
+            </div>
             
-            
-            <br>
-            {{ personstats['fullstar'] }} anonymized 9+ ratings out of {{  personstats['responsecount'] }} survey forms.
-            {{ (personstats['fullstar']/personstats['responsecount']*100) | round(2) }}
         </div>
         <div class="col-md-10 col-lg-5 offset-lg-1 col-sm-10 mt-2">
+            <h4><code>group_by().sum()</code></h4>
             <div class="plot" id="vis_accomp_1"></div>
        </div>
    </div>
@@ -58,7 +72,7 @@
 
     <div class="row mt-2">
         <div class="col-md-12 col-lg-5 col-sm-12">
-            <h4>Workshop Timeline</h4>
+            <h4><code>tail()</code></h4>
             <p>You're looking at performance metrics for: 
                     {{ personstats['employee']['email'] }}, joined on {{ personstats['employee']['join_date'] }}</p>
             {% for workshop in personstats['workshops'] %}

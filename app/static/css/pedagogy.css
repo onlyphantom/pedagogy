@@ -8,15 +8,19 @@
 }
 
 /* Common Elements customization */
+h4 > code {
+    color: black;
+}
+
 .statcards {
     margin: 1% 0;
-    background-color: #e8ecef;
+    background-color: #f5f5f5;
     padding:2.5% 1.5% 1% 1.5%;
     border-radius: 5px
 }
 
 .statcards-header{
-    font-size:0.55em;
+    font-size:0.7em;
     color: #343a40;
     font-weight: bolder; 
     text-transform:uppercase  
@@ -29,11 +33,12 @@
 
 .statcards-count-p {
     margin-left: 3%;
-    font-size: 1.8em
+    font-size: 2em;
+    font-weight:bolder;
 }
 
 .statsupport {
-    font-size:0.55em;
+    font-size:0.7em;
     line-height: 0;
     font-weight: 300;
     margin-left: 11%

@@ -310,6 +310,12 @@ def person_total_stats():
         'totalstud': totalstud,
         'totalhours': totalhours,
         'fullstar': fullstar,
-        'responsecount': len(responses)
+        'responsecount': len(responses),
+        # change here:
+        'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(
+            'name').sum().sort_values(
+                by='workshop_hours', 
+                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
+
     }
     return stats
