@@ -30,6 +30,7 @@ def accomplishment():
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
     personstats=person_total_stats()
+
     return render_template('accomplishment.html', personstats=personstats)
 
 @app.route('/analytics')

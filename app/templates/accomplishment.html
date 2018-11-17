@@ -99,18 +99,15 @@
     {% for review in personstats['qualitative'].items %}
         {% include "sub/single_response.html" %}
     {% endfor %}
-    <hr>
-    
-
-    <hr>
-    <ul>
-        {% for response in personstats['responses'] %}
-            {% if response.comments %}
-                <li>{{ response.satisfaction_score }} | {{ response.comments }} | {{ response.knowledge }}</li>
-            {% endif %}           
-        {% endfor %}
+    {% for page in personstats['qualitative'].iter_pages() %}
+        {% if page  %}
+            <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
+        {% else %}
+            ...
+        {% endif %}
         
-    </ul>
+    {% endfor %}
+    
     <hr>
     <script type="text/javascript">
         function parse(url, div) {
