@@ -1,0 +1,18 @@
+<h1>Hello, {{ id }}</h1>
+
+<dl>
+    {% for review in reviews.items %}
+    <dt>{{ review['comments'] }}</dt>
+    <dd>Satisfaction: {{ review['satisfaction_score'] }} and Knowledge: {{ review['knowledge'] }}</dd>
+    {% endfor %}
+</dl>
+
+{% for page in reviews.iter_pages() %}
+    {% if page  %}
+        <a href="{{ url_for('qualitative', id=id, page_num=page) }}">{{ page }}</a>
+    {% else %}
+        ...
+    {% endif %}
+    
+{% endfor %}
+

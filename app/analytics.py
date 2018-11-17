@@ -302,6 +302,10 @@ def person_total_stats():
 
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     fullstar = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.satisfaction_score + Response.knowledge >= 9).count()
+
+    # for qualitative reviews
+    qualitative = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').paginate(per_page=8, page=1, error_out=True)
+
     stats = {
         'employee': g.employee,
         'workshops': workshops.limit(5),
@@ -311,6 +315,7 @@ def person_total_stats():
         'totalhours': totalhours,
         'fullstar': fullstar,
         'responsecount': len(responses),
+        'qualitative': qualitative,
         # change here:
         'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(
             'name').sum().sort_values(

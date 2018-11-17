@@ -19,16 +19,9 @@ def before_request():
 @app.route('/index')
 @login_required
 def index():
-    workshops = [
-        {'name': 'BCA Cohort 3 Visualization',
-         'instructor':'Ajeng'},
-        {'name': 'Academy Neural Network',
-         'instructor':'Tiara'}
-    ]
     stats=global_total_stats()
-    return render_template('index.html', employee=g.employee, workshops=workshops, stats=stats)
+    return render_template('index.html', employee=g.employee, stats=stats)
 
-print(current_user)
 @app.route('/accomplishment')
 @login_required
 def accomplishment():
@@ -80,3 +73,13 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
+
+@app.route('/<int:id>/qualitative/<int:page_num>')
+@login_required
+def qualitative(id, page_num):
+    # return all qualitative comments for this user
+    # qualitative.html is then embedded intlo the accomplishment template
+    workshops = Workshop.query.filter_by(workshop_instructor=id).order_by(Workshop.workshop_start.desc())
+    reviews = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').paginate(per_page=8, page=page_num, error_out=True)
+
+    return render_template('sub/qualitative.html', id=id, page_num=page_num, reviews=reviews)
