@@ -12,6 +12,10 @@ h4 > code {
     color: black;
 }
 
+.darkaqua {
+    background: #1d2125!important;
+}
+
 .statcards {
     margin: 1% 0;
     background-color: #f5f5f5;
@@ -67,7 +71,7 @@ h4 > code {
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
 
-/* Accomplishment Page customization */
+/* Aqua Skin customization */
 body{
     background: #202122;
 }

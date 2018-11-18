@@ -90,17 +90,19 @@ def class_size_hours():
 @app.route('/data/accum_global')
 def accum_global():
     chart = alt.Chart(g.accum).mark_area().encode(
-        column='workshop_category',
+        column=alt.Column('workshop_category', title=None, sort="descending", 
+                          header=alt.Header(titleColor='red', labelColor='red', titleAnchor="end")),
         x=alt.X("workshop_start", title="Date"),
         y=alt.Y("sum(cumsum):Q", title="Cumulative"),
         color=alt.Color("variable", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
-            legend=alt.Legend(
-                orient="left",
-                title="Measurement")
-        )
-    ).properties(width=250)
+            legend=None
+        ),
+        tooltip=['variable', 'sum(cumsum):Q']
+    ).properties(width=350).configure_axis( 
+        labelColor='#bbc6cbe6',titleColor='#bbc6cbe6'
+    )
     return chart.to_json()
 
 @app.route('/data/accum_global_line')
@@ -175,9 +177,12 @@ def punchcode():
         x=alt.X('mnth_yr:T', axis=alt.Axis(title='')),
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),
-        column='workshop_category:O'
+        column=alt.Column('workshop_category:O', title=None, sort="descending", 
+            header=alt.Header(titleColor='#bbc6cbe6', labelColor='#bbc6cbe6', labelAngle=30, titleFontSize=40, titleAngle=30))
     ).properties(
-        width=250, height=320
+        width=300, height=320
+    ).configure_axis( 
+        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6'
     )
     return chart.to_json()
 
