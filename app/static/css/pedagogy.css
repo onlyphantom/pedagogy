@@ -105,6 +105,11 @@ tr {
     background-color: rgba(216, 241, 253, 0.4);
 }
 
+.jumbo-mini {
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
 .jumbotron ul, .jumbotron p {
     color: white;
 }
@@ -116,7 +121,7 @@ tr {
     margin-right: auto;
     margin-left: auto;
     background: #b5bdc8;
-    background: -moz-linear-gradient(top, #1b1b1b 0%, #2a4a69 36%, #203644 100%);
-    background: -webkit-linear-gradient(top, #1b1b1b 0%,#2a4a69 36%,#203644 100%);
-    background: linear-gradient(to bottom, #1b1b1b 0%,#2a4a69 36%,#203644 100%);
+    background: -moz-linear-gradient(top, #1b1b1b 0%, #436382 36%, #203644 100%);
+    background: -webkit-linear-gradient(top, #1b1b1b 0%,#436382 36%,#203644 100%);
+    background: linear-gradient(to bottom, #1b1b1b 0%,#436382 36%,#203644 100%);
 }
