@@ -44,6 +44,13 @@ h4 > code {
     margin-left: 11%
 }
 
+.plot-area > .plot {
+    vertical-align: middle;
+    text-align: center;
+    min-width: 100%;
+    max-width: 100%;
+    margin: 5% auto;
+}
 
 /* Home Page customization */
 .progress.progress-dark {
@@ -60,3 +67,56 @@ h4 > code {
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
 
+/* Accomplishment Page customization */
+body{
+    background: #202122;
+}
+
+h2 {
+    color: white;
+}
+
+tr {
+    color: rgb(195, 218, 239);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(19, 25, 31, 0.3);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.badge-dark {
+    background-color: #75b3cacc;
+    padding: 0.5% 1%;
+}
+
+.display-4 {
+    font-size: 3rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: white;
+}
+
+.lead {
+    color: white
+}
+
+.jumbotron {
+    background-color: rgba(216, 241, 253, 0.4);
+}
+
+.jumbotron ul, .jumbotron p {
+    color: white;
+}
+
+.container-fluid {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    background: #b5bdc8;
+    background: -moz-linear-gradient(top, #1b1b1b 0%, #2a4a69 36%, #203644 100%);
+    background: -webkit-linear-gradient(top, #1b1b1b 0%,#2a4a69 36%,#203644 100%);
+    background: linear-gradient(to bottom, #1b1b1b 0%,#2a4a69 36%,#203644 100%);
+}

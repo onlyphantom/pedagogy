@@ -62,12 +62,12 @@ def class_size_vs():
             legend=None
         ),
         tooltip=['workshop_category']
-    ).properties(width=400)
+    ).properties(width=450)
     lower = alt.Chart(df[df['this_user'] == True]).mark_rect(color='#91989e').encode(
         x=alt.X("mnth_yr:T", axis=alt.Axis(title='Interval Selector'), scale={'domain':brush.ref()})
     ).add_selection(
         brush
-    )
+    ).properties(width=450)
     chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True])
     return chart.to_json()
 
@@ -95,7 +95,7 @@ def accum_global():
         y=alt.Y("sum(cumsum):Q", title="Cumulative"),
         color=alt.Color("variable", 
             scale=alt.Scale(
-                range=['#6c757d', '#343a40']),
+                range=['#7dbbd2cc', '#bbc6cbe6']),
             legend=alt.Legend(
                 orient="left",
                 title="Measurement")
@@ -109,7 +109,7 @@ def accum_global_line():
     # Create a selection that chooses the nearest point & selects based on x-value
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
                             fields=['workshop_start'], empty='none')
-    line = alt.Chart().mark_line(color='#212529', interpolate='basis').encode(
+    line = alt.Chart().mark_line(color='#cccccc', interpolate='basis').encode(
             x=alt.X("workshop_start:T", axis=alt.Axis(title='', grid=False),scale={'domain': brush.ref()}),
             y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students', grid=False))
     )
@@ -132,7 +132,7 @@ def accum_global_line():
     )
 
     upper = alt.layer(line, selectors, points, rules, text, data=g.accumtotal, width=350)
-    lower = alt.Chart().mark_area(color='#6c757d').encode(
+    lower = alt.Chart().mark_area(color='#75b3cacc').encode(
             x=alt.X("workshop_start:T", axis=alt.Axis(title=''), scale={
                 'domain':brush.ref()
             }),
@@ -155,7 +155,12 @@ def accum_personal():
         column='workshop_category',
         x=alt.X("workshop_start"),
         y=alt.Y("sum(cumsum):Q"),
-        color=alt.Color("variable")
+        color=alt.Color("variable", 
+            scale=alt.Scale(
+                range=['#6c757d', '#343a40']),
+            legend=None
+        ),
+        tooltip=['variable', 'sum(cumsum):Q']
     ).properties(
         width=250
     )
@@ -166,7 +171,7 @@ def punchcode():
     g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )
     g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
 
-    chart = alt.Chart(g.df2).mark_circle(color='#6c757d').encode(
+    chart = alt.Chart(g.df2).mark_circle(color='#bbc6cbe6').encode(
         x=alt.X('mnth_yr:T', axis=alt.Axis(title='')),
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),
@@ -178,7 +183,7 @@ def punchcode():
 
 @app.route('/data/category_bars')
 def category_bars():
-    chart = alt.Chart(df).mark_bar(color='#6c757d').encode(
+    chart = alt.Chart(df).mark_bar(color='#bbc6cbe6').encode(
         x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
         y=alt.Y('workshop_category:O', title=''),
         tooltip=['sum(workshop_hours):Q', 'workshop_category:O']

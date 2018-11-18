@@ -24,18 +24,18 @@
     </div> 
     <div class="row mt-2">
        <div class="col-md-12 col-lg-6 col-sm-12">
-            <h4><code>summary()</code></h4>
+            <h4><code>.summary()</code></h4>
             <div>
                 {% for gr in personstats['grped'] %}
                 <div class="statcards row">
-                    <div class="col-4 col-sm-12 col-md-12 col-lg-12">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                         <h4 class="statcards-header">{{ gr }}</h4>
                     </div>
                     <div class="col-4 col-sm-4 col-md-4 col-lg-4">
                         <span class="statcards-count"><i class="material-icons">school</i></span><span class="statcards-count-p">{{ personstats['grped'][gr]['count'] }}</span>
                         <p class="statsupport">workshops</p> 
                     </div>
-                    <div class=" col-4 col-sm-4 col-md-4 col-lg-4">
+                    <div class="col-4 col-sm-4 col-md-4 col-lg-4">
                         <span class="statcards-count"><i class="material-icons">people</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['students']) }}</span>
                         <p class="statsupport">Students</p> 
                     </div>
@@ -47,7 +47,7 @@
                 {% endfor %}
             </div>
             <div class="statcards row">
-                <div class="col-4 col-sm-12 col-md-12 col-lg-12">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                     <h4 class="statcards-header">Ratings</h4>
                 </div>
                 <div class="col-4 col-sm-4 col-md-4 col-lg-4">
@@ -65,16 +65,16 @@
             </div>
             
         </div>
-        <div class="col-md-10 col-lg-5 offset-lg-1 col-sm-10 mt-2">
-            <h4><code>group_by().sum()</code></h4>
-            <div class="plot" id="vis_accomp_1"></div>
+        <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
+            <div class="plot-area">
+                <div class="plot" id="vis_accomp_1"></div>
+            </div>
        </div>
-    </div>
-    <hr>
+    </div>  
 
-    <div class="row mt-2">
-        <div class="col-md-12 col-lg-5 col-sm-12">
-            <h4><code>tail()</code></h4>
+    <div class="row mt-4">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+            <h4><code>.tail()</code></h4>
             <p>You're looking at performance metrics for: 
                     {{ personstats['employee']['email'] }}, joined on {{ personstats['employee']['join_date'] }}</p>
             {% for workshop in personstats['workshops'] %}
@@ -86,29 +86,33 @@
                 <br>
             {% endfor %}
         </div>
-        <div class="col-md-12 col-lg-7 col-sm-12">
-            <div class="plot" id="vis_accomp_2"></div>
-            <div class="plot" id="vis_accomp_3"></div>
+        <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
+                <div class="plot-area">
+                    <div class="plot" id="vis_accomp_2"></div>
+                    <div class="plot" id="vis_accomp_3"></div>
+                </div>
+
         </div>
 
     </div>
 
-    <hr>
-    <h2>Ratings</h2>
-    <h3>Qualitative Feedback</h3>
-    {% for review in personstats['qualitative'].items %}
-        {% include "sub/single_response.html" %}
-    {% endfor %}
-    {% for page in personstats['qualitative'].iter_pages() %}
-        {% if page  %}
-            <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
-        {% else %}
-            ...
-        {% endif %}
-        
-    {% endfor %}
+    <div class="row mt-2">
+        <div class="col-md-12 col-lg-12 col-sm-12">
+            <h4><code>.describe()</code></h4>
+            {% for review in personstats['qualitative'].items %}
+                {% include "sub/single_response.html" %}
+            {% endfor %}
+            {% for page in personstats['qualitative'].iter_pages() %}
+                {% if page  %}
+                    <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
+                {% else %}
+                    ...
+                {% endif %}
+                
+            {% endfor %}
+        </div>
+    </div>    
     
-    <hr>
     <script type="text/javascript">
         function parse(url, div) {
             var opt = {

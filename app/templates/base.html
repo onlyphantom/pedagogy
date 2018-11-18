@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Pedagogy</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -22,6 +22,7 @@
                                     <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
                                     <li class="nav-item"><a class="nav-link" href="{{  url_for('analytics') }}">Analytics</a></li>
                                     <li class="nav-item"><a class="nav-link" href="{{  url_for('accomplishment') }}">Accomplishment</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{{ url_for('qualitative', id=current_user.id, page_num=1) }}">Comment Logs</a></li>
                             </ul>
                             <ul class="navbar-nav ml-auto">       
                                     {% if current_user.is_authenticated %}
