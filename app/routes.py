@@ -78,6 +78,9 @@ def register():
 @app.route('/<int:id>/qualitative/<int:page_num>')
 @login_required
 def qualitative(id, page_num):
+    if g.employee is None:
+        flash('Not registered as a Product team member yet. Check back later!')
+        return redirect(url_for('index'))
     # return all qualitative comments for this user
     # qualitative.html is then embedded intlo the accomplishment template
     workshops = Workshop.query.filter_by(workshop_instructor=id).order_by(Workshop.workshop_start.desc())

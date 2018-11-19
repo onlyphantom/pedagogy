@@ -8,8 +8,12 @@
 }
 
 /* Common Elements customization */
+svg {
+    max-width: 100%;
+}
+
 h4 > code {
-    color: black;
+    color: white;
 }
 
 .darkaqua {
@@ -18,14 +22,15 @@ h4 > code {
 
 .statcards {
     margin: 1% 0;
-    background-color: #f5f5f5;
-    padding:2.5% 1.5% 1% 1.5%;
-    border-radius: 5px
+    background-color: rgba(216, 241, 253, 0.4);
+    padding: 2.5% 1.5% 1% 1.5%;
+    border-radius: 5px;
+    color: white;
 }
 
 .statcards-header{
     font-size:0.7em;
-    color: #343a40;
+    color: white;
     font-weight: bolder; 
     text-transform:uppercase  
 }
@@ -54,6 +59,7 @@ h4 > code {
     min-width: 100%;
     max-width: 100%;
     margin: 5% auto;
+    overflow: auto;
 }
 
 /* Home Page customization */
@@ -114,7 +120,7 @@ tr {
     margin: 2rem 0;
 }
 
-.jumbotron ul, .jumbotron p {
+.jumbotron ul, .jumbotron p, .jumbotron small {
     color: white;
 }
 
