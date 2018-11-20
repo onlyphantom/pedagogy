@@ -2,6 +2,7 @@ from flask import g
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import Employee, Workshop, Response
 import altair as alt
+from altair import expr, datum
 import pandas as pd
 from app import app
 from config import conn
@@ -58,12 +59,13 @@ def class_size_vs():
         y=alt.Y('sum(workshop_hours)', axis=alt.Axis(title='Workshop Hours')),
         color=alt.Color(
             'workshop_category',
-            scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2']),
+            scale=alt.Scale(range=['#1a1d21', '#7dbbd2cc', '#153f5a', '#bbc6cbe6']),
+            #'#7dbbd2cc', '#bbc6cbe6'
             legend=None
         ),
         tooltip=['workshop_category']
     ).properties(width=450)
-    lower = alt.Chart(df[df['this_user'] == True]).mark_rect(color='#91989e').encode(
+    lower = alt.Chart(df[df['this_user'] == True]).mark_rect(color='#75b3cacc').encode(
         x=alt.X("mnth_yr:T", axis=alt.Axis(title='Interval Selector'), scale={'domain':brush.ref()})
     ).add_selection(
         brush
@@ -197,6 +199,23 @@ def category_bars():
 
 @app.route('/data/instructor_breakdown')
 def instructor_breakdown():
+    # Getting Responses Data
+    q = """ SELECT response.id, workshop_id, workshop_category, name, difficulty, assistants_score, knowledge, objectives, timeliness, venue_score, satisfaction_score, comments 
+        FROM response 
+        LEFT JOIN workshop as w 
+            ON w.id = response.workshop_id
+        LEFT JOIN employee as e
+            ON w.workshop_instructor = e.id
+    """
+    responses = pd.read_sql_query(
+        q,
+        conn,
+        index_col='id'
+    )
+    resp_nw = responses[responses['workshop_category'] != 'Weekend'].groupby('name').agg('mean').round(2).sort_values('knowledge', ascending=False)
+    resp_nw['total'] = resp_nw.iloc[:,1:].mean(axis=1).round(2)
+    resp_nwm = pd.melt(resp_nw.iloc[:,1:].reset_index(), id_vars='name')
+
     multi = alt.selection_multi(fields=['name'], on='click')
     brush = alt.selection(type='interval')
     color = alt.condition(multi, alt.Color('name:N',  legend=None), alt.value('lightgray'))
@@ -233,16 +252,30 @@ def instructor_breakdown():
         multi
     ).add_selection(
         brush
-    ).properties(
-        height=150
     )
     picker = alt.Chart(df).mark_rect().encode(
-        y='name:N',
-        color=color
+        y=alt.Y('name:N'),
+        color=color, 
     ).add_selection(
         multi
     )
-    chart = alt.hconcat(picker,point, alt.vconcat(box, bar))
+
+    a = alt.Chart(resp_nwm).mark_square(size=40).encode(
+        x=alt.X('variable:N', scale=alt.Scale(rangeStep=80), axis=alt.Axis(labelAngle=0)),
+        y=alt.Y('value'),
+        color=alt.Color('name', legend=None),
+        tooltip=['name','value']
+    ).transform_calculate(
+        value=expr.round(expr.exp(datum.value))
+    ).transform_filter(
+        multi
+    )
+
+    b = a.mark_line(opacity=0.8, interpolate='monotone').encode(
+        x=alt.X('variable')
+    )
+    chart = picker | (point & a+b) | (box & bar)
+    #chart = alt.hconcat(picker, alt.vconcat(point, a+b) , alt.vconcat(box, bar))
     return chart.to_json()
 
 
@@ -272,8 +305,6 @@ def studentprof():
         domainWidth=0.8
     )
     return chart.to_json()
-
-
 
 # ================ Non-Chart Section ================
 # Return Stats, usually in the form of Dictionary

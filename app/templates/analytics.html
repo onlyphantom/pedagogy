@@ -6,6 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
 
     <div class="plot" id="multi1"></div> 
+    <div class="plot" id="multi2"></div> 
     <div class="bar" id="vis1"></div>
     <div class="bar" id="vis2"></div>
 
@@ -14,7 +15,7 @@
             var opt = {
               mode: "vega-lite",
               renderer: "svg",
-              actions: {export: true, source: false, editor: false}
+              actions: {export: false, source: false, editor: false}
             }; 
         //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
     
@@ -25,6 +26,7 @@
         parse("/data/mediumos", "#vis1")
         parse("/data/studentprof", "#vis2")
         parse("/data/instructor_breakdown", "#multi1")
+        parse("/data/response_picker", "#multi2")
     </script>
 
 {% endblock %}

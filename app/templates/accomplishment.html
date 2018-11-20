@@ -75,16 +75,19 @@
     <div class="row mt-4">
         <div class="col-12 col-sm-12 col-md-12 col-lg-6">
             <h4><code>.tail()</code></h4>
-            <p>You're looking at performance metrics for: 
-                    {{ personstats['employee']['email'] }}, joined on {{ personstats['employee']['join_date'] }}</p>
-            {% for workshop in personstats['workshops'] %}
-                <div>
-                    {{ workshop.workshop_start }}<br>    
-                    {{ workshop.workshop_name }}: <b> {{ workshop.workshop_category }}</b> <br/>
-                    <small> {{ workshop.workshop_venue }} | {{ workshop.class_size }} students | {{ workshop.workshop_hours }} hours </small>
-                </div>
-                <br>
-            {% endfor %}
+            <div class="jumbotron">
+                
+                <p>You're looking at performance metrics for: 
+                        {{ personstats['employee']['email'] }}, joined on {{ personstats['employee']['join_date'] }}</p>
+                {% for workshop in personstats['workshops'] %}
+                    <div>
+                        {{ workshop.workshop_start }}<br>    
+                        {{ workshop.workshop_name }}: <b> {{ workshop.workshop_category }}</b> <br/>
+                        <small> {{ workshop.workshop_venue }} | {{ workshop.class_size }} students | {{ workshop.workshop_hours }} hours </small>
+                    </div>
+                    <br>
+                {% endfor %}
+            </div>
         </div>
         <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
                 <div class="plot-area">

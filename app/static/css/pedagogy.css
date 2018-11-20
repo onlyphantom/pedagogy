@@ -22,10 +22,11 @@ h4 > code {
 
 .statcards {
     margin: 1% 0;
-    background-color: rgba(216, 241, 253, 0.4);
-    padding: 2.5% 1.5% 1% 1.5%;
+    background-color: rgba(0, 12, 16, 0.3);
+    padding: 2.5% 1.5%;
     border-radius: 5px;
     color: white;
+    border: 2px solid rgba(129, 243, 255, 0.8);
 }
 
 .statcards-header{
