@@ -74,19 +74,33 @@
 
     <div class="row mt-4">
         <div class="col-12 col-sm-12 col-md-12 col-lg-6">
-            <h4><code>.tail()</code></h4>
-            <div class="jumbotron">
-                
-                <p>You're looking at performance metrics for: 
-                        {{ personstats['employee']['email'] }}, joined on {{ personstats['employee']['join_date'] }}</p>
-                {% for workshop in personstats['workshops'] %}
-                    <div>
-                        {{ workshop.workshop_start }}<br>    
-                        {{ workshop.workshop_name }}: <b> {{ workshop.workshop_category }}</b> <br/>
-                        <small> {{ workshop.workshop_venue }} | {{ workshop.class_size }} students | {{ workshop.workshop_hours }} hours </small>
-                    </div>
-                    <br>
-                {% endfor %}
+            <p class="lead">You joined the company on {{ personstats['employee']['join_date'] }}
+                 and were the lead instructor in {{ personstats['totalws'] }} workshops. These are the most recent workshops you've conducted.
+            </p>
+            <div class="jumbotron jumbo-mini"> 
+                <!-- <h4>Most Recent Workshops</h4> -->
+                <div>
+                        <div class="row">
+                            <div class="col-md-12 col-lg-12">
+                                <h4><i class="material-icons md-light">timeline</i> Most Recent Workshops</h4>
+                                <ul class="timeline">
+                                    {% for workshop in personstats['workshops'] %}
+                                    <li>
+                                        <b>{{ workshop.workshop_name }}</b>
+                                        <!-- TODO: Add moment to show "6 days ago" -->
+                                        <span class="float-right">{{ workshop.workshop_start }}</span>
+                                        <ul class="timeline-sub">
+                                            <li><i class="material-icons">place</i> {{ workshop.workshop_venue }}</li>
+                                            <li><i class="material-icons">person_pin</i> {{ workshop.class_size }} students.</li>
+                                            <li><i class="material-icons">timer</i> {{ workshop.workshop_hours }} hours.</li>
+                                        </ul>
+                                            
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                </div>
             </div>
         </div>
         <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">

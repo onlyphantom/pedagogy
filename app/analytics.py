@@ -81,7 +81,7 @@ def class_size_hours():
         y=alt.Y('mnth_yr'),
         color=alt.Color(
             'workshop_category',
-            scale=alt.Scale(range=['#1a1d21', '#6c757d', '#8f9fb3', '#d1d8e2']),legend=None),
+            scale=alt.Scale(range=['#7dbbd2cc', '#bbc6cbe6', '#6c757d', '#d1d8e2', '#1a1d21', '#8f9fb3' ]),legend=None),
             tooltip=['workshop_category', 'sum(value)']
         ).properties(
             width=250
@@ -161,7 +161,7 @@ def accum_personal():
         y=alt.Y("sum(cumsum):Q"),
         color=alt.Color("variable", 
             scale=alt.Scale(
-                range=['#6c757d', '#343a40']),
+                range=['#7dbbd2cc', '#bbc6cbe6']),
             legend=None
         ),
         tooltip=['variable', 'sum(cumsum):Q']
@@ -354,6 +354,7 @@ def person_total_stats():
         'grped': grped,
         'totalstud': totalstud,
         'totalhours': totalhours,
+        'totalws': workshops.count(),
         'fullstar': fullstar,
         'responsecount': len(responses),
         'qualitative': qualitative,
