@@ -81,7 +81,7 @@ def class_size_hours():
         y=alt.Y('mnth_yr'),
         color=alt.Color(
             'workshop_category',
-            scale=alt.Scale(range=['#7dbbd2cc', '#bbc6cbe6', '#6c757d', '#d1d8e2', '#1a1d21', '#8f9fb3' ]),legend=None),
+            scale=alt.Scale(range=['#7dbbd2cc', '#bbc6cbe6', '#6eb0ea', '#d1d8e2', '#1a1d21', '#8f9fb3' ]),legend=None),
             tooltip=['workshop_category', 'sum(value)']
         ).properties(
             width=250
@@ -345,7 +345,11 @@ def person_total_stats():
     fullstar = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.satisfaction_score + Response.knowledge >= 9).count()
 
     # for qualitative reviews
-    qualitative = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').paginate(per_page=8, page=1, error_out=True)
+    qualitative = Response.query.filter(
+        Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
+            Workshop, isouter=True).order_by(
+                Workshop.workshop_start.desc()).paginate(
+                    per_page=15, page=1, error_out=True)
 
     stats = {
         'employee': g.employee,
