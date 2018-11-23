@@ -20,13 +20,16 @@ h4 > code {
     background: #1d2125!important;
 }
 
+.jumbotron.lightaqua{
+    background-color: rgb(124, 152, 174);
+}
+
 .statcards {
     margin: 1% 0;
-    background-color: rgba(0, 12, 16, 0.3);
+    background-color: rgb(124, 152, 174);
     padding: 2.5% 1.5%;
     border-radius: 5px;
     color: white;
-    border: 2px solid rgba(129, 243, 255, 0.8);
 }
 
 .statcards-header{
@@ -116,6 +119,39 @@ ul.timeline > li:before {
     height: 20px;
     z-index: 400;
 }
+.response-card {
+    margin: 1%;
+    padding: 3%;
+}
+
+.response-card > ul {
+    list-style: none;
+}
+.response-card > ul {
+    list-style: none;
+    padding-left: 5%;
+    font-size: 0.8em;
+    color: white;
+}
+
+.response-card > ul > li > i.material-icons {
+    font-size: 0.8em;
+    margin-right: 2%;
+}
+
+.card.response-card {
+    background: #7893a8;
+}
+
+p.card-text {
+    color: white;
+    font-weight: bolder;
+}
+
+.blockquote-footer {
+    color: #273f52;
+}
+
 
 /* Iconography */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }

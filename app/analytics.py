@@ -349,7 +349,7 @@ def person_total_stats():
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
                 Workshop.workshop_start.desc()).paginate(
-                    per_page=15, page=1, error_out=True)
+                    per_page=20, page=1, error_out=True)
 
     stats = {
         'employee': g.employee,

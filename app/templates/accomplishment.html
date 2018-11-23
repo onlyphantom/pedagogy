@@ -6,7 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
 
     <!-- TODO: Use a dictionary instead of separate objects -->
-    <div class="jumbotron">
+    <div class="jumbotron lightaqua">
         <div class="row">
             <div class="col-md-6 col-lg-4 col-sm-6">
                 <h4 class="display-4 text-center">{{ personstats['totalstud'] }} </h4>
@@ -24,7 +24,6 @@
     </div> 
     <div class="row mt-2">
        <div class="col-md-12 col-lg-6 col-sm-12">
-            <h4><code>.summary()</code></h4>
             <div>
                 {% for gr in personstats['grped'] %}
                 <div class="statcards row">
@@ -78,7 +77,6 @@
                  and were the lead instructor in {{ personstats['totalws'] }} workshops. These are the most recent workshops you've conducted.
             </p>
             <div class="jumbotron jumbo-mini"> 
-                <!-- <h4>Most Recent Workshops</h4> -->
                 <div>
                         <div class="row">
                             <div class="col-md-12 col-lg-12">
@@ -88,7 +86,7 @@
                                     <li>
                                         <b>{{ workshop.workshop_name }}</b>
                                         <!-- TODO: Add moment to show "6 days ago" -->
-                                        <span class="float-right">{{ workshop.workshop_start }}</span>
+                                        <span class="float-right">{{ workshop.printtime() }}</span>
                                         <ul class="timeline-sub">
                                             <li><i class="material-icons">place</i> {{ workshop.workshop_venue }}</li>
                                             <li><i class="material-icons">person_pin</i> {{ workshop.class_size }} students</li>
@@ -115,19 +113,22 @@
 
     <div class="row mt-2">
         <div class="col-md-12 col-lg-12 col-sm-12">
-            <h4><code>.describe()</code></h4>
-            {% for review in personstats['qualitative'].items %}
-                {% include "sub/single_response.html" %}
-            {% endfor %}
-            {% for page in personstats['qualitative'].iter_pages() %}
-                {% if page  %}
-                    <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
-                {% else %}
-                    ...
-                {% endif %}
-                
-            {% endfor %}
-        </div>
+            <div>
+                <h4><i class="material-icons md-light">timeline</i> Most Recent Reviews</h4>
+                <div class="card-columns">
+                {% for review in personstats['qualitative'].items %}
+                    {% include "sub/single_response.html" %}
+                {% endfor %}
+                </div>
+                <!-- {% for page in personstats['qualitative'].iter_pages() %}
+                    {% if page  %}
+                        <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
+                    {% else %}
+                        ...
+                    {% endif %}
+                    
+                {% endfor %} -->
+            </div>
     </div>    
     
     <script type="text/javascript">

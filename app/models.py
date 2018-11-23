@@ -1,5 +1,7 @@
 from app import db
 from datetime import datetime
+import arrow
+
 # association table
 ta_assignment = db.Table(
     'assistants',
@@ -43,7 +45,13 @@ class Workshop(db.Model):
     responses = db.relationship('Response', backref='workshop', lazy='dynamic')
 
     def __repr__(self):
-        return '{} on {}'.format(self.workshop_name, self.workshop_start)
+        past = arrow.get(self.workshop_start).humanize()
+        # return '{} on {}'.format(self.workshop_name, self.workshop_start)
+        return '{}, {}'.format(self.workshop_name, past)
+
+    def printtime(self):
+        past = arrow.get(self.workshop_start).humanize()
+        return past
 
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)

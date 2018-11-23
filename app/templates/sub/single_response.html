@@ -1,9 +1,24 @@
-<dl>
-    <dt>{{ review['comments'] }}</dt>
-    <dd>Satisfaction: {{ review['satisfaction_score'] }} and Knowledge: {{ review['knowledge'] }} <br/>
-        Difficulty: {{ review['difficulty'] }}, Objectives: {{ review['objectives'] }}, Timeliness: {{ review['timeliness'] }} <br/>
-        
-        Workshop: {{ review['workshop'] }} 
 
-    </dd>
-</dl>
+    <div class="card response-card">
+        <p class="card-text">{{ review['comments'] }}</p>
+        <ul>
+            {% if review['difficulty'] >= 4%}
+                <li><i class="material-icons">check</i>Lecture wasn't too difficult</li>
+            {% endif %}
+            {% if review['difficulty'] >= 4%}
+                <li><i class="material-icons">check</i>Training was knowledgeable</li>
+            {% endif %}
+            {% if review['objectives'] >= 4 %}
+                <li><i class="material-icons">check</i>Training objectives were met</li>
+            {% endif %}
+            {% if review['timeliness'] >= 4 %}
+                <li><i class="material-icons">check</i>Time allocated was sufficient</li>
+            {% endif %}
+            {% if review['satisfaction_score'] >= 4 %}
+                <li><i class="material-icons">check</i>Great Overall Experience </li>
+            {% endif %}
+        </ul>
+        <footer class="blockquote-footer">
+            <small>Student from {{ review['workshop'] }}</small>
+        </footer>
+    </div>
