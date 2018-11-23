@@ -20,6 +20,10 @@ h4 > code {
     background: #1d2125!important;
 }
 
+i.material-icons.md-light {
+    font-size: 0.8em;
+}
+
 .jumbotron.lightaqua{
     background-color: rgb(124, 152, 174);
 }

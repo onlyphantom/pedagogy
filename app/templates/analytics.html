@@ -5,9 +5,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.6.0/vega-lite.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
 
-    <div class="plot" id="multi1"></div> 
-    <div class="bar" id="vis1"></div>
-    <div class="bar" id="vis2"></div>
+    <div class="jumbotron jumbo-mini">
+            <h4><i class="material-icons md-light">timeline</i> How to Use:</h4>
+            <p class="lead">.Hold on <kbd>SHIFT</kbd></p>
+        <div class="plot" id="multi1"></div> 
+    </div>
 
     <script type="text/javascript">
         function parse(url, div) {
@@ -22,8 +24,8 @@
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
-        parse("/data/mediumos", "#vis1")
-        parse("/data/studentprof", "#vis2")
+        // parse("/data/mediumos", "#vis1")
+        // parse("/data/studentprof", "#vis2")
         parse("/data/instructor_breakdown", "#multi1")
     </script>
 
