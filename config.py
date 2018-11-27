@@ -26,7 +26,7 @@ class Config():
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
     'mysql+pymysql://Samuel:tirab33@localhost/assistants'
-
+    FLASK_DEBUG = 0
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
     SQLALCHEMY_ECHO = False
+    SQLALCHEMY_RECORD_QUERIES = False
