@@ -6,12 +6,19 @@ user = os.getenv('MYSQL_USER')
 password = os.getenv('MYSQL_PASSWORD')
 database = os.getenv('MYSQL_DATABASE')
 
-conn = pymysql.connect(user=user, 
-        password=password, 
-        database=database, 
-        port=int(3306),
-        host=host, 
-        ssl = {'ssl': {'ca': '/var/www/html/BaltimoreCyberTrustRoot.crt.pem'}})
+conn = pymysql.connect(
+    host=host,
+    port=int(3306),
+    user=user,
+    passwd=password,
+    db=database)
+
+# conn = pymysql.connect(user=user, 
+#         password=password, 
+#         database=database, 
+#         port=int(3306),
+#         host=host, 
+#         ssl = {'ssl': {'ca': '/var/www/html/BaltimoreCyberTrustRoot.crt.pem'}})
 
 # create the configuration class
 class Config():
