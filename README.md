@@ -3,6 +3,8 @@ Pedagogy is a performance management tool for education professionals. It is dev
 
 ## Main Features
 
+![](blurb.png)
+
 At its current release (v0.1), Pedagogy delivers key performance indicators and assembly-wide analytics to its employees and training roster. The initial release includes three main modules:
 - Company-wide statistics
     - Number of students 
