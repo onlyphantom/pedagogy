@@ -200,13 +200,13 @@ def category_bars():
 @app.route('/data/instructor_breakdown')
 def instructor_breakdown():
     # Getting Responses Data
-    q = """ SELECT response.id, workshop_id, workshop_category, name, difficulty, assistants_score, knowledge, objectives, timeliness, venue_score, satisfaction_score, comments 
-        FROM response 
-        LEFT JOIN workshop as w 
-            ON w.id = response.workshop_id
-        LEFT JOIN employee as e
-            ON w.workshop_instructor = e.id
-    """
+    q = """ SELECT response.*, workshop_category, name
+            FROM response
+            INNER JOIN workshop as w 
+                ON w.id = response.workshop_id
+            INNER JOIN employee as e
+                ON w.workshop_instructor = e.id
+        """
     responses = pd.read_sql_query(
         q,
         conn,
