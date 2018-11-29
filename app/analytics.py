@@ -1,14 +1,14 @@
 from flask import g
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user
+from app import app
 from app.models import Employee, Workshop, Response
 import altair as alt
 from altair import expr, datum
 import pandas as pd
-from app import app
 from config import conn
 
 df = pd.read_sql_query(
-    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop LEFT JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
+    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop INNER JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
 # convert datetime to '2018-09' month and year format
 df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
 df['workshop_category'] = df['workshop_category'].astype('category')
