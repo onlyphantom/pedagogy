@@ -8,7 +8,7 @@ import pandas as pd
 from config import conn
 
 df = pd.read_sql_query(
-    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop INNER JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
+    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop LEFT JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
 # convert datetime to '2018-09' month and year format
 df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
 df['workshop_category'] = df['workshop_category'].astype('category')
@@ -35,12 +35,24 @@ def before_request():
         
     g.df2 = df.copy()
     g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
-    g.dat = g.df2.set_index('workshop_start').resample('W').sum()
+    g.df2['workshop_category'] = g.df2['workshop_category'].astype('category')
+    
+    g.dat = df[['workshop_start','workshop_category', 'workshop_hours', 'class_size']].copy()
+    g.dat['workshop_category'] = pd.Categorical(g.dat['workshop_category']).codes
+    g.dat['workshop_category'] = g.dat['workshop_category'].astype('category')
+
+    g.dat['workshop_category'] = g.dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
+    g.dat = g.dat.set_index(
+        'workshop_start').groupby(
+            'workshop_category').resample('W').sum()
+    g.dat.sort_index(inplace=True)
+
     g.accum = pd.melt(g.dat.reset_index(), 
-        id_vars=['workshop_start','workshop_category'], 
-        value_vars=['workshop_hours', 'class_size'])
-    g.accum['workshop_category'] = g.accum['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
-    g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum().fillna(0)
+            id_vars=['workshop_start','workshop_category'], 
+            value_vars=['workshop_hours', 'class_size'])
+    g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum()
+    g.accum = g.accum.sort_values(['workshop_category', 'workshop_start'])
+ 
     g.accumtotal = pd.melt(g.dat.reset_index(),
                 id_vars=['workshop_start'], 
                 value_vars=['class_size'])    
