@@ -52,12 +52,9 @@ def before_request():
             value_vars=['workshop_hours', 'class_size'])
     g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum()
     g.accum = g.accum.sort_values(['workshop_category', 'workshop_start'])
- 
-    g.accumtotal = pd.melt(g.dat.reset_index(),
-                id_vars=['workshop_start'], 
-                value_vars=['class_size'])    
-    g.accumtotal['cumsum'] = g.accumtotal.groupby(['variable']).cumsum().fillna(0)
 
+    g.accumtotal = df[['workshop_start', 'class_size']].copy().set_index('workshop_start').sort_index().reset_index()
+    g.accumtotal['cumsum'] = g.accumtotal['class_size'].cumsum()
 
 @app.route('/data/class_size_vs')
 def class_size_vs():
@@ -127,7 +124,7 @@ def accum_global_line():
                             fields=['workshop_start'], empty='none')
     line = alt.Chart().mark_line(color='#cccccc', interpolate='basis').encode(
             x=alt.X("workshop_start:T", axis=alt.Axis(title='', grid=False),scale={'domain': brush.ref()}),
-            y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title='Total Students', grid=False))
+            y=alt.Y("cumsum", axis=alt.Axis(title='Total Students', grid=False))
     )
     selectors = alt.Chart(g.accumtotal).mark_point().encode(
         x=alt.X("workshop_start:T"),
@@ -152,7 +149,7 @@ def accum_global_line():
             x=alt.X("workshop_start:T", axis=alt.Axis(title=''), scale={
                 'domain':brush.ref()
             }),
-            y=alt.Y("sum(cumsum):Q", axis=alt.Axis(title=''))
+            y=alt.Y("cumsum", axis=alt.Axis(title=''))
         ).properties(
         height=30,
         width=350
