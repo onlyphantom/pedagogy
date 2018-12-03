@@ -104,13 +104,13 @@ def accum_global():
         column=alt.Column('workshop_category', title=None, sort="descending", 
                           header=alt.Header(titleColor='red', labelColor='red', titleAnchor="end")),
         x=alt.X("workshop_start", title="Date"),
-        y=alt.Y("sum(cumsum):Q", title="Cumulative"),
+        y=alt.Y("cumsum:Q", title="Cumulative"),
         color=alt.Color("variable", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
             legend=None
         ),
-        tooltip=['variable', 'sum(cumsum):Q']
+        tooltip=['variable', 'cumsum:Q']
     ).properties(width=350).configure_axis( 
         labelColor='#bbc6cbe6',titleColor='#bbc6cbe6'
     )
@@ -136,7 +136,7 @@ def accum_global_line():
         opacity=alt.condition(nearest, alt.value(1), alt.value(0))
     )
     text = line.mark_text(align='left', dx=-20, dy=-5).encode(
-        text=alt.condition(nearest, 'sum(cumsum):Q', alt.value(' '))
+        text=alt.condition(nearest, 'cumsum:Q', alt.value(' '))
     )
     rules = alt.Chart().mark_rule(color='gray').encode(
         x=alt.X("workshop_start:T"),
@@ -167,13 +167,13 @@ def accum_personal():
     chart = alt.Chart(g.accum_personal).mark_area().encode(
         column='workshop_category',
         x=alt.X("workshop_start"),
-        y=alt.Y("sum(cumsum):Q"),
+        y=alt.Y("cumsum:Q"),
         color=alt.Color("variable", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
             legend=None
         ),
-        tooltip=['variable', 'sum(cumsum):Q']
+        tooltip=['variable', 'cumsum:Q']
     ).properties(
         width=250
     )
