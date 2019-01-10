@@ -4,7 +4,7 @@ from app import app, db
 from app.analytics import global_total_stats, person_total_stats
 from app.users import User
 from app.models import Employee, Workshop, Response
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, SurveyForm
 from datetime import datetime
 from sqlalchemy import func
 
@@ -90,4 +90,5 @@ def qualitative(id, page_num):
 
 @app.route('/survey/<int:workshop_id>', methods=['GET', 'POST'])
 def rate(workshop_id):
-    return render_template('survey.html', workshop_id=workshop_id)
+    form = SurveyForm(workshop_id=workshop_id)
+    return render_template('survey.html', workshop_id=workshop_id, form=form)

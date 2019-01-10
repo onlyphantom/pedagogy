@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>{{ workshop_id }}</h3>
-{% endblock %}
+    <div class="jumbotron">
+        <h3>{{ workshop_id }}</h3>
+        <hr>
+        <p>Please help us to serve you better by taking a couple of minutes to tell us about the program so that we can do better in the future.</p>
+
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.difficulty.label }}<br/>
+                {{ form.difficulty() }}
+            </p>
+            <p>
+                {{ form.assistants_score.label }}<br/>
+                {{ form.assistants_score() }}
+            </p>
+
+        </form>
+
+
+    </div>
+    {% endblock %}
 
 
