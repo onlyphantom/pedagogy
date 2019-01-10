@@ -87,3 +87,7 @@ def qualitative(id, page_num):
     reviews = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').paginate(per_page=8, page=page_num, error_out=True)
 
     return render_template('sub/qualitative.html', id=id, page_num=page_num, reviews=reviews)
+
+@app.route('/survey/<int:workshop_id>', methods=['GET', 'POST'])
+def rate(workshop_id):
+    return render_template('survey.html', workshop_id=workshop_id)
