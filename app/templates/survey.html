@@ -2,25 +2,112 @@
 
 {% block content %}
     <div class="jumbotron">
-        <h3>{{ workshop_id }}</h3>
-        <hr>
+        <h2>{{ workshop_name }} Workshop Feedback Form</h2>
         <p>Please help us to serve you better by taking a couple of minutes to tell us about the program so that we can do better in the future.</p>
 
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            <p>
-                {{ form.difficulty.label }}<br/>
-                {{ form.difficulty() }}
-            </p>
-            <p>
-                {{ form.assistants_score.label }}<br/>
-                {{ form.assistants_score() }}
-            </p>
+        <hr>
+        <br>
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <center>
+                    <h4>{{ form.difficulty.label }}</h4>
+                        {{ form.difficulty(min=1, max=5, oninput="difficultyValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="difficulty" id="difficulty-score"> {{ form.difficulty.data }} </output> </br>
+                    </h5>
 
-        </form>
+                    <h4>{{ form.assistant.label }}</h4>
+                        {{ form.assistant(min=1, max=5, oninput="assistantValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="assistant" id="assistant-score"> {{ form.assistant.data }} </output> </br>
+                    </h5>
 
+                    <h4>{{ form.knowledgeable.label }}</h4>
+                        {{ form.knowledgeable(min=1, max=5, oninput="knowledgeableValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="knowledgeable" id="knowledgeable-score"> {{ form.knowledgeable.data }} </output> </br>
+                    </h5>
 
+                    <h4>{{ form.objective.label }}</h4>
+                        {{ form.objective(min=1, max=5, oninput="objectiveValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="objective" id="objective-score"> {{ form.objective.data }} </output> </br>
+                    </h5>
+
+                    <h4>{{ form.time.label }}</h4>
+                        {{ form.time(min=1, max=5, oninput="timeValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="time" id="time-score"> {{ form.time.data }} </output> </br>
+                    </h5>
+                    
+                    <h4>{{ form.venue.label }}</h4>
+                        {{ form.venue(min=1, max=5, oninput="venueValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="venue" id="venue-score"> {{ form.venue.data }} </output> </br>
+                    </h5>
+
+                    <h4>{{ form.satisfaction.label }}</h4>
+                        {{ form.satisfaction(min=1, max=5, oninput="satisfactionValue(value)", id='larger') }}
+                    <br/>
+                    <h5>
+                        <output for="satisfaction" id="satisfaction-score"> {{ form.satisfaction.data }} </output> </br>
+                    </h5>
+
+                    <br>
+
+                    <h4>{{ form.comments.label }}</h4>
+                        {{ form.comments(id='area') }}
+                    <br/>
+
+                    <br>
+                    <p> 
+                        {{ form.submit() }}
+                    </p>
+                </center>
+
+            </form>
     </div>
-    {% endblock %}
 
+    <script>
+        function difficultyValue(difficulty) {
+            document.querySelector('#difficulty-score').value = difficulty;
+        }
+        function assistantValue(assistant) {
+            document.querySelector('#assistant-score').value = assistant;
+        }
+        function knowledgeableValue(knowledgeable) {
+            document.querySelector('#knowledgeable-score').value = knowledgeable;
+        }
+        function objectiveValue(objective) {
+            document.querySelector('#objective-score').value = objective;
+        }
+        function timeValue(time) {
+            document.querySelector('#time-score').value = time;
+        }
+        function venueValue(venue) {
+            document.querySelector('#venue-score').value = venue;
+        }
+        function satisfactionValue(satisfaction) {
+            document.querySelector('#satisfaction-score').value = satisfaction;
+        }
 
+    </script>    
+
+<style>
+    #larger {
+        width: 400px;
+    }
+    #area{
+        width:600px;
+        height: 100px;
+        font-size:16pt;
+    }
+</style>
+
+{% endblock %}

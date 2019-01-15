@@ -16,6 +16,7 @@ def before_request():
         db.session.commit()
 
 @app.route('/')
+#Put a home screen
 @app.route('/index')
 @login_required
 def index():
@@ -90,5 +91,30 @@ def qualitative(id, page_num):
 
 @app.route('/survey/<int:workshop_id>', methods=['GET', 'POST'])
 def rate(workshop_id):
-    form = SurveyForm(workshop_id=workshop_id)
-    return render_template('survey.html', workshop_id=workshop_id, form=form)
+    g.workshop = Workshop.query.filter_by(id=workshop_id).first()
+    if g.workshop is None:
+        flash('Workshop survey is not available at the moment!')
+        return redirect(url_for('index'))
+
+    form = SurveyForm()
+    form.workshop_id.data = workshop_id
+
+    if form.validate_on_submit():
+        response = Response(
+            workshop_id=form.workshop_id.data,
+            difficulty=form.difficulty.data,
+            assistants_score=form.assistant.data,
+            knowledge=form.knowledgeable.data,
+            objectives=form.objective.data,
+            timeliness=form.time.data,
+            venue_score=form.venue.data,
+            satisfaction_score=form.satisfaction.data
+            comments=form.comments.data
+        )
+        db.session.add(response)
+        db.session.commit()
+        return render_template('response.html')
+    
+    return render_template('survey.html', form=form, workshop_name=g.workshop.workshop_name)
+        
+    
