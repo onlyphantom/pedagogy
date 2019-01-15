@@ -108,7 +108,7 @@ def rate(workshop_id):
             objectives=form.objective.data,
             timeliness=form.time.data,
             venue_score=form.venue.data,
-            satisfaction_score=form.satisfaction.data
+            satisfaction_score=form.satisfaction.data,
             comments=form.comments.data
         )
         db.session.add(response)
