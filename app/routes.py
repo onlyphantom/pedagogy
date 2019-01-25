@@ -115,6 +115,6 @@ def rate(workshop_id):
         db.session.commit()
         return render_template('response.html')
     
-    return render_template('survey.html', form=form, workshop_name=g.workshop.workshop_name)
+    return render_template('survey.html', form=form, workshop_name=g.workshop.workshop_name, workshop_category=g.workshop.workshop_category)
         
     

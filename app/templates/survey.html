@@ -44,13 +44,14 @@
                     <h5>
                         <output for="time" id="time-score"> {{ form.time.data }} </output> </br>
                     </h5>
-                    
-                    <h4>{{ form.venue.label }}</h4>
-                        {{ form.venue(min=1, max=5, oninput="venueValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="venue" id="venue-score"> {{ form.venue.data }} </output> </br>
-                    </h5>
+                    {% if workshop_category != "Corporate" %}
+                        <h4>{{ form.venue.label }}</h4>
+                            {{ form.venue(min=1, max=5, oninput="venueValue(value)", id='larger') }}
+                        <br/>
+                        <h5>
+                            <output for="venue" id="venue-score"> {{ form.venue.data }} </output> </br>
+                        </h5>
+                    {% endif %}
 
                     <h4>{{ form.satisfaction.label }}</h4>
                         {{ form.satisfaction(min=1, max=5, oninput="satisfactionValue(value)", id='larger') }}
@@ -101,12 +102,12 @@
 
 <style>
     #larger {
-        width: 400px;
+        width: 25%;
     }
     #area{
-        width:600px;
-        height: 100px;
-        font-size:16pt;
+        width:30%;
+        height: 20%;
+        font-size:12pt;
     }
 </style>
 
