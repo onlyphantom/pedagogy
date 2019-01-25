@@ -327,7 +327,7 @@ def global_total_stats():
         # 'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
         'instructors': len(df['workshop_instructor'].unique()),
-        'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(
+        'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
             'name').sum().sort_values(
                 by='workshop_hours', 
                 ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
@@ -371,8 +371,7 @@ def person_total_stats():
         'fullstar': fullstar,
         'responsecount': len(responses),
         'qualitative': qualitative,
-        # change here:
-        'topten': g.df2.loc[:,['name','workshop_hours', 'class_size']].groupby(
+        'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
             'name').sum().sort_values(
                 by='workshop_hours', 
                 ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
