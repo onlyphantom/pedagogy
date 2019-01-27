@@ -184,7 +184,7 @@ def punchcode():
     g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )
     g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
 
-    chart = alt.Chart(g.df2).mark_circle(color='#bbc6cbe6').encode(
+    chart = alt.Chart(g.df2[g.df2.name != 'Capstone']).mark_circle(color='#bbc6cbe6').encode(
         x=alt.X('mnth_yr:T', axis=alt.Axis(title='')),
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),

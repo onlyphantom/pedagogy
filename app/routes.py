@@ -10,15 +10,13 @@ from sqlalchemy import func
 
 @app.before_request
 def before_request():
+    g.employee = None
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         g.employee = Employee.query.filter_by(email=current_user.email).first()
-        db.session.commit()
 
 @app.route('/')
-#Put a home screen
 @app.route('/index')
-@login_required
 def index():
     stats=global_total_stats()
     return render_template('index.html', employee=g.employee, stats=stats)
