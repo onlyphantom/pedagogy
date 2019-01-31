@@ -1,78 +1,69 @@
 {% extends "base.html" %}
 
+
 {% block content %}
     <div class="jumbotron">
-        <h2>{{ workshop_name }} Workshop Feedback Form</h2>
-        <p>Please help us to serve you better by taking a couple of minutes to tell us about the program so that we can do better in the future.</p>
-
+        <div id="survey-blurb">
+            <h2>{{ workshop_name }} Workshop Feedback Form</h2>
+            <p>Help us serve you better by taking a couple of minutes to tell us about the program so we can do better in the future.</p>        
+        </div>
         <hr>
         <br>
-            <form action="" method="post" novalidate>
-                {{ form.hidden_tag() }}
-                <center>
-                    <h4>{{ form.difficulty.label }}</h4>
-                        {{ form.difficulty(min=1, max=5, oninput="difficultyValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="difficulty" id="difficulty-score"> {{ form.difficulty.data }} </output> </br>
-                    </h5>
-
-                    <h4>{{ form.assistant.label }}</h4>
-                        {{ form.assistant(min=1, max=5, oninput="assistantValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="assistant" id="assistant-score"> {{ form.assistant.data }} </output> </br>
-                    </h5>
-
-                    <h4>{{ form.knowledgeable.label }}</h4>
-                        {{ form.knowledgeable(min=1, max=5, oninput="knowledgeableValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="knowledgeable" id="knowledgeable-score"> {{ form.knowledgeable.data }} </output> </br>
-                    </h5>
-
-                    <h4>{{ form.objective.label }}</h4>
-                        {{ form.objective(min=1, max=5, oninput="objectiveValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="objective" id="objective-score"> {{ form.objective.data }} </output> </br>
-                    </h5>
-
-                    <h4>{{ form.time.label }}</h4>
-                        {{ form.time(min=1, max=5, oninput="timeValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="time" id="time-score"> {{ form.time.data }} </output> </br>
-                    </h5>
-                    {% if workshop_category != "Corporate" %}
-                        <h4>{{ form.venue.label }}</h4>
-                            {{ form.venue(min=1, max=5, oninput="venueValue(value)", id='larger') }}
-                        <br/>
-                        <h5>
-                            <output for="venue" id="venue-score"> {{ form.venue.data }} </output> </br>
-                        </h5>
-                    {% endif %}
-
-                    <h4>{{ form.satisfaction.label }}</h4>
-                        {{ form.satisfaction(min=1, max=5, oninput="satisfactionValue(value)", id='larger') }}
-                    <br/>
-                    <h5>
-                        <output for="satisfaction" id="satisfaction-score"> {{ form.satisfaction.data }} </output> </br>
-                    </h5>
-
-                    <br>
-
-                    <h4>{{ form.comments.label }}</h4>
-                        {{ form.comments(id='area') }}
-                    <br/>
-
-                    <br>
-                    <p> 
-                        {{ form.submit() }}
-                    </p>
-                </center>
-
-            </form>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="col-md-12 text-center">
+                <h4>{{ form.difficulty.label }}</h4>
+                    {{ form.difficulty(min=1, max=5, oninput="difficultyValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="difficulty" id="difficulty-score"> {{ form.difficulty.data }} </output> </br>
+                </h5>
+                <h4>{{ form.assistant.label }}</h4>
+                    {{ form.assistant(min=1, max=5, oninput="assistantValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="assistant" id="assistant-score"> {{ form.assistant.data }} </output> </br>
+                </h5>
+                <h4>{{ form.knowledgeable.label }}</h4>
+                    {{ form.knowledgeable(min=1, max=5, oninput="knowledgeableValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="knowledgeable" id="knowledgeable-score"> {{ form.knowledgeable.data }} </output> </br>
+                </h5>
+                <h4>{{ form.objective.label }}</h4>
+                    {{ form.objective(min=1, max=5, oninput="objectiveValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="objective" id="objective-score"> {{ form.objective.data }} </output> </br>
+                </h5>
+                <h4>{{ form.time.label }}</h4>
+                    {{ form.time(min=1, max=5, oninput="timeValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="time" id="time-score"> {{ form.time.data }} </output> </br>
+                </h5>
+                <h4>{{ form.venue.label }}</h4>
+                    {{ form.venue(min=1, max=5, oninput="venueValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="venue" id="venue-score"> {{ form.venue.data }} </output> </br>
+                </h5>
+                <h4>{{ form.satisfaction.label }}</h4>
+                    {{ form.satisfaction(min=1, max=5, oninput="satisfactionValue(value)", class='larger') }}
+                <br/>
+                <h5>
+                    <output for="satisfaction" id="satisfaction-score"> {{ form.satisfaction.data }} </output> </br>
+                </h5>
+                <br>
+                <h4>{{ form.comments.label }}</h4>
+                    {{ form.comments(class='comment_area') }}
+                <br/>
+                <br>
+                <p> 
+                    {{ form.submit() }}
+                </p>
+            </div>
+        </form>
     </div>
 
     <script>
@@ -101,10 +92,10 @@
     </script>    
 
 <style>
-    #larger {
+    .larger {
         width: 25%;
     }
-    #area{
+    .comment_area{
         width:30%;
         height: 20%;
         font-size:12pt;
