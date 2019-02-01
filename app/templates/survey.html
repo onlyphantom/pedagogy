@@ -1,68 +1,116 @@
 {% extends "base.html" %}
-
-
 {% block content %}
-    <div class="jumbotron">
+    <div class="jumbotron jumbo-mini">
         <div id="survey-blurb">
-            <h2>{{ workshop_name }} Workshop Feedback Form</h2>
-            <p>Help us serve you better by taking a couple of minutes to tell us about the program so we can do better in the future.</p>        
+            <h1 class="display-2">Feedback Form</h1>
+            <p class="small">
+                Help us serve you better by taking a few minutes to tell us about your experience at {{ workshop_name }}.
+            </p>
+            <hr>
+            <p class="lead">
+                A score of 5 indicates high satisfaction (strongly agree with the statement)<br/>
+                A score of 1 indicates poor satisfaction (strongly disagree).
+            </p>        
         </div>
-        <hr>
-        <br>
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
-            <div class="col-md-12 text-center">
-                <h4>{{ form.difficulty.label }}</h4>
-                    {{ form.difficulty(min=1, max=5, oninput="difficultyValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="difficulty" id="difficulty-score"> {{ form.difficulty.data }} </output> </br>
-                </h5>
-                <h4>{{ form.assistant.label }}</h4>
-                    {{ form.assistant(min=1, max=5, oninput="assistantValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="assistant" id="assistant-score"> {{ form.assistant.data }} </output> </br>
-                </h5>
-                <h4>{{ form.knowledgeable.label }}</h4>
-                    {{ form.knowledgeable(min=1, max=5, oninput="knowledgeableValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="knowledgeable" id="knowledgeable-score"> {{ form.knowledgeable.data }} </output> </br>
-                </h5>
-                <h4>{{ form.objective.label }}</h4>
-                    {{ form.objective(min=1, max=5, oninput="objectiveValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="objective" id="objective-score"> {{ form.objective.data }} </output> </br>
-                </h5>
-                <h4>{{ form.time.label }}</h4>
-                    {{ form.time(min=1, max=5, oninput="timeValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="time" id="time-score"> {{ form.time.data }} </output> </br>
-                </h5>
-                <h4>{{ form.venue.label }}</h4>
-                    {{ form.venue(min=1, max=5, oninput="venueValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="venue" id="venue-score"> {{ form.venue.data }} </output> </br>
-                </h5>
-                <h4>{{ form.satisfaction.label }}</h4>
-                    {{ form.satisfaction(min=1, max=5, oninput="satisfactionValue(value)", class='larger') }}
-                <br/>
-                <h5>
-                    <output for="satisfaction" id="satisfaction-score"> {{ form.satisfaction.data }} </output> </br>
-                </h5>
-                <br>
-                <h4>{{ form.comments.label }}</h4>
-                    {{ form.comments(class='comment_area') }}
-                <br/>
-                <br>
-                <p> 
-                    {{ form.submit() }}
-                </p>
+            <div class="row mt-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.difficulty.label }}</h4>
+                    <p class="mb-4 lead">Course materials are delivered in an empathetic fashion, and the instructor made an effort
+                        in presenting the materials with clarity and a student-centric focus.
+                    </p>    
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                    {{ form.difficulty(min=1, max=5, oninput="difficultyValue(value)") }}  
+                    <output for="difficulty" id="difficulty-score"> {{ form.difficulty.data }} </output>
+                </div>
             </div>
+            <div class="row mt-4 mb-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.assistant.label }}</h4>
+                    <p class="mb-4 lead">The teaching assistants were helpful, polite and professional. They offered assistance in 
+                        a cheerful manner.
+                    </p>   
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                    {{ form.assistant(min=1, max=5, oninput="assistantValue(value)") }}  
+                    <output for="difficulty" id="assistant-score"> {{ form.assistant.data }} </output>
+                </div>
+            </div>
+            <div class="row mt-4 mb-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.knowledgeable.label }}</h4>
+                    <p class="mb-4 lead">The lead instructor in my workshop has the right amount of qualification and technical expertise
+                        on the subject. 
+                    </p>   
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                        {{ form.knowledgeable(min=1, max=5, oninput="knowledgeableValue(value)") }}  
+                    <output for="difficulty" id="knowledgeable-score"> {{ form.knowledgeable.data }} </output>
+                </div>
+            </div>
+            <div class="row mt-4 mb-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.objective.label}}</h4>
+                    <p class="mb-4 lead">The materials and delivery were presented in a way that meets my training objectives. Through the
+                        training, my skills and knowledge has improved reasonably.
+                    </p>   
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                    {{ form.objective(min=1, max=5, oninput="objectiveValue(value)") }}  
+                    <output for="difficulty" id="objective-score"> {{ form.objective.data }} </output>
+                </div>
+            </div>
+            <div class="row mt-4 mb-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.time.label }}</h4>
+                    <p class="mb-4 lead">The allocated time was reasonable and the delivery was well-paced.
+                    </p>   
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                    {{ form.time(min=1, max=5, oninput="timeValue(value)") }}
+                    <output for="time" id="time-score"> {{ form.time.data }} </output> 
+                </div>
+            </div>
+            <div class="row mt-4 mb-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.venue.label }}</h4>
+                    <p class="mb-4 lead">The classroom environment was conducive to my learning experience. It is well-maintained,
+                        clean, and orderly. The venue and facilities met my expectations.
+                    </p>   
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                        {{ form.venue(min=1, max=5, oninput="venueValue(value)") }}
+                    <output for="time" id="venue-score"> {{ form.venue.data }} </output> 
+                </div>
+            </div>
+            <div class="row mt-4 mb-4">
+                <div class="col-md-7 col-12">
+                    <h4>{{ form.satisfaction.label }}</h4>
+                    <p class="mb-4 lead">Rate your <b>overall experience</b> throughout the workshop: Were you satisfied
+                        with the training you have received on the subject?
+                    </p>   
+                </div>
+                <div class="col-md-4 col-12 offset-md-1 mt-4 text-center">
+                    {{ form.satisfaction(min=1, max=5, oninput="satisfactionValue(value)") }}
+                    <output for="satisfaction" id="satisfaction-score"> {{ form.satisfaction.data }} </output>
+                </div>
+            </div>
+
+            <div class="row mt-4 mb-4">
+                <div class="col-7">
+                    <label class="lead">{{ form.comments.label }}</label>
+                    {{ form.comments(class='form-control') }}
+                    <small class="form-text"> 
+                        Your feedback is an integral part to our unending strive for pedagogical excellence. Thank you!
+                    </small>
+                </div> 
+            </div>
+            <p> 
+                {{ form.submit(class="btn btn-light") }}
+            </p>    
+                
         </form>
     </div>
 
@@ -90,16 +138,5 @@
         }
 
     </script>    
-
-<style>
-    .larger {
-        width: 25%;
-    }
-    .comment_area{
-        width:30%;
-        height: 20%;
-        font-size:12pt;
-    }
-</style>
 
 {% endblock %}

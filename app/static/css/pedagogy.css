@@ -156,7 +156,6 @@ p.card-text {
     color: #273f52;
 }
 
-
 /* Iconography */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
@@ -218,4 +217,68 @@ tr {
     background: -moz-linear-gradient(top, #1b1b1b 0%, #436382 36%, #203644 100%);
     background: -webkit-linear-gradient(top, #1b1b1b 0%,#436382 36%,#203644 100%);
     background: linear-gradient(to bottom, #1b1b1b 0%,#436382 36%,#203644 100%);
+}
+
+/* Survey Form */
+#survey-blurb {
+    padding: 2% 0;
+}
+
+#survey-blurb > h1{
+    color: white;
+    margin-bottom: 0;
+}
+
+#survey-blurb > p {
+    color: white;
+}
+
+input[type=range] {
+    margin: 13px 0;
+    -webkit-appearance: none;
+    width: 240px;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    height: 8.4px;
+    cursor: pointer;
+    background: #375d7b;
+    border-radius: 3%;
+    border: 0.2px solid #010101;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    background: white;
+    border: 1px solid #000000;
+    border-radius: 3px;
+    height: 1.7em;
+    width: 16px;
+    -webkit-appearance: none;
+    cursor: pointer;
+    margin-top: -3.6%;
+}
+
+input[type=range]::-moz-range-track {
+    height: 8.4px;
+    cursor: pointer;
+    background: #375d7b;
+    border-radius: 3%;
+    border: 0.2px solid #010101;
+}
+
+input[type=range]::-moz-range-thumb {
+    background: white;
+    border: 1px solid #000000;
+    border-radius: 3px;
+    height: 1.7em;
+    width: 16px;
+    cursor: pointer;
+}
+
+textarea#comments {
+    height: 120px;
 }

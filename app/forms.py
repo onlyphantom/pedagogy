@@ -24,14 +24,14 @@ class RegistrationForm(FlaskForm):
 
 class SurveyForm(FlaskForm):
     workshop_id = HiddenField("Workshop id", validators=[DataRequired()])
-    difficulty = IntegerRangeField("The lecture presented wasn't too difficult:", default=3)
-    assistant = IntegerRangeField("The teaching assistants were helpful:", default=3)
-    knowledgeable = IntegerRangeField("The trainer was knowledgeable about the training topics:", default=3)
-    objective = IntegerRangeField("My training objectives were met:", default=3)
-    time = IntegerRangeField("The time allocated for the training was sufficient:", default=3)
-    venue = IntegerRangeField("Training venue and facilities were adequate and comfortable:", default=3)
-    satisfaction = IntegerRangeField("With 5 being the most positive, how do you feel about the overall experience on this workshop:", default=3)
-    comments = TextAreaField("If you have additional comments/ideas/improvements, please enter them below:")
+    difficulty = IntegerRangeField("The lecture presented has a reasonable difficulty curve", default=3)
+    assistant = IntegerRangeField("The teaching assistants were helpful", default=3)
+    knowledgeable = IntegerRangeField("The trainer was knowledgeable about the training topics", default=3)
+    objective = IntegerRangeField("My training objectives were met", default=3)
+    time = IntegerRangeField("The time allocated for the training was sufficient", default=3)
+    venue = IntegerRangeField("Training venue and facilities were adequate and comfortable", default=3)
+    satisfaction = IntegerRangeField("What is your overall experience in this workshop?", default=3)
+    comments = TextAreaField("Additional comments/ideas/improvements to your lead instructor and the training organizer")
 
     submit = SubmitField('Submit')
 
