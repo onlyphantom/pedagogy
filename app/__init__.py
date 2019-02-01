@@ -17,4 +17,4 @@ admin = Admin(app, name='pedagogy')
 # let Flask-Login know which page (function name) handles login
 login.login_view = 'login'
 
-from app import routes, models, adminconf, users
+from app import routes, models, adminconf, users, errors

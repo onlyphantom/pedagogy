@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="jumbotron">
+        <h1 class="display-3">Woah, this is embarrasing.</h1>
+        <p class="lead">
+            This shouldn't be happening. The page is either not found or there is a problem on our server.
+            <br/>If you think this is an error, please
+            help us fix this by <a href="https://github.com/onlyphantom/pedagogy/issues" class="text-warning">filing an issue on the github repo</a>. 
+        </p>
+        <a href="{{ url_for('index') }}"><button type="button" class="btn btn-dark">Back to Home</button></a>
+    </div>
+        
+{% endblock %}
+
+
