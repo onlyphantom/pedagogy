@@ -24,6 +24,9 @@ At its current release (v0.1), Pedagogy delivers key performance indicators and 
     - Performance Indicators
     - Timeline View
     - Student Reviews
+    
+ - Survey Form
+    - Built-in survey form with tight integration with the rest of Pedagogy features and services.
 
 ## Deployment
 
