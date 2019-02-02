@@ -1,113 +1,119 @@
-# packages in environment at /anaconda3/envs/pedagogy:
-#
-alembic                   0.9.9                      py_0    conda-forge
-altair                    2.2.2                    py36_1    conda-forge
-appnope                   0.1.0            py36hf537a9a_0    anaconda
-arrow                     0.12.1                py36_1002    conda-forge
-asn1crypto                0.24.0                   py36_0    conda-forge
-astroid                   2.0.2                    py36_0    conda-forge
-backcall                  0.1.0                    py36_0    anaconda
-blas                      1.0                         mkl  
-bleach                    3.1.0                    py36_0  
-blinker                   1.4                        py_1    conda-forge
-bzip2                     1.0.6                         1    conda-forge
-ca-certificates           2018.8.24            ha4d7672_0    conda-forge
-certifi                   2018.8.24                py36_1    conda-forge
-cffi                      1.11.5           py36h6174b99_1    anaconda
-click                     6.7                        py_1    conda-forge
-cryptography              2.4.2            py36ha12b0ac_0  
-decorator                 4.3.0                    py36_0    anaconda
-entrypoints               0.2.3                    py36_2    conda-forge
-expat                     2.2.6                h0a44026_0  
-flask                     1.0.2                      py_1    conda-forge
-flask-admin               1.5.3                      py_0    conda-forge
-flask-login               0.4.1                    py36_0    anaconda
-flask-mail                0.9.1                      py_2    conda-forge
-flask-migrate             2.2.1                    py36_0    conda-forge
-flask-sqlalchemy          2.3.2                      py_0    conda-forge
-flask-wtf                 0.14.2                   py36_0    conda-forge
-git                       2.20.1          pl526h6951d83_0  
-idna                      2.7                      py36_0    conda-forge
-intel-openmp              2019.0                      118    anaconda
-ipykernel                 5.1.0            py36h39e3cac_0    anaconda
-ipython                   7.1.1            py36h39e3cac_0    anaconda
-ipython_genutils          0.2.0            py36h241746c_0    anaconda
-isort                     4.3.4                    py36_0    conda-forge
-itsdangerous              0.24                       py_2    conda-forge
-jedi                      0.13.1                   py36_0    anaconda
-jinja2                    2.10                       py_1    conda-forge
-jsonschema                2.6.0                    py36_2    conda-forge
-jupyter_client            5.2.3                    py36_0    conda-forge
-jupyter_core              4.4.0                    py36_0    anaconda
-krb5                      1.16.1               hddcf347_7  
-lazy-object-proxy         1.3.1                    py36_0    conda-forge
-libcurl                   7.63.0            h051b688_1000  
-libcxx                    4.0.1                h579ed51_0    anaconda
-libcxxabi                 4.0.1                hebd6815_0    anaconda
-libedit                   3.1.20170329         hb402a30_2    anaconda
-libffi                    3.2.1                h475c297_4    anaconda
-libgfortran               3.0.1                h93005f0_2    anaconda
-libiconv                  1.15                 hdd342a3_7  
-libsodium                 1.0.16               h3efe00b_0    anaconda
-libssh2                   1.8.0                ha12b0ac_4  
-mako                      1.0.7                      py_1    conda-forge
-markupsafe                1.0              py36h470a237_1    conda-forge
-mccabe                    0.6.1                      py_1    conda-forge
-mistune                   0.8.4            py36h1de35cc_0  
-mkl                       2019.0                      118    anaconda
-mkl_fft                   1.0.6                    py36_0    conda-forge
-mkl_random                1.0.1                    py36_0    conda-forge
-nb_conda                  2.2.1                    py36_0  
-nb_conda_kernels          2.2.0                    py36_0  
-nbconvert                 5.3.1                    py36_0  
-nbformat                  4.4.0            py36h827af21_0  
-ncurses                   6.1                  h0a44026_0    anaconda
-notebook                  5.7.4                    py36_0  
-numpy                     1.15.1           py36h6a91979_0    anaconda
-numpy-base                1.15.1           py36h8a80b8c_0    anaconda
-openssl                   1.1.1a               h1de35cc_0  
-pandas                    0.23.4           py36hf8a1672_0    conda-forge
-pandoc                    2.2.3.2                       0  
-pandocfilters             1.4.2                    py36_1  
-parso                     0.3.1                    py36_0    anaconda
-perl                      5.26.2               h4e221da_0  
-pexpect                   4.6.0                    py36_0    conda-forge
-pickleshare               0.7.5                    py36_0    conda-forge
-pip                       18.1                     py36_0  
-prometheus_client         0.5.0                    py36_0  
-prompt_toolkit            2.0.7                    py36_0    anaconda
-ptyprocess                0.6.0                    py36_0    conda-forge
-pycparser                 2.18                     py36_1    anaconda
-pygments                  2.2.0            py36h240cd3f_0    anaconda
-pyjwt                     1.7.1                      py_0    conda-forge
-pylint                    2.1.1                    py36_0    conda-forge
-pymysql                   0.9.2                    py36_0    anaconda
-python                    3.6.8                haf84260_0  
-python-dateutil           2.7.3                      py_0    conda-forge
-python-dotenv             0.9.1                      py_0    conda-forge
-python-editor             1.0.3                      py_0    conda-forge
-pytz                      2018.5                     py_0    conda-forge
-pyzmq                     17.1.2           py36h1de35cc_0    anaconda
-readline                  7.0                  h1de35cc_5    anaconda
-send2trash                1.5.0                    py36_0  
-setuptools                40.2.0                   py36_0    conda-forge
-six                       1.11.0                   py36_1    conda-forge
-sqlalchemy                1.2.11           py36h470a237_0    conda-forge
-sqlite                    3.26.0               ha441bb4_0  
-terminado                 0.8.1                    py36_1  
-testpath                  0.4.2                    py36_0  
-tk                        8.6.8                ha441bb4_0    anaconda
-toolz                     0.9.0                      py_0    conda-forge
-tornado                   5.1.1            py36h1de35cc_0    anaconda
-traitlets                 4.3.2            py36h65bd3ce_0    anaconda
-typed-ast                 1.1.0                    py36_0    conda-forge
-vega_datasets             0.5.0                      py_0    conda-forge
-wcwidth                   0.1.7            py36h8c6ec74_0    anaconda
-webencodings              0.5.1                    py36_1  
-werkzeug                  0.14.1                     py_0    conda-forge
-wheel                     0.31.1                   py36_1    conda-forge
-wrapt                     1.10.11                  py36_0    conda-forge
-wtforms                   2.1                      py36_0    conda-forge
-xz                        5.2.4                h1de35cc_4    anaconda
-zeromq                    4.2.5                h0a44026_1    anaconda
-zlib                      1.2.11               hf3cbc9b_2    anaconda
+name: pedagogy
+channels:
+- conda-forge
+- anaconda
+- defaults
+dependencies:
+- appnope=0.1.0=py36hf537a9a_0
+- backcall=0.1.0=py36_0
+- cffi=1.11.5=py36h6174b99_1
+- decorator=4.3.0=py36_0
+- flask-login=0.4.1=py36_0
+- intel-openmp=2019.0=118
+- ipykernel=5.1.0=py36h39e3cac_0
+- ipython=7.1.1=py36h39e3cac_0
+- ipython_genutils=0.2.0=py36h241746c_0
+- jedi=0.13.1=py36_0
+- jupyter_core=4.4.0=py36_0
+- libcxx=4.0.1=h579ed51_0
+- libcxxabi=4.0.1=hebd6815_0
+- libedit=3.1.20170329=hb402a30_2
+- libffi=3.2.1=h475c297_4
+- libgfortran=3.0.1=h93005f0_2
+- libsodium=1.0.16=h3efe00b_0
+- mkl=2019.0=118
+- ncurses=6.1=h0a44026_0
+- numpy=1.15.1=py36h6a91979_0
+- numpy-base=1.15.1=py36h8a80b8c_0
+- parso=0.3.1=py36_0
+- prompt_toolkit=2.0.7=py36_0
+- pycparser=2.18=py36_1
+- pygments=2.2.0=py36h240cd3f_0
+- pymysql=0.9.2=py36_0
+- pyzmq=17.1.2=py36h1de35cc_0
+- readline=7.0=h1de35cc_5
+- tk=8.6.8=ha441bb4_0
+- tornado=5.1.1=py36h1de35cc_0
+- traitlets=4.3.2=py36h65bd3ce_0
+- wcwidth=0.1.7=py36h8c6ec74_0
+- xz=5.2.4=h1de35cc_4
+- zeromq=4.2.5=h0a44026_1
+- zlib=1.2.11=hf3cbc9b_2
+- alembic=0.9.9=py_0
+- altair=2.2.2=py36_1
+- arrow=0.12.1=py36_1002
+- asn1crypto=0.24.0=py36_0
+- astroid=2.0.2=py36_0
+- blinker=1.4=py_1
+- bzip2=1.0.6=1
+- ca-certificates=2018.8.24=ha4d7672_0
+- certifi=2018.8.24=py36_1
+- click=6.7=py_1
+- entrypoints=0.2.3=py36_2
+- flask=1.0.2=py_1
+- flask-admin=1.5.3=py_0
+- flask-mail=0.9.1=py_2
+- flask-migrate=2.2.1=py36_0
+- flask-sqlalchemy=2.3.2=py_0
+- flask-wtf=0.14.2=py36_0
+- idna=2.7=py36_0
+- isort=4.3.4=py36_0
+- itsdangerous=0.24=py_2
+- jinja2=2.10=py_1
+- jsonschema=2.6.0=py36_2
+- jupyter_client=5.2.3=py36_0
+- lazy-object-proxy=1.3.1=py36_0
+- mako=1.0.7=py_1
+- markupsafe=1.0=py36h470a237_1
+- mccabe=0.6.1=py_1
+- mkl_fft=1.0.6=py36_0
+- mkl_random=1.0.1=py36_0
+- pandas=0.23.4=py36hf8a1672_0
+- pexpect=4.6.0=py36_0
+- pickleshare=0.7.5=py36_0
+- ptyprocess=0.6.0=py36_0
+- pyjwt=1.7.1=py_0
+- pylint=2.1.1=py36_0
+- python-dateutil=2.7.3=py_0
+- python-dotenv=0.9.1=py_0
+- python-editor=1.0.3=py_0
+- pytz=2018.5=py_0
+- setuptools=40.2.0=py36_0
+- six=1.11.0=py36_1
+- sqlalchemy=1.2.11=py36h470a237_0
+- toolz=0.9.0=py_0
+- typed-ast=1.1.0=py36_0
+- vega_datasets=0.5.0=py_0
+- werkzeug=0.14.1=py_0
+- wheel=0.31.1=py36_1
+- wrapt=1.10.11=py36_0
+- wtforms=2.1=py36_0
+- blas=1.0=mkl
+- bleach=3.1.0=py36_0
+- cryptography=2.4.2=py36ha12b0ac_0
+- expat=2.2.6=h0a44026_0
+- git=2.20.1=pl526h6951d83_0
+- krb5=1.16.1=hddcf347_7
+- libcurl=7.63.0=h051b688_1000
+- libiconv=1.15=hdd342a3_7
+- libssh2=1.8.0=ha12b0ac_4
+- mistune=0.8.4=py36h1de35cc_0
+- nb_conda=2.2.1=py36_0
+- nb_conda_kernels=2.2.0=py36_0
+- nbconvert=5.3.1=py36_0
+- nbformat=4.4.0=py36h827af21_0
+- notebook=5.7.4=py36_0
+- openssl=1.1.1a=h1de35cc_0
+- pandoc=2.2.3.2=0
+- pandocfilters=1.4.2=py36_1
+- perl=5.26.2=h4e221da_0
+- pip=18.1=py36_0
+- prometheus_client=0.5.0=py36_0
+- python=3.6.8=haf84260_0
+- send2trash=1.5.0=py36_0
+- sqlite=3.26.0=ha441bb4_0
+- terminado=0.8.1=py36_1
+- testpath=0.4.2=py36_0
+- webencodings=0.5.1=py36_1
+prefix: /anaconda3/envs/pedagogy
+
