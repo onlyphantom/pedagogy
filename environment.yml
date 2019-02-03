@@ -92,7 +92,6 @@ dependencies:
 - bleach=3.1.0=py36_0
 - cryptography=2.4.2=py36ha12b0ac_0
 - expat=2.2.6=h0a44026_0
-- git=2.20.1=pl526h6951d83_0
 - krb5=1.16.1=hddcf347_7
 - libcurl=7.63.0=h051b688_1000
 - libiconv=1.15=hdd342a3_7

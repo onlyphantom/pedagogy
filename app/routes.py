@@ -89,8 +89,9 @@ def qualitative(id, page_num):
 
 @app.route('/survey/<int:workshop_id>', methods=['GET', 'POST'])
 def rate(workshop_id):
-    g.workshop = Workshop.query.filter_by(id=workshop_id).first()
-    if g.workshop is None:
+    workshop = Workshop.query.filter_by(id=workshop_id).first()
+    timediff = datetime.utcnow() - workshop.workshop_start
+    if workshop is None or timediff.days > 10:
         flash('Workshop survey is not available at the moment!')
         return redirect(url_for('index'))
 
@@ -113,4 +114,4 @@ def rate(workshop_id):
         db.session.commit()
         return render_template('response.html')
     
-    return render_template('survey.html', form=form, workshop_name=g.workshop.workshop_name, workshop_category=g.workshop.workshop_category)
+    return render_template('survey.html', form=form, workshop_name=workshop.workshop_name, workshop_category=workshop.workshop_category)

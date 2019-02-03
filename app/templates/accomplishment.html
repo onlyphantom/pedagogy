@@ -85,7 +85,6 @@
                                     {% for workshop in personstats['workshops'] %}
                                     <li>
                                         <b>{{ workshop.workshop_name }}</b>
-                                        <!-- TODO: Add moment to show "6 days ago" -->
                                         <span class="float-right">{{ workshop.printtime() }}</span>
                                         <ul class="timeline-sub">
                                             <li><i class="material-icons">place</i> {{ workshop.workshop_venue }}</li>
