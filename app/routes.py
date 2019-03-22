@@ -4,7 +4,8 @@ from app import app, db
 from app.analytics import global_total_stats, person_total_stats
 from app.users import User
 from app.models import Employee, Workshop, Response
-from app.forms import LoginForm, RegistrationForm, SurveyForm
+from app.forms import LoginForm, RegistrationForm, SurveyForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.email import send_pw_reset_email
 from datetime import datetime
 from sqlalchemy import func
 
@@ -73,6 +74,34 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_pw_reset_email(user)
+            flash('Instructions have been sent to your email')
+        else:
+            flash('Email is not registered with Pedagogy yet!')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html', title='Reset Password', form=form)        
+
+@app.route('/reset_password/<token>', methods=['GET','POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
 
 @app.route('/<int:id>/qualitative/<int:page_num>')
 @login_required
