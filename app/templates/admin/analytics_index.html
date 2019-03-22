@@ -1,4 +1,8 @@
 {% extends 'admin/master.html' %}
 {% block body %}
   <p>{{ user.email }}, here I'm going to display some data.</p>
+  <p>Your privilege:
+    <ul>Analyst: {{ user.analyst }}</ul>
+    <ul>Leadership: {{ user.leadership }}</ul>
+  </p>
 {% endblock %}

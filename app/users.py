@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     leadership = db.Column(db.Boolean, default=False, nullable=False)
+    analyst = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
         return '<User {}>'.format(self.email)
