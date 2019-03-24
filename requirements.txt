@@ -38,7 +38,7 @@ mccabe==0.6.1
 mistune==0.8.4
 mkl-fft==1.0.6
 mkl-random==1.0.1
-nb-conda==2.2.1
+nb-conda
 nb-conda-kernels==2.2.0
 nbconvert==5.3.1
 nbformat==4.4.0
