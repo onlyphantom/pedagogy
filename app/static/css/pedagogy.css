@@ -282,3 +282,21 @@ input[type=range]::-moz-range-thumb {
 textarea#comments {
     height: 120px;
 }
+
+/* List items*/  
+
+dt {
+    color: #273f52;
+}
+
+dd {
+    color: white;
+}
+
+#submit {
+    background: rgb(2, 73, 109);
+    border-radius: 8%;
+    border: none;
+    padding: 1% 2.5%;
+    color: white;
+}

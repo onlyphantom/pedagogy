@@ -1,36 +1,66 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="jumbotron jumbo-mini">
-    <h1>Register Form</h1>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.email.label }}<br/>
-            {{ form.email(size=32) }}
+<div class="jumbotron">
+    <div class="row">
+        <h1 class="display-4">Account Registration</h1>
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-lg-6 col-sm-10 mt-4">
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.email.label }}<br/>
+                    {{ form.email(size=32) }}
+        
+                    {% for error in form.email.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.password.label }}<br/>
+                    {{ form.password(size=32) }}
+        
+                    {% for error in form.password.errors %}
+                        {{ error }}
+                    {% endfor %}            
+                </p>
+                <p>
+                    {{ form.password2.label }}<br/>
+                    {{ form.password2(size=32) }}
+        
+                    {% for error in form.password2.errors %}
+                        {{ error }}
+                    {% endfor %}  
+                </p>
+                <p>{{ form.submit() }}</p>
+            </form>
+        </div>
+            <div class="col-md-10 col-lg-5 col-sm-10">
+                <h4>Feedback-driven performance management</h4>
+                <p style="margin-right:2%">
+                    Join algoritma's production team (consultants / instructors) to gain full access to Pedagogy.
+                    <dl>
+                        <dt>Regional</dt>
+                        <dd>Work with 50+ companies across SEA: Indonesia, Singapore, and Thailand. Broaden
+                            your skill set and perspective by immersing in a culturally diverse team.
+                        </dd>
 
-            {% for error in form.email.errors %}
-                {{ error }}
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.password.label }}<br/>
-            {{ form.password(size=32) }}
+                        <dt>Develop</dt>
+                        <dd>Through intensive training, exposure, and holistic training programs, continue to
+                            hone and develop the necessary skill to be a highly effective public consultant and data professional.   
+                        </dd>
 
-            {% for error in form.password.errors %}
-                {{ error }}
-            {% endfor %}            
-        </p>
-        <p>
-            {{ form.password2.label }}<br/>
-            {{ form.password2(size=32) }}
-
-            {% for error in form.password2.errors %}
-                {{ error }}
-            {% endfor %}  
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+                        <dt>Freedom</dt>
+                        <dd>Choose your own progression path, your growth
+                            direction, your week-to-week activities and focus. Our environment doesn't just <i>allow</i> that. We
+                            <i>support</i> it.
+                        </dd>
+                    </dl>
+                </p>
+            </div>
+    </div>
+    
 </div>
 {% endblock %}
 

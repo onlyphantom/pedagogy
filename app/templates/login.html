@@ -2,32 +2,67 @@
 
 {% block content %}
     <div class="jumbotron">
-        <h1>Sign In</h1>
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            <p>
-                {{ form.email.label }}<br/>
-                {{ form.email(size=32) }}
+        <div class="row">
+            <h1 class="display-4">Sign In</h1>
+        </div>
+        <div class="row">
+            <div class="col-md-10 col-lg-6 col-sm-10 mt-4">
+                <form action="" method="post" novalidate>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.email.label }}<br/>
+                            {{ form.email(size=42) }}
+            
+                            {% for error in form.email.errors %}
+                                <span style="color:red">{{ error }}</span>
+                            {% endfor %}            
+                        </p>
+                        <p>
+                            {{ form.password.label }}<br/>
+                            {{ form.password(size=42) }}
+            
+                            {% for error in form.password.errors %}
+                                <span style="color:red">{{ error }}</span>
+                            {% endfor %}            
+                        </p>
+                        <p>{{ form.remember_me() }} {{ form.remember_me.label() }}</p>
+                        <p>{{ form.submit() }}</p>
+                    </form>
+                    <p>Forgot your password? 
+                        <a href="{{ url_for('reset_password_request') }}" class="text-warning">Reset password here</a>
+                    </p>
+            </div>
+            <div class="col-md-10 col-lg-5  col-sm-10">
+                <h4>Feedback-driven performance management</h4>
+                <p style="margin-right:2%">
+                    Join algoritma's production team (consultants / instructors) to gain full access to Pedagogy.
+                    <dl>
+                        <dt>Regional</dt>
+                        <dd>Work with 50+ companies across SEA: Indonesia, Singapore, and Thailand. Broaden
+                            your skill set and perspective by immersing in a culturally diverse team.
+                        </dd>
 
-                {% for error in form.email.errors %}
-                    <span style="color:red">{{ error }}</span>
-                {% endfor %}            
-            </p>
-            <p>
-                {{ form.password.label }}<br/>
-                {{ form.password(size=32) }}
+                        <dt>Develop</dt>
+                        <dd>Through intensive training, exposure, and holistic training programs, continue to
+                            hone and develop the necessary skill to be a highly effective public consultant and data professional.   
+                        </dd>
 
-                {% for error in form.password.errors %}
-                    <span style="color:red">{{ error }}</span>
-                {% endfor %}            
-            </p>
-            <p>{{ form.remember_me() }} {{ form.remember_me.label() }}</p>
-            <p>{{ form.submit() }}</p>
-        </form>
-        <p>
-            Forgot your password?
-            <a href="{{ url_for('reset_password_request') }}" class="text-warning">Reset password here</a>
-        </p>
+                        <dt>Freedom</dt>
+                        <dd>Choose your own progression path, your growth
+                            direction, your week-to-week activities and focus. Our environment doesn't just <i>allow</i> that. We
+                            <i>support</i> it.
+                        </dd>
+                    </dl>
+                </p>
+                <small>
+                    Got a feature request? Encountered a bug? <a href="http://github.com/onlyphantom/pedagogy/issues" class="text-warning">Open an issue on the GitHub repo.</a>
+                </small>
+            </div>
+        </div>
+
+
+        
+
     </div>
     
 {% endblock %}
