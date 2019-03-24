@@ -23,3 +23,4 @@ def send_pw_reset_email(user):
         html_body=render_template('email/reset_password.html',
             user=user, token=token))
 
+
