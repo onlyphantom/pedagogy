@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, date
 import arrow
 
 # association table
@@ -10,6 +10,16 @@ ta_assignment = db.Table(
     db.Column('employee_id', db.Integer, db.ForeignKey('employee.id')),
     db.Column('workshop_id', db.Integer, db.ForeignKey('workshop.id'))
 )
+
+# association table
+student_enrollment = db.Table(
+    'enrollment',
+    # ForeignKey constraints that column to only allow values that are present in
+    # the corresponding table (almost always the primary key for their owning table)
+    db.Column('student_id', db.Integer, db.ForeignKey('student.id')),
+    db.Column('workshop_id', db.Integer, db.ForeignKey('workshop.id'))
+)
+
 
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,3 +75,39 @@ class Response(db.Model):
     venue_score = db.Column(db.Integer)
     satisfaction_score = db.Column(db.Integer)
     comments = db.Column(db.Text)
+
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+    dob = db.Column(db.Date)
+    batch = db.Column(db.String(32), nullable=False)
+    gender = db.Column(db.Enum(
+        "Male", "Female", 
+        name="gender"), nullable=False)
+    specialization = db.Column(db.Enum(
+        "FT", "DV", "ML", "Ad Hoc", 
+        name="specialization"), nullable=False)
+    funding = db.Column(db.Enum(
+        "Self funding", "Corporate", 
+        name="funding"), nullable=False)
+    previous_title = db.Column(db.String(64))
+    ds_related = db.Column(db.Boolean, default=False)
+
+    student_enrollment = db.relationship(
+        'Workshop',
+        secondary=student_enrollment,
+        backref=db.backref('enrollment', lazy='dynamic'))
+
+class Demoday(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
+    participants_size = db.Column(db.Integer, nullable=False)
+
+class Participant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    project_link = db.Column(db.String(64))
+    status = db.Column(db.Enum(
+        "employed", "promoted",
+        name="status"))
+    employer = db.Column(db.String(32))
