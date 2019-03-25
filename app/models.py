@@ -20,7 +20,6 @@ student_enrollment = db.Table(
     db.Column('workshop_id', db.Integer, db.ForeignKey('workshop.id'))
 )
 
-
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), db.ForeignKey('user.email'))
@@ -78,7 +77,7 @@ class Response(db.Model):
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.String(64))
     dob = db.Column(db.Date)
     batch = db.Column(db.String(32), nullable=False)
     gender = db.Column(db.Enum(
