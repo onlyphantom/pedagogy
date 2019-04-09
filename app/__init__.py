@@ -21,7 +21,6 @@ mail = Mail(app)
 # let Flask-Login know which page (function name) handles login
 login.login_view = 'login'
 
-# mailing configuration
 if not app.debug:
     if app.config['MAIL_SERVER']:
         auth = None
