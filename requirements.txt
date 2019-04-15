@@ -1,3 +1,4 @@
+# pip freeze > requirements.txt
 alembic==0.9.9
 altair==2.2.2
 appnope==0.1.0
@@ -15,6 +16,7 @@ decorator==4.3.0
 entrypoints==0.2.3
 Flask==1.0.2
 Flask-Admin==1.5.3
+Flask-Caching==1.6.0
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
 Flask-Migrate==2.2.1

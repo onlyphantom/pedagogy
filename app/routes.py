@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, g
 from flask_login import current_user, login_user, logout_user, login_required
-from app import app, db
+from app import app, db, cache
 from app.analytics import global_total_stats, person_total_stats
 from app.users import User
 from app.models import Employee, Workshop, Response
@@ -35,6 +35,7 @@ def accomplishment():
 
 @app.route('/analytics')
 @login_required
+@cache.cached(timeout=86400*7)
 def analytics():
     return render_template('analytics.html')
 

@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_caching import Cache
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_mail import Mail
@@ -17,6 +18,7 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 admin = Admin(app, name='pedagogy')
 mail = Mail(app)
+cache = Cache(app)
 
 # let Flask-Login know which page (function name) handles login
 login.login_view = 'login'

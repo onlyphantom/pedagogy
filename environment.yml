@@ -1,7 +1,7 @@
 name: pedagogy
 channels:
-- conda-forge
 - anaconda
+- conda-forge
 - defaults
 dependencies:
 - appnope=0.1.0=py36hf537a9a_0
@@ -52,6 +52,7 @@ dependencies:
 - entrypoints=0.2.3=py36_2
 - flask=1.0.2=py_1
 - flask-admin=1.5.3=py_0
+- flask-caching=1.6.0=py_0
 - flask-mail=0.9.1=py_2
 - flask-migrate=2.2.1=py36_0
 - flask-sqlalchemy=2.3.2=py_0

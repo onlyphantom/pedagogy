@@ -1,6 +1,6 @@
 from flask import g
 from flask_login import current_user
-from app import app
+from app import app, cache
 from app.models import Employee, Workshop, Response
 import altair as alt
 from altair import expr, datum
@@ -57,6 +57,7 @@ def before_request():
     g.accumtotal['cumsum'] = g.accumtotal['class_size'].cumsum()
 
 @app.route('/data/class_size_vs')
+@cache.cached(timeout=86400, key_prefix='cs_vs')
 def class_size_vs():
     brush = alt.selection(type='interval', encodings=['x'])
     upper = alt.Chart(df[df['this_user'] == True]).mark_area(
@@ -83,6 +84,7 @@ def class_size_vs():
     return chart.to_json()
 
 @app.route('/data/class_size_hours')
+@cache.cached(timeout=86400, key_prefix='cs_hours')
 def class_size_hours():
     chart = alt.Chart(g.user_melted).mark_bar().encode(
         column='variable',
@@ -99,6 +101,7 @@ def class_size_hours():
     return chart.to_json()
 
 @app.route('/data/accum_global')
+@cache.cached(timeout=86400, key_prefix='accum_g')
 def accum_global():
     chart = alt.Chart(g.accum).mark_area().encode(
         column=alt.Column('workshop_category', title=None, sort="descending", 
@@ -117,6 +120,7 @@ def accum_global():
     return chart.to_json()
 
 @app.route('/data/accum_global_line')
+@cache.cached(timeout=86400, key_prefix='gt_line')
 def accum_global_line():
     brush = alt.selection(type='interval', encodings=['x'])
     # Create a selection that chooses the nearest point & selects based on x-value
@@ -207,6 +211,7 @@ def category_bars():
     return chart.to_json()
 
 @app.route('/data/instructor_breakdown')
+@cache.cached(timeout=86400, key_prefix='ib')
 def instructor_breakdown():
     # Getting Responses Data
     q = """ SELECT response.*, workshop_category, name
@@ -318,7 +323,7 @@ def studentprof():
 # ================ Non-Chart Section ================
 # Return Stats, usually in the form of Dictionary
 # ===================================================
-
+@cache.cached(timeout=86400, key_prefix='gt_stats')
 def global_total_stats():
     stats = {
         'students': df['class_size'].sum(),
