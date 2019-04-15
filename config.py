@@ -17,7 +17,7 @@ conn = pymysql.connect(
 class Config():
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'l3arn2t3ach'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    FLASK_DEBUG = 0
+    FLASK_DEBUG = 1
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_RECORD_QUERIES = False
@@ -28,4 +28,6 @@ class Config():
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['samuel@algorit.ma']
+    CACHE_TYPE = 'simple'
+    CACHE_DEFAULT_TIMEOUT = 86400 # 24 hours
 
