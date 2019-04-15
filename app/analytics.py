@@ -292,33 +292,17 @@ def instructor_breakdown():
     #chart = alt.hconcat(picker, alt.vconcat(point, a+b) , alt.vconcat(box, bar))
     return chart.to_json()
 
+# @app.route('/data/mediumos')
+# def mediumos():
+#     home = pd.read_csv('data/home.csv')
+#     chart = alt.Chart(home).mark_bar().encode(
+#         x='Medium',
+#         y='count()',
+#         column='OSGroup',
+#         color='Medium'
+#     )
+#     return chart.to_json()
 
-@app.route('/data/mediumos')
-def mediumos():
-    home = pd.read_csv('data/home.csv')
-    chart = alt.Chart(home).mark_bar().encode(
-        x='Medium',
-        y='count()',
-        column='OSGroup',
-        color='Medium'
-    )
-    return chart.to_json()
-
-@app.route('/data/studentprof')
-def studentprof():
-    academy = pd.read_csv('data/academy.csv')
-    chart = alt.Chart(academy).mark_bar().encode(
-        # rangeStep allocates 20px for each bar
-        alt.X('Medium:N', scale=alt.Scale(rangeStep=20), axis=alt.Axis(title='')),
-        alt.Y('count():Q', axis=alt.Axis(title='Observations', grid=False)),
-        column='OSGroup:N',
-        color=alt.Color(
-            'Are you a student or a professional?:N',
-            scale=alt.Scale(range=["#EA98D2", "#659CCA"]))
-    ).configure_axis(
-        domainWidth=0.8
-    )
-    return chart.to_json()
 
 # ================ Non-Chart Section ================
 # Return Stats, usually in the form of Dictionary
