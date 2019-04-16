@@ -94,6 +94,8 @@ def class_size_hours():
             'workshop_category',
             scale=alt.Scale(range=['#7dbbd2cc', '#bbc6cbe6', '#6eb0ea', '#d1d8e2', '#1a1d21', '#8f9fb3' ]),legend=None),
             tooltip=['workshop_category', 'sum(value)']
+        ).configure_axis(
+            grid=False
         ).properties(
             width=250
         )
@@ -105,7 +107,9 @@ def class_size_hours():
 def accum_global():
     chart = alt.Chart(g.accum).mark_area().encode(
         column=alt.Column('workshop_category', title=None, sort="descending", 
-                          header=alt.Header(titleColor='red', labelColor='red', titleAnchor="end")),
+                          header=alt.Header(
+                              labelColor='#ffffff', 
+                              titleAnchor="start")),
         x=alt.X("workshop_start", title="Date"),
         y=alt.Y("cumsum:Q", title="Cumulative"),
         color=alt.Color("variable", 
@@ -114,10 +118,14 @@ def accum_global():
             legend=None
         ),
         tooltip=['variable', 'cumsum:Q']
-    ).properties(width=350).configure_axis( 
-        labelColor='#bbc6cbe6',titleColor='#bbc6cbe6'
+    ).properties(width=350).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6', 
+        grid=False
     )
+
     return chart.to_json()
+
 
 @app.route('/data/accum_global_line')
 @cache.cached(timeout=86400, key_prefix='gt_line')
@@ -197,7 +205,7 @@ def punchcode():
     ).properties(
         width=300, height=320
     ).configure_axis( 
-        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6'
+        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
     )
     return chart.to_json()
 

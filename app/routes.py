@@ -20,7 +20,7 @@ def before_request():
 @app.route('/index')
 def index():
     stats=global_total_stats()
-    return render_template('index.html', employee=g.employee, stats=stats)
+    return render_template('index.html', stats=stats)
 
 @app.route('/accomplishment')
 @login_required
