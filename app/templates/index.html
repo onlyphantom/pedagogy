@@ -25,13 +25,7 @@
             </div>
         </div>
         <hr class="mt-4 col-md-12">
-        {% if g.employee is none %}
-            <small>You're not currently registered as an instructor.</small>
-        {% else %}
-            <p> You're currently logged in as {{ g.employee.email }}</p>
-            <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
-            <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
-        {% endif %}                
+        <small>This project is under active development. <br/> Feature request or report a bug <a href="https://github.com/onlyphantom/pedagogy/issues" class="text-warning">on the project's repo.</a></small>         
     </div>
     <div class="row">
             <div class="col-md-10 col-lg-5 col-sm-10">
@@ -52,25 +46,18 @@
                 <h2>Hours by Category</h2>
                 <div class="plot" id="vis_home_3"></div>
                 <hr>
-                {% if g.employee is none %}
-                <h2><i class="large material-icons">lock</i> Personal Statistics</h2>  
-                <div>
-                    <p>You're not currently registered as an instructor.</p>
-                    <p>As an instructor, you unlock detailed performance statistics under the Accomplishment page:</p>        
-                    <ul>
-                        <li>Personal Accomplishments</li>
-                        <li>Accumulative Statistics</li>
-                        <li>Key Milestones</li>
-                        <li>Performance Indicators</li>
-                        <li>Student Reviews</li>
-                    </ul>
-                </div>
-                {% else %}
                 <h2><i class="large material-icons">insert_chart_outlined</i> Personal Statistics</h2>
-                    <p>You're currently logged in as {{ g.employee.email }}</p>
-                    <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
-                    <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
-                {% endif %}
+                <p>Registered as an instructor on Pedagogy? <br>
+                    Log in and view detailed performance statistics:</p>
+                    <ul>
+                            <li>Personal Accomplishments</li>
+                            <li>Accumulative Statistics</li>
+                            <li>Key Milestones</li>
+                            <li>Performance Indicators</li>
+                            <li>Student Reviews</li>
+                        </ul>
+                <a class="btn btn-dark btn-sm" href="{{  url_for('accomplishment') }}" role="button">Accomplishment</a>
+                <a class="btn btn-secondary btn-sm" href="{{  url_for('analytics') }}" role="button">Analytics</a>
             </div>
         </div>
         <div class="col-md-10 col-lg-7 col-sm-10 mt-4">
