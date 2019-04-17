@@ -7,11 +7,19 @@ from altair import expr, datum
 import pandas as pd
 from config import conn
 
-df = pd.read_sql_query(
-    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, workshop_start, workshop_hours, class_size, e.name FROM workshop LEFT JOIN employee as e ON e.id = workshop.workshop_instructor", conn, index_col='id')
+@cache.cached(timeout=60*60, key_prefix='hourly_db')
+def getdb():
+    return pd.read_sql_query(
+    "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, \
+        workshop_start, workshop_hours, class_size, e.name \
+        FROM workshop \
+        LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
+        conn, index_col='id')
+
+df = getdb()
 # convert datetime to '2018-09' month and year format
-df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
-df['workshop_category'] = df['workshop_category'].astype('category')
+# df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
+# df['workshop_category'] = df['workshop_category'].astype('category')
 
 @app.before_request
 def before_request():
@@ -34,6 +42,7 @@ def before_request():
             g.accum_personal['cumsum'] = g.accum_personal.groupby(['variable','workshop_category']).cumsum().fillna(0)
         
     g.df2 = df.copy()
+    g.df2['mnth_yr'] = g.df2['workshop_start'].dt.to_period('M').astype(str)
     g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
     g.df2['workshop_category'] = g.df2['workshop_category'].astype('category')
     
@@ -80,7 +89,11 @@ def class_size_vs():
     ).add_selection(
         brush
     ).properties(width=450)
-    chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True])
+    chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True]).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6',
+        grid=False)
+
     return chart.to_json()
 
 @app.route('/data/class_size_hours')
@@ -315,8 +328,8 @@ def instructor_breakdown():
 # ================ Non-Chart Section ================
 # Return Stats, usually in the form of Dictionary
 # ===================================================
-@cache.cached(timeout=86400, key_prefix='gt_stats')
-def global_total_stats():
+@cache.cached(timeout=43200, key_prefix='gt_stats')
+def factory_homepage():
     stats = {
         'students': df['class_size'].sum(),
         'workshops': df.shape[0],
@@ -324,19 +337,27 @@ def global_total_stats():
         # 'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
         'instructors': len(df['workshop_instructor'].unique()),
-        'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
+        'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
             'name').sum().sort_values(
-                by='workshop_hours', 
-                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
+                by='class_size', 
+                ascending=False)
+                .head(10)
+                .rename_axis(None)
+                .rename(
+                    columns={'workshop_hours':'Total Hours',
+                          'class_size':'Total Students'})
+                .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'], )
     }
     return stats
 
-def person_total_stats():
+
+def person_total_stats(u):
     workshops = Workshop.query.filter_by(
-        workshop_instructor=g.employee.id).order_by(Workshop.workshop_start.desc())
+        workshop_instructor=u.id).order_by(Workshop.workshop_start.desc())
     grped = dict()
     totalstud = 0
     totalhours = 0
+
     for gr in workshops:
         category = gr.workshop_category
         if category not in grped:
@@ -350,7 +371,6 @@ def person_total_stats():
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     fullstar = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.satisfaction_score + Response.knowledge >= 9).count()
 
-    # for qualitative reviews
     qualitative = Response.query.filter(
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
@@ -358,20 +378,21 @@ def person_total_stats():
                     per_page=20, page=1, error_out=True)
 
     stats = {
-        'employee': g.employee,
-        'workshops': workshops.limit(5),
-        'responses': responses,
-        'grped': grped,
-        'totalstud': totalstud,
-        'totalhours': totalhours,
-        'totalws': workshops.count(),
-        'fullstar': fullstar,
-        'responsecount': len(responses),
-        'qualitative': qualitative,
-        'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
-            'name').sum().sort_values(
-                by='workshop_hours', 
-                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
+            'joindate': u.join_date,
+            'workshops': workshops.limit(5),
+            'responses': responses,
+            'grped': grped,
+            'totalstud': totalstud,
+            'totalhours': totalhours,
+            'totalws': workshops.count(),
+            'fullstar': fullstar,
+            'responsecount': len(responses),
+            'qualitative': qualitative,
+            'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
+                'name').sum().sort_values(
+                    by='workshop_hours', 
+                    ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
 
-    }
+        }
+    
     return stats
