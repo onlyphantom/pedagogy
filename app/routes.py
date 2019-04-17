@@ -18,6 +18,7 @@ def before_request():
 
 @app.route('/')
 @app.route('/index')
+@cache.cached(timeout=86400)
 def index():
     stats=global_total_stats()
     return render_template('index.html', stats=stats)
@@ -29,8 +30,7 @@ def accomplishment():
     if g.employee is None:
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
-    personstats=person_total_stats()
-
+    personstats=person_total_stats(u=g.employee)
     return render_template('accomplishment.html', personstats=personstats)
 
 @app.route('/analytics')

@@ -1,4 +1,4 @@
-from app import db
+from app import db, cache
 from datetime import datetime
 import arrow
 
@@ -49,7 +49,8 @@ class Workshop(db.Model):
         past = arrow.get(self.workshop_start).humanize()
         # return '{} on {}'.format(self.workshop_name, self.workshop_start)
         return '{}, {}'.format(self.workshop_name, past)
-
+    
+    @cache.memoize(50)
     def printtime(self):
         past = arrow.get(self.workshop_start).humanize()
         return past

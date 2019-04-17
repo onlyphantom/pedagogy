@@ -80,7 +80,11 @@ def class_size_vs():
     ).add_selection(
         brush
     ).properties(width=450)
-    chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True])
+    chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True]).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6',
+        grid=False)
+
     return chart.to_json()
 
 @app.route('/data/class_size_hours')
@@ -315,7 +319,7 @@ def instructor_breakdown():
 # ================ Non-Chart Section ================
 # Return Stats, usually in the form of Dictionary
 # ===================================================
-@cache.cached(timeout=86400, key_prefix='gt_stats')
+@cache.cached(timeout=43200, key_prefix='gt_stats')
 def global_total_stats():
     stats = {
         'students': df['class_size'].sum(),
@@ -331,12 +335,14 @@ def global_total_stats():
     }
     return stats
 
-def person_total_stats():
+
+def person_total_stats(u):
     workshops = Workshop.query.filter_by(
-        workshop_instructor=g.employee.id).order_by(Workshop.workshop_start.desc())
+        workshop_instructor=u.id).order_by(Workshop.workshop_start.desc())
     grped = dict()
     totalstud = 0
     totalhours = 0
+
     for gr in workshops:
         category = gr.workshop_category
         if category not in grped:
@@ -350,7 +356,6 @@ def person_total_stats():
     responses = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops)).all()
     fullstar = Response.query.filter(Response.workshop_id.in_(w.id for w in workshops), Response.satisfaction_score + Response.knowledge >= 9).count()
 
-    # for qualitative reviews
     qualitative = Response.query.filter(
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
@@ -358,20 +363,21 @@ def person_total_stats():
                     per_page=20, page=1, error_out=True)
 
     stats = {
-        'employee': g.employee,
-        'workshops': workshops.limit(5),
-        'responses': responses,
-        'grped': grped,
-        'totalstud': totalstud,
-        'totalhours': totalhours,
-        'totalws': workshops.count(),
-        'fullstar': fullstar,
-        'responsecount': len(responses),
-        'qualitative': qualitative,
-        'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
-            'name').sum().sort_values(
-                by='workshop_hours', 
-                ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
+            'joindate': u.join_date,
+            'workshops': workshops.limit(5),
+            'responses': responses,
+            'grped': grped,
+            'totalstud': totalstud,
+            'totalhours': totalhours,
+            'totalws': workshops.count(),
+            'fullstar': fullstar,
+            'responsecount': len(responses),
+            'qualitative': qualitative,
+            'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
+                'name').sum().sort_values(
+                    by='workshop_hours', 
+                    ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
 
-    }
+        }
+    
     return stats
