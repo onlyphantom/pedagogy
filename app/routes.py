@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, g
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db, cache
-from app.analytics import factory_homepage, person_total_stats
+from app.analytics import factory_homepage, factory_accomplishment
 from app.users import User
 from app.models import Employee, Workshop, Response
 from app.forms import LoginForm, RegistrationForm, SurveyForm, ResetPasswordRequestForm, ResetPasswordForm
@@ -18,7 +18,7 @@ def before_request():
 
 @app.route('/')
 @app.route('/index')
-@cache.cached(timeout=86400)
+@cache.cached(timeout=100)
 def index():
     stats=factory_homepage()
     return render_template('index.html', stats=stats)
@@ -30,7 +30,7 @@ def accomplishment():
     if g.employee is None:
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
-    personstats=person_total_stats(u=g.employee)
+    personstats=factory_accomplishment(u=g.employee)
     return render_template('accomplishment.html', personstats=personstats)
 
 @app.route('/analytics')
