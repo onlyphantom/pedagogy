@@ -74,7 +74,7 @@ def accum_global():
 
 
 @app.route('/data/accum_global_line')
-@cache.cached(timeout=86400, key_prefix='gt_line')
+@cache.cached(timeout=86400, key_prefix='accum_g_l')
 def accum_global_line():
     dat = df.copy()
     dat = dat[['workshop_start', 'class_size']].sort_values(by='workshop_start')
@@ -125,7 +125,7 @@ def accum_global_line():
     return chart.to_json()
 
 @app.route('/data/punchcode')
-@cache.cached(timeout=86400, key_prefix='gt_line')
+@cache.cached(timeout=86400, key_prefix='pc')
 def punchcode():
     dat = df.copy()
     dat['mnth_yr'] = dat['workshop_start'].dt.to_period('M').astype(str)
@@ -146,7 +146,7 @@ def punchcode():
     return chart.to_json()
 
 @app.route('/data/category_bars')
-@cache.cached(timeout=86400, key_prefix='gt_line')
+@cache.cached(timeout=86400, key_prefix='c_b')
 def category_bars():
     chart = alt.Chart(df).mark_bar(color='#bbc6cbe6').encode(
         x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
@@ -220,6 +220,7 @@ def person_class_bar():
     return chart.to_json()
 
 @app.route('/data/person_vs_area')
+@cache.cached(timeout=86400, key_prefix='p_v_a')
 def person_vs_area():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -237,13 +238,13 @@ def person_vs_area():
     chart = alt.Chart(dat).mark_area().encode(
         column='workshop_category',
         x=alt.X("workshop_start"),
-        y=alt.Y("cumsum:Q"),
+        y=alt.Y("value:Q"),
         color=alt.Color("variable", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
             legend=None
         ),
-        tooltip=['variable', 'cumsum:Q']
+        tooltip=['variable', 'value:Q']
     ).properties(
         width=250
     ).configure_axis(
