@@ -17,6 +17,17 @@ def getdb():
         LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
         conn, index_col='id')
 
+@cache.cached(timeout=86400, key_prefix='multi_db')
+def getdb_multi():
+    q = """ SELECT response.*, workshop_category, name
+            FROM response
+            INNER JOIN workshop as w 
+                ON w.id = response.workshop_id
+            INNER JOIN employee as e
+                ON w.workshop_instructor = e.id
+        """
+    return pd.read_sql_query(q, conn, index_col='id')
+
 df = getdb()
 
 def getuserdb():
@@ -252,23 +263,20 @@ def person_vs_area():
     )
     return chart.to_json()
 
+# ================ ================ ================
+# ============= Multi-person Section ===============
+#
+# Visualization relating to multiple instructors
+# 
+#
+# ===================================================
+# ===================================================
 
 @app.route('/data/instructor_breakdown')
 @cache.cached(timeout=86400, key_prefix='ib')
 def instructor_breakdown():
-    # Getting Responses Data
-    q = """ SELECT response.*, workshop_category, name
-            FROM response
-            INNER JOIN workshop as w 
-                ON w.id = response.workshop_id
-            INNER JOIN employee as e
-                ON w.workshop_instructor = e.id
-        """
-    responses = pd.read_sql_query(
-        q,
-        conn,
-        index_col='id'
-    )
+    responses = getdb_multi()
+
     resp_nw = responses[responses['workshop_category'] != 'Weekend'].groupby('name').agg('mean').round(2).sort_values('knowledge', ascending=False)
     resp_nw['total'] = resp_nw.iloc[:,1:].mean(axis=1).round(2)
     resp_nwm = pd.melt(resp_nw.iloc[:,1:].reset_index(), id_vars='name')
@@ -334,17 +342,6 @@ def instructor_breakdown():
     chart = picker | (point & a+b) | (box & bar)
     #chart = alt.hconcat(picker, alt.vconcat(point, a+b) , alt.vconcat(box, bar))
     return chart.to_json()
-
-# @app.route('/data/mediumos')
-# def mediumos():
-#     home = pd.read_csv('data/home.csv')
-#     chart = alt.Chart(home).mark_bar().encode(
-#         x='Medium',
-#         y='count()',
-#         column='OSGroup',
-#         color='Medium'
-#     )
-#     return chart.to_json()
 
 # ================ ================ ================
 # ================ Non-Chart Section ================
