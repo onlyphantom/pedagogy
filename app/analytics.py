@@ -5,6 +5,7 @@ from app.models import Employee, Workshop, Response
 import altair as alt
 from altair import expr, datum
 import pandas as pd
+import datetime as datetime
 from config import conn
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
@@ -17,120 +18,52 @@ def getdb():
         conn, index_col='id')
 
 df = getdb()
-# convert datetime to '2018-09' month and year format
-# df['mnth_yr'] = df['workshop_start'].dt.to_period('M').astype(str)
-# df['workshop_category'] = df['workshop_category'].astype('category')
 
-@app.before_request
-def before_request():
+def getuserdb():
     if current_user.is_authenticated:
         employee = Employee.query.filter_by(email=current_user.email).first()
         if employee is not None:
             df['this_user'] = df['workshop_instructor'] == employee.id
-            g.user_melted = pd.melt(
-                df[df['this_user'] == True],
-                id_vars=['mnth_yr', 'workshop_category'], 
-                value_vars=['workshop_hours', 'class_size'])       
-    
-            g.df3 = df[df['this_user'] == True].copy()
-            g.df3['workshop_category'] = pd.Categorical(g.df3['workshop_category']).codes
-            g.dat2 = g.df3.set_index('workshop_start').resample('W').sum()
-            g.accum_personal = pd.melt(g.dat2.reset_index(), 
-                id_vars=['workshop_start','workshop_category'], 
-                value_vars=['workshop_hours', 'class_size'])
-            g.accum_personal['workshop_category'] = g.accum_personal['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
-            g.accum_personal['cumsum'] = g.accum_personal.groupby(['variable','workshop_category']).cumsum().fillna(0)
-        
-    g.df2 = df.copy()
-    g.df2['mnth_yr'] = g.df2['workshop_start'].dt.to_period('M').astype(str)
-    g.df2['workshop_category'] = pd.Categorical(g.df2['workshop_category']).codes
-    g.df2['workshop_category'] = g.df2['workshop_category'].astype('category')
-    
-    g.dat = df[['workshop_start','workshop_category', 'workshop_hours', 'class_size']].copy()
-    g.dat['workshop_category'] = pd.Categorical(g.dat['workshop_category']).codes
-    g.dat['workshop_category'] = g.dat['workshop_category'].astype('category')
+            return df
 
-    g.dat['workshop_category'] = g.dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 1) else 'Public')
-    g.dat = g.dat.set_index(
-        'workshop_start').groupby(
-            'workshop_category').resample('W').sum()
-    g.dat.sort_index(inplace=True)
-
-    g.accum = pd.melt(g.dat.reset_index(), 
-            id_vars=['workshop_start','workshop_category'], 
-            value_vars=['workshop_hours', 'class_size'])
-    g.accum['cumsum'] = g.accum.groupby(['variable','workshop_category']).cumsum()
-    g.accum = g.accum.sort_values(['workshop_category', 'workshop_start'])
-
-    g.accumtotal = df[['workshop_start', 'class_size']].copy().set_index('workshop_start').sort_index().reset_index()
-    g.accumtotal['cumsum'] = g.accumtotal['class_size'].cumsum()
-
-@app.route('/data/class_size_vs')
-@cache.cached(timeout=86400, key_prefix='cs_vs')
-def class_size_vs():
-    brush = alt.selection(type='interval', encodings=['x'])
-    upper = alt.Chart(df[df['this_user'] == True]).mark_area(
-    clip=True,
-    opacity=0.75,
-    interpolate='monotone'
-    ).encode(
-        x=alt.X("mnth_yr:T", axis=alt.Axis(title=''), scale={'domain':brush.ref()}),
-        y=alt.Y('sum(workshop_hours)', axis=alt.Axis(title='Workshop Hours')),
-        color=alt.Color(
-            'workshop_category',
-            scale=alt.Scale(range=['#1a1d21', '#7dbbd2cc', '#153f5a', '#bbc6cbe6']),
-            #'#7dbbd2cc', '#bbc6cbe6'
-            legend=None
-        ),
-        tooltip=['workshop_category']
-    ).properties(width=450)
-    lower = alt.Chart(df[df['this_user'] == True]).mark_rect(color='#75b3cacc').encode(
-        x=alt.X("mnth_yr:T", axis=alt.Axis(title='Interval Selector'), scale={'domain':brush.ref()})
-    ).add_selection(
-        brush
-    ).properties(width=450)
-    chart = alt.vconcat(upper, lower, data=df[df['this_user'] == True]).configure_axis(
-        labelColor='#bbc6cbe6',
-        titleColor='#bbc6cbe6',
-        grid=False)
-
-    return chart.to_json()
-
-@app.route('/data/class_size_hours')
-@cache.cached(timeout=86400, key_prefix='cs_hours')
-def class_size_hours():
-    chart = alt.Chart(g.user_melted).mark_bar().encode(
-        column='variable',
-        x=alt.X("sum(value)"),
-        y=alt.Y('mnth_yr'),
-        color=alt.Color(
-            'workshop_category',
-            scale=alt.Scale(range=['#7dbbd2cc', '#bbc6cbe6', '#6eb0ea', '#d1d8e2', '#1a1d21', '#8f9fb3' ]),legend=None),
-            tooltip=['workshop_category', 'sum(value)']
-        ).configure_axis(
-            grid=False
-        ).properties(
-            width=250
-        )
-        
-    return chart.to_json()
+# ================ ================ ================
+# ================ Global Section ================
+#
+# Visualization using the overall population (global)
+# 
+#
+# ===================================================
+# ===================================================
 
 @app.route('/data/accum_global')
 @cache.cached(timeout=86400, key_prefix='accum_g')
 def accum_global():
-    chart = alt.Chart(g.accum).mark_area().encode(
+    dat = df.copy()
+    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Corporate'}, ignore_index=True)
+    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Academy'}, ignore_index=True)
+    dat['workshop_category'] = dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 'Corporate') else 'Public').astype('category')
+    dat = dat.loc[:,['workshop_start', 'workshop_category', 'workshop_hours', 'class_size']]\
+        .set_index('workshop_start')\
+        .groupby('workshop_category')\
+        .resample('W').sum().reset_index()
+
+    dat['workshop hours']=dat.groupby(['workshop_category'])['workshop_hours'].cumsum()
+    dat['students']=dat.groupby(['workshop_category'])['class_size'].cumsum()
+    dat = dat.melt(id_vars=['workshop_start', 'workshop_category'],value_vars=['workshop hours', 'students'])
+
+    chart = alt.Chart(dat).mark_area().encode(
         column=alt.Column('workshop_category', title=None, sort="descending", 
                           header=alt.Header(
                               labelColor='#ffffff', 
                               titleAnchor="start")),
         x=alt.X("workshop_start", title="Date"),
-        y=alt.Y("cumsum:Q", title="Cumulative"),
+        y=alt.Y("value:Q", title="Cumulative"),
         color=alt.Color("variable", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
             legend=None
         ),
-        tooltip=['variable', 'cumsum:Q']
+        tooltip=['variable', 'value:Q']
     ).properties(width=350).configure_axis(
         labelColor='#bbc6cbe6',
         titleColor='#bbc6cbe6', 
@@ -143,6 +76,10 @@ def accum_global():
 @app.route('/data/accum_global_line')
 @cache.cached(timeout=86400, key_prefix='gt_line')
 def accum_global_line():
+    dat = df.copy()
+    dat = dat[['workshop_start', 'class_size']].sort_values(by='workshop_start')
+    dat['cumsum'] = dat['class_size'].cumsum()
+
     brush = alt.selection(type='interval', encodings=['x'])
     # Create a selection that chooses the nearest point & selects based on x-value
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
@@ -151,7 +88,7 @@ def accum_global_line():
             x=alt.X("workshop_start:T", axis=alt.Axis(title='', grid=False),scale={'domain': brush.ref()}),
             y=alt.Y("cumsum", axis=alt.Axis(title='Total Students', grid=False))
     )
-    selectors = alt.Chart(g.accumtotal).mark_point().encode(
+    selectors = alt.Chart(dat).mark_point().encode(
         x=alt.X("workshop_start:T"),
         opacity=alt.value(0)
     ).add_selection(
@@ -169,7 +106,7 @@ def accum_global_line():
         nearest
     )
 
-    upper = alt.layer(line, selectors, points, rules, text, data=g.accumtotal, width=350)
+    upper = alt.layer(line, selectors, points, rules, text, data=dat, width=350)
     lower = alt.Chart().mark_area(color='#75b3cacc').encode(
             x=alt.X("workshop_start:T", axis=alt.Axis(title=''), scale={
                 'domain':brush.ref()
@@ -182,34 +119,20 @@ def accum_global_line():
         brush
     )
 
-    chart = alt.vconcat(upper,lower, data=g.accumtotal).configure_view(
+    chart = alt.vconcat(upper,lower, data=dat).configure_view(
         strokeWidth=0
     )
     return chart.to_json()
 
-@app.route('/data/accum_personal')
-def accum_personal():
-    chart = alt.Chart(g.accum_personal).mark_area().encode(
-        column='workshop_category',
-        x=alt.X("workshop_start"),
-        y=alt.Y("cumsum:Q"),
-        color=alt.Color("variable", 
-            scale=alt.Scale(
-                range=['#7dbbd2cc', '#bbc6cbe6']),
-            legend=None
-        ),
-        tooltip=['variable', 'cumsum:Q']
-    ).properties(
-        width=250
-    )
-    return chart.to_json()
-
 @app.route('/data/punchcode')
+@cache.cached(timeout=86400, key_prefix='gt_line')
 def punchcode():
-    g.df2['workshop_category'] = g.df2['workshop_category'].apply(lambda x:'Corporate' if x == 1 else 'Public' )
-    g.df2['contrib'] = g.df2['workshop_hours'] * g.df2['class_size']
+    dat = df.copy()
+    dat['mnth_yr'] = dat['workshop_start'].dt.to_period('M').astype(str)
+    dat['workshop_category'] = dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 'Corporate') else 'Public')
+    dat['contrib'] = dat['workshop_hours'] * dat['class_size']
 
-    chart = alt.Chart(g.df2[g.df2.name != 'Capstone']).mark_circle(color='#bbc6cbe6').encode(
+    chart = alt.Chart(dat[dat.name != 'Capstone']).mark_circle(color='#bbc6cbe6').encode(
         x=alt.X('mnth_yr:T', axis=alt.Axis(title='')),
         y='name:O',
         size=alt.Size('sum(contrib):Q', legend=None),
@@ -223,6 +146,7 @@ def punchcode():
     return chart.to_json()
 
 @app.route('/data/category_bars')
+@cache.cached(timeout=86400, key_prefix='gt_line')
 def category_bars():
     chart = alt.Chart(df).mark_bar(color='#bbc6cbe6').encode(
         x=alt.X('sum(workshop_hours):Q', title='Accumulated Hours'),
@@ -230,6 +154,103 @@ def category_bars():
         tooltip=['sum(workshop_hours):Q', 'workshop_category:O']
     )
     return chart.to_json()
+
+
+# ================ ================ ================
+# ================ Person Section ================
+#
+# Visualization relating to individual instructor
+# 
+#
+# ===================================================
+# ===================================================
+
+@app.route('/data/person_contrib_area')
+@cache.cached(timeout=86400, key_prefix='p_contrb')
+def person_contrib_area():
+    dat_ori = getuserdb()
+    dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
+    dat['contrib'] = dat['workshop_hours'] * dat['class_size']
+
+    brush = alt.selection(type='interval', encodings=['x'])
+    upper = alt.Chart(dat).mark_area(
+        clip=True,
+        color='#7c98ae',
+        opacity=1,
+        interpolate='monotone'
+        ).encode(
+            x=alt.X("workshop_start:T", axis=alt.Axis(title=''), scale={'domain':brush.ref()}),
+            y=alt.Y('sum(contrib)', axis=alt.Axis(title='Activities'))
+        ).properties(width=450)
+    lower = alt.Chart(dat).mark_rect(color='#75b3cacc').encode(
+        x=alt.X("workshop_start:T", axis=alt.Axis(title='Interval Selector'), scale={'domain':brush.ref()})
+    ).add_selection(
+        brush
+    ).properties(width=450)
+    chart = alt.vconcat(upper, lower, data=dat).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6',
+        grid=False)
+
+    return chart.to_json()
+
+@app.route('/data/person_class_bar')
+@cache.cached(timeout=86400, key_prefix='p_hours')
+def person_class_bar():
+    dat_ori = getuserdb()
+    dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
+    dat['mnth_yr'] = dat['workshop_start'].dt.to_period('M').astype(str)
+    dat = dat.melt(
+        id_vars=['mnth_yr', 'workshop_category'],
+        value_vars=['workshop_hours', 'class_size'])
+    chart = alt.Chart(dat).mark_bar().encode(
+        column='variable',
+        x=alt.X("sum(value)"),
+        y=alt.Y('mnth_yr'),
+        color=alt.Color(
+            'workshop_category',
+            scale=alt.Scale(range=['#7dbbd2cc', '#bbc6cbe6', '#6eb0ea', '#d1d8e2', '#1a1d21', '#8f9fb3' ]),legend=None),
+            tooltip=['workshop_category', 'sum(value)']
+        ).configure_axis(
+            grid=False
+        ).properties(
+            width=250
+        )
+        
+    return chart.to_json()
+
+@app.route('/data/person_vs_area')
+def person_vs_area():
+    dat_ori = getuserdb()
+    dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
+    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Corporate'}, ignore_index=True)
+    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Academy'}, ignore_index=True)
+    dat['workshop_category'] = dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 'Corporate') else 'Public').astype('category')
+    dat = dat.loc[:,['workshop_start', 'workshop_category', 'workshop_hours', 'class_size']]\
+        .set_index('workshop_start')\
+        .groupby('workshop_category')\
+        .resample('W').sum().reset_index()
+    dat['workshop hours']=dat.groupby(['workshop_category'])['workshop_hours'].cumsum()
+    dat['students']=dat.groupby(['workshop_category'])['class_size'].cumsum()
+    dat = dat.melt(id_vars=['workshop_start', 'workshop_category'],value_vars=['workshop hours', 'students'])
+    
+    chart = alt.Chart(dat).mark_area().encode(
+        column='workshop_category',
+        x=alt.X("workshop_start"),
+        y=alt.Y("cumsum:Q"),
+        color=alt.Color("variable", 
+            scale=alt.Scale(
+                range=['#7dbbd2cc', '#bbc6cbe6']),
+            legend=None
+        ),
+        tooltip=['variable', 'cumsum:Q']
+    ).properties(
+        width=250
+    ).configure_axis(
+        grid=False
+    )
+    return chart.to_json()
+
 
 @app.route('/data/instructor_breakdown')
 @cache.cached(timeout=86400, key_prefix='ib')
@@ -324,9 +345,13 @@ def instructor_breakdown():
 #     )
 #     return chart.to_json()
 
-
+# ================ ================ ================
 # ================ Non-Chart Section ================
-# Return Stats, usually in the form of Dictionary
+#
+#  Each factory is responsible for the data required 
+# to render the chart and view for each page
+#
+# ===================================================
 # ===================================================
 @cache.cached(timeout=43200, key_prefix='gt_stats')
 def factory_homepage():
@@ -346,12 +371,12 @@ def factory_homepage():
                 .rename(
                     columns={'workshop_hours':'Total Hours',
                           'class_size':'Total Students'})
-                .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'], )
+                .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
     }
     return stats
 
 
-def person_total_stats(u):
+def factory_accomplishment(u):
     workshops = Workshop.query.filter_by(
         workshop_instructor=u.id).order_by(Workshop.workshop_start.desc())
     grped = dict()
@@ -388,7 +413,7 @@ def person_total_stats(u):
             'fullstar': fullstar,
             'responsecount': len(responses),
             'qualitative': qualitative,
-            'topten': g.df2[g.df2.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
+            'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
                 'name').sum().sort_values(
                     by='workshop_hours', 
                     ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% cache 43200 %}
+<!-- {% cache 43200 %} -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.3.1/vega.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.6.0/vega-lite.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
@@ -147,9 +147,9 @@
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
-        parse("/data/class_size_vs", "#vis_accomp_1")
-        parse("/data/class_size_hours", "#vis_accomp_2")
+        parse("/data/person_contrib_area", "#vis_accomp_1")
+        parse("/data/person_class_bar", "#vis_accomp_2")
         parse("/data/accum_personal", "#vis_accomp_3")
     </script>
-{% endcache %}
+<!-- {% endcache %} -->
 {% endblock %}
