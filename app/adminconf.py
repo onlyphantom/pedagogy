@@ -1,5 +1,5 @@
 from flask import redirect, url_for, request
-from app import admin, db
+from app import app, admin, db
 from app.models import Employee, Workshop, Response
 from app.users import User
 from flask_admin import BaseView, expose
@@ -13,7 +13,7 @@ class AdminModelView(ModelView):
 
     def is_accessible(self):
         return (current_user.is_authenticated and
-                current_user.email == 'samuel@algorit.ma')
+                current_user.email in app.config['ADMINS'])
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
         return redirect(url_for('login', next=request.url))
@@ -48,7 +48,7 @@ class WorkshopView(ModelView):
 class ResponseView(ModelView):
     def is_accessible(self):
         return (current_user.is_authenticated and
-                current_user.email == 'samuel@algorit.ma')
+                current_user.email in app.config['ADMINS'])
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access

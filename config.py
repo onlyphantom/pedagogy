@@ -9,7 +9,9 @@ password = os.getenv('MYSQL_PASSWORD')
 database = os.getenv('MYSQL_DATABASE')
 dburl = os.environ.get('DATABASE_URL')
 
-adminsemail = ['samuel@algorit.ma']
+adminsemail = [
+    'samuel@algorit.ma',
+    'tiara@algorit.ma']
 
 conn = pymysql.connect(
     host=host,
