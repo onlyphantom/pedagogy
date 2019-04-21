@@ -335,17 +335,6 @@ def instructor_breakdown():
     #chart = alt.hconcat(picker, alt.vconcat(point, a+b) , alt.vconcat(box, bar))
     return chart.to_json()
 
-# @app.route('/data/mediumos')
-# def mediumos():
-#     home = pd.read_csv('data/home.csv')
-#     chart = alt.Chart(home).mark_bar().encode(
-#         x='Medium',
-#         y='count()',
-#         column='OSGroup',
-#         color='Medium'
-#     )
-#     return chart.to_json()
-
 # ================ ================ ================
 # ================ Non-Chart Section ================
 #

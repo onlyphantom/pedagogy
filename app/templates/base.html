@@ -20,7 +20,8 @@
                     <div class="collapse navbar-collapse" id="navbarNav">
                             <ul class="navbar-nav mr-auto">
                                     <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="{{  url_for('analytics') }}">Analytics</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{{  url_for('analytics') }}">Team Analytics</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{{  url_for('explorer') }}">Visual Explorer</a></li>
                                     <li class="nav-item"><a class="nav-link" href="{{  url_for('accomplishment') }}">Accomplishment</a></li>
                                     <!-- {% if current_user.is_authenticated %}
                                     <li class="nav-item"><a class="nav-link" href="{{ url_for('qualitative', id=current_user.id, page_num=1) }}">Comment Logs</a></li>
