@@ -1,29 +1,16 @@
 {% extends "base.html" %}
-
 {% block content %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.3.1/vega.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.6.0/vega-lite.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
 
-    <div class="jumbotron jumbo-mini">
-            <h4><i class="material-icons md-light">timeline</i> How to Use</h4>
-            <div class="row">
-                <div class="col-lg-4">
-                        <h5>Multi-Instructor</h5>
-                        <p class="lead">Click on any instructor on picker to toggle selection. Hold on <kbd>SHIFT</kbd> to select multiple instructors.</p>
-                    </div>
-                    <div class="col-lg-4">
-                        <h5>Zoomable Plots</h5>
-                        <p class="lead">Scroll across the plot area below and the scales will adapt to fit a different length of horizon.</p>
-                    </div>
-                    <div class="col-lg-4">
-                        <h5>Selectable Areas</h5>
-                        <p class="lead">Draw a selectable region across the plot area below using your mouse in a brush-like manner.</p>
-                </div>
-            </div>
-
+    <div class="jumbotron lightaqua">
+        <h2><i class="material-icons md-light">insert_chart</i> Team Analytics </h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-6 col-sm-6" id="vis_team_1">
             
-        <div class="plot" id="multi1"></div> 
+            </div>
+        </div>
     </div>
 
     <script type="text/javascript">
@@ -41,7 +28,7 @@
         }
         // parse("/data/mediumos", "#vis1")
         // parse("/data/studentprof", "#vis2")
-        parse("/data/instructor_breakdown", "#multi1")
+        parse("/data/person_class_bar", "#vis_team_1")
     </script>
-
 {% endblock %}
+

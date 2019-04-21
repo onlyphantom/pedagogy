@@ -33,9 +33,13 @@ def accomplishment():
     personstats=factory_accomplishment(u=g.employee)
     return render_template('accomplishment.html', personstats=personstats)
 
-@app.route('/analytics')
+@app.route('/explorer')
 @login_required
 @cache.cached(timeout=86400*7)
+def explorer():
+    return render_template('explorer.html')
+
+@app.route('/analytics')
 def analytics():
     return render_template('analytics.html')
 
