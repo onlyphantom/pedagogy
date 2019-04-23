@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, g
 from flask_login import current_user, login_user, logout_user, login_required
-from app import app, db, cache
+from app import app, db
 from app.analytics import factory_homepage, factory_accomplishment, factory_analytics
 from app.users import User
 from app.models import Employee, Workshop, Response
@@ -18,7 +18,6 @@ def before_request():
 
 @app.route('/')
 @app.route('/index')
-@cache.cached(timeout=100)
 def index():
     stats = factory_homepage()
     return render_template('index.html', stats=stats)
@@ -35,7 +34,6 @@ def accomplishment():
 
 @app.route('/explorer')
 @login_required
-@cache.cached(timeout=86400*7)
 def explorer():
     return render_template('explorer.html')
 

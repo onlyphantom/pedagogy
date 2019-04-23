@@ -23,34 +23,34 @@
                             <th scope="row">Most Prolific</th>
                             <td>
                                 {% for inst in instructorstats['max_6mths'] %}
-                                    {{ inst }}
+                                <span class="instructor btn-info">{{ inst }}</span>
                                 {% endfor %}
                             </td>
-                            <td>{{ instructorstats.max_wh }} workshops in the last 6 months</td>
+                            <td>{{ instructorstats.max_wh }} workshop(s) in the last 6 months</td>
                         </tr>
                         <tr>
                             <th scope="row">Training Camp</th>
                             <td>
                                 {% for inst in instructorstats['min_6mths'] %}
-                                    {{ inst }}
+                                <span class="instructor btn-secondary">{{ inst }}</span>
                                 {% endfor %}
                             </td>
-                            <td>{{ instructorstats.min_wh }} workshops in the last 6 months</td>
+                            <td>{{ instructorstats.min_wh }} workshop(s) in the last 6 months</td>
                         </tr>
                         <tr>
                             <th scope="row">Steepest Ascent</th>
                             <td>
                                 {% for inst in instructorstats['max_diff'] %}
-                                    {{ inst }}
+                                <span class="instructor btn-success">{{ inst }}</span>
                                 {% endfor %}
                             </td>
                             <td>{{ instructorstats.max_diff_n }} difference compared to previous period</td>
                         </tr>    
                         <tr>
-                            <th scope="row">Training Camp</th>
+                            <th scope="row">Steepest Descent</th>
                             <td>
                                 {% for inst in instructorstats['min_diff'] %}
-                                    {{ inst }}
+                                <span class="instructor btn-danger">{{ inst }}</span>
                                 {% endfor %}
                             </td>
                             <td>{{ instructorstats.min_diff_n }} difference compared to previous period</td>
@@ -59,14 +59,20 @@
                             <th scope="row">Testing Multiple</th>
                             <td>
                                 {% for inst in instructorstats['testing'] %}
-                                    {{ inst }}
+                                    <span class="instructor btn-warning">{{ inst }}</span>
                                 {% endfor %}
                             </td>
-                            <td>{{ instructorstats.min_diff_n }} difference compared to previous period</td>
+                            <td>Purely for testing front-end code.</td>
                         </tr>
                         <tr>
-                            <th scope="row">Summary</th>
-                            <td colspan="2">Larry the Bird</td>
+                            <th scope="row">Recommendations</th>
+                            <td colspan="2">
+                                    {% for inst in instructorstats['min_diff'] %}
+                                    {{ inst }} 
+                                    {% endfor %}
+                                    has had limited leading roles in the last 3 months. 
+                                    Consider more responbsibilities for the individual or call for a performance evaluation. 
+                            </td>
                         </tr>
                     </tbody>
                 </table>

@@ -54,6 +54,15 @@ i.material-icons.md-light {
     color: black
 }
 
+.instructor {
+    padding: 2% 4%;
+    display: block;
+    margin: 1.5%;
+    border-radius: 5px;
+    font-weight: bolder;
+    color: white;
+}
+
 .statcards-header{
     font-size:0.7em;
     color: white;

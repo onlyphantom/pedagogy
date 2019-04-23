@@ -166,7 +166,6 @@ def category_bars():
 # ===================================================
 
 @app.route('/data/person_contrib_area')
-@cache.cached(timeout=86400, key_prefix='p_contrb')
 def person_contrib_area():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -195,7 +194,6 @@ def person_contrib_area():
     return chart.to_json()
 
 @app.route('/data/person_class_bar')
-@cache.cached(timeout=86400, key_prefix='p_hours')
 def person_class_bar():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -220,7 +218,6 @@ def person_class_bar():
     return chart.to_json()
 
 @app.route('/data/person_vs_area')
-@cache.cached(timeout=86400, key_prefix='p_v_a')
 def person_vs_area():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -254,7 +251,7 @@ def person_vs_area():
 
 
 @app.route('/data/instructor_breakdown')
-@cache.cached(timeout=86400, key_prefix='ib')
+@cache.cached(timeout=86400*7, key_prefix='ib')
 def instructor_breakdown():
     # Getting Responses Data
     q = """ SELECT response.*, workshop_category, name
@@ -461,7 +458,7 @@ def factory_analytics():
         'min_diff_n': min_diff,
         'max_diff': [i for i in dat[dat['diff']==max_diff].name.unique()],
         'min_diff': [i for i in dat[dat['diff']==min_diff].name.unique()],
-        'testing': ['John Doe', 'Max Brenner'],
+        'testing': ['Steven Surya', 'Steven Christian'],
         'updatewhen': gettimenow(),
     }
     return instructorstats
