@@ -67,11 +67,19 @@
                         <tr>
                             <th scope="row">Recommendations</th>
                             <td colspan="2">
-                                    {% for inst in instructorstats['min_diff'] %}
-                                    {{ inst }} 
-                                    {% endfor %}
-                                    has had limited leading roles in the last 3 months. 
-                                    Consider more responbsibilities for the individual or call for a performance evaluation. 
+                                    <!-- Move into separate template and inherit from -->
+                                    {% if instructorstats['testing']|length == 1 %}
+                                        {% for inst in instructorstats['testing'] %}
+                                            {{ inst }}
+                                        {% endfor %}
+                                    {% else %}
+                                        {% set comma = joiner(", ") %}
+                                        {% for inst in instructorstats['testing'] %}
+                                            {{ comma() }}{{ inst }}
+                                        {% endfor %}
+                                    {% endif %}
+                                    had limited leading roles in the last 3 months. 
+                                    Consider more responsibilities for the individual(s) or call for a performance evaluation. 
                             </td>
                         </tr>
                     </tbody>
@@ -87,7 +95,6 @@
               renderer: "svg",
               actions: {export: false, source: false, editor: false}
             }; 
-        //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
     
             vegaEmbed(div, url, opt).then(function(result) {
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view

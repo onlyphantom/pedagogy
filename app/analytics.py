@@ -358,7 +358,7 @@ def team_leadinst_line():
         color=alt.condition(
             alt.datum.diff > 0,
             alt.value("black"),
-            alt.value("#fd7777")
+            alt.value("#dc3545")
         )
     )
 
@@ -369,8 +369,7 @@ def team_leadinst_line():
                         scale=alt.Scale(range=['#375d7b','black']),
                         legend=alt.Legend(orient='bottom-right', 
                                         title=None,
-                                        offset=4, 
-                                        zindex=0)
+                                        offset=4)
                     ),
         tooltip=['workshop_period:O', 'wh_count']
     )
@@ -384,7 +383,7 @@ def team_leadinst_line():
         color=alt.condition(
             alt.datum.diff > 0,
             alt.value("black"),
-            alt.value("#fd7777")
+            alt.value("#dc3545")
         )
     ).transform_filter(
         filter={"field":'workshop_period',
