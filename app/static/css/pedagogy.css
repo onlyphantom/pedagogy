@@ -28,11 +28,38 @@ i.material-icons.md-light {
     background-color: rgb(124, 152, 174);
 }
 
+.jumbotron.white {
+    background-color: rgba(255,255,255,1);
+    padding: 2rem 2rem 4rem;
+    margin: 1.6rem;
+}
+
+.jumbotron.white > h2 {
+    color:#375d7b
+}
+
 .statcards {
     margin: 1% 0;
     background-color: rgb(124, 152, 174);
     padding: 2.5% 1.5%;
     border-radius: 5px;
+    color: white;
+}
+
+.leadinst_table {
+    font-size: 0.8em
+}
+
+.leadinst_table tr{
+    color: black
+}
+
+.instructor {
+    padding: 2% 4%;
+    display: block;
+    margin: 1.5%;
+    border-radius: 5px;
+    font-weight: bolder;
     color: white;
 }
 
@@ -167,6 +194,10 @@ body{
 
 h2, h3, h4 {
     color: white;
+}
+
+h5 {
+    text-align: left;
 }
 
 tr {

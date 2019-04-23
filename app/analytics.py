@@ -12,7 +12,7 @@ from config import conn
 def getdb():
     return pd.read_sql_query(
     "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, \
-        workshop_start, workshop_hours, class_size, e.name \
+        workshop_start, workshop_hours, class_size, e.name, e.active, e.university \
         FROM workshop \
         LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
         conn, index_col='id')
@@ -166,7 +166,6 @@ def category_bars():
 # ===================================================
 
 @app.route('/data/person_contrib_area')
-@cache.cached(timeout=86400, key_prefix='p_contrb')
 def person_contrib_area():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -195,7 +194,6 @@ def person_contrib_area():
     return chart.to_json()
 
 @app.route('/data/person_class_bar')
-@cache.cached(timeout=86400, key_prefix='p_hours')
 def person_class_bar():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -220,7 +218,6 @@ def person_class_bar():
     return chart.to_json()
 
 @app.route('/data/person_vs_area')
-@cache.cached(timeout=86400, key_prefix='p_v_a')
 def person_vs_area():
     dat_ori = getuserdb()
     dat = dat_ori.loc[dat_ori.this_user == True,:].copy()
@@ -254,7 +251,7 @@ def person_vs_area():
 
 
 @app.route('/data/instructor_breakdown')
-@cache.cached(timeout=86400, key_prefix='ib')
+@cache.cached(timeout=86400*7, key_prefix='ib')
 def instructor_breakdown():
     # Getting Responses Data
     q = """ SELECT response.*, workshop_category, name
@@ -336,6 +333,75 @@ def instructor_breakdown():
     return chart.to_json()
 
 # ================ ================ ================
+# ================ Team Analytics Section ================
+#
+# Visualization relating to team analytics page
+#
+# ===================================================
+# ===================================================
+@app.route('/data/team_leadinst_line')
+def team_leadinst_line():
+    dat = df.copy()
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    threemonths = datetime.datetime.now() - datetime.timedelta(weeks=13)
+    dat = dat.loc[(dat.workshop_start >= sixmonths) &
+            (dat.active == 1) & (dat.name != 'Capstone'), :]
+    dat['workshop_period'] = dat.loc[:, 'workshop_start'].apply(lambda x: 'Last 3 months' if (x >= threemonths) else '3 months ago')
+    dat = dat.loc[:,['name','workshop_period','workshop_hours']].groupby(['name','workshop_period']).count().reset_index()
+    dat.columns = ['name', 'workshop_period', 'wh_count']
+    dat['diff'] = dat.groupby('name').diff().fillna(method='bfill', limit=1)
+
+    line = alt.Chart(data=dat, title='Lead Instructor Roles').mark_line().encode(
+        x=alt.X('wh_count', axis=alt.Axis(title='Workshops in the last 6 months')),
+        y=alt.Y('name', axis=alt.Axis(title=' ')),
+        detail='name',
+        color=alt.condition(
+            alt.datum.diff > 0,
+            alt.value("black"),
+            alt.value("#fd7777")
+        )
+    )
+
+    p1 = alt.Chart(data=dat).mark_point(filled=True, size=100).encode(
+        x='wh_count',
+        y='name',
+        color=alt.Color('workshop_period:O', 
+                        scale=alt.Scale(range=['#375d7b','black']),
+                        legend=alt.Legend(orient='bottom-right', 
+                                        title=None,
+                                        offset=4, 
+                                        zindex=0)
+                    ),
+        tooltip=['workshop_period:O', 'wh_count']
+    )
+
+    t1 = p1.mark_text(
+        align='right',
+        baseline='bottom',
+        dx=-3, dy=-1,
+    ).encode(
+        text='wh_count',
+        color=alt.condition(
+            alt.datum.diff > 0,
+            alt.value("black"),
+            alt.value("#fd7777")
+        )
+    ).transform_filter(
+        filter={"field":'workshop_period',
+            "oneOf": ['Last 3 months']}
+    )
+
+    rule = alt.Chart(dat).mark_rule(color='#bbc6cb', strokeDash=[4]).encode(
+        x='average(wh_count)',
+        size=alt.value(1)
+    )
+
+    chart = line + p1 + t1 + rule
+    chart = chart.configure_axis(grid=False).properties(width=580)
+
+    return chart.to_json()
+
+# ================ ================ ================
 # ================ Non-Chart Section ================
 #
 #  Each factory is responsible for the data required 
@@ -364,6 +430,38 @@ def factory_homepage():
                 .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
     }
     return stats
+
+def factory_analytics():
+    dat = df.copy()
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    threemonths = datetime.datetime.now() - datetime.timedelta(weeks=13)
+    dat = dat.loc[(dat.workshop_start >= sixmonths) &
+            (dat.active == 1) & (dat.name != 'Capstone'), :]
+    dat['workshop_period'] = dat.loc[:, 'workshop_start'].apply(lambda x: 'Last 3 months' if (x >= threemonths) else '3 months ago')
+    dat = dat.loc[:,['name','workshop_period','workshop_hours']].groupby(['name','workshop_period']).count().reset_index()
+    dat.columns = ['name', 'workshop_period', 'wh_count']
+    dat['diff'] = dat.groupby('name').diff().fillna(method='bfill', limit=1)
+    df_sum = pd.DataFrame(dat.groupby('name').wh_count.sum())
+    max_wh = df_sum.wh_count.max()
+    min_wh = df_sum.wh_count.min()
+    max_diff = dat['diff'].max()
+    min_diff = dat['diff'].min()
+    def gettimenow():
+        import arrow
+        return arrow.get(arrow.utcnow()).humanize()
+    instructorstats = {
+        'max_wh': max_wh,
+        'min_wh': min_wh,
+        'max_6mths': [i for i in df_sum[df_sum.wh_count == max_wh].index],
+        'min_6mths': [i for i in df_sum[df_sum.wh_count == min_wh].index],
+        'max_diff_n': max_diff,
+        'min_diff_n': min_diff,
+        'max_diff': [i for i in dat[dat['diff']==max_diff].name.unique()],
+        'min_diff': [i for i in dat[dat['diff']==min_diff].name.unique()],
+        'testing': ['Steven Surya', 'Steven Christian'],
+        'updatewhen': gettimenow(),
+    }
+    return instructorstats
 
 
 def factory_accomplishment(u):

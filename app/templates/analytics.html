@@ -4,12 +4,79 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.6.0/vega-lite.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
 
-    <div class="jumbotron lightaqua">
-        <h2><i class="material-icons md-light">insert_chart</i> Team Analytics </h2>
+    <div class="jumbotron white">
+        <h2><i class="material-icons md-dark">insert_chart</i> Team Analytics </h2>
         <div class="row">
-            <div class="col-md-6 col-lg-6 col-sm-6" id="vis_team_1">
-            
-            </div>
+            <div class="col-md-12 col-lg-7 col-sm-12" id="vis_team_1"></div>
+            <div class="col-md-12 col-lg-5 col-sm-12">
+                <table class="table table-bordered leadinst_table">
+                    <caption>Last updated {{ instructorstats.updatewhen }}</caption>
+                    <thead class="thead-light">
+                      <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Individual</th>
+                        <th scope="col">Remark</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Most Prolific</th>
+                            <td>
+                                {% for inst in instructorstats['max_6mths'] %}
+                                <span class="instructor btn-info">{{ inst }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ instructorstats.max_wh }} workshop(s) in the last 6 months</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Training Camp</th>
+                            <td>
+                                {% for inst in instructorstats['min_6mths'] %}
+                                <span class="instructor btn-secondary">{{ inst }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ instructorstats.min_wh }} workshop(s) in the last 6 months</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Steepest Ascent</th>
+                            <td>
+                                {% for inst in instructorstats['max_diff'] %}
+                                <span class="instructor btn-success">{{ inst }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ instructorstats.max_diff_n }} difference compared to previous period</td>
+                        </tr>    
+                        <tr>
+                            <th scope="row">Steepest Descent</th>
+                            <td>
+                                {% for inst in instructorstats['min_diff'] %}
+                                <span class="instructor btn-danger">{{ inst }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ instructorstats.min_diff_n }} difference compared to previous period</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Testing Multiple</th>
+                            <td>
+                                {% for inst in instructorstats['testing'] %}
+                                    <span class="instructor btn-warning">{{ inst }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>Purely for testing front-end code.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Recommendations</th>
+                            <td colspan="2">
+                                    {% for inst in instructorstats['min_diff'] %}
+                                    {{ inst }} 
+                                    {% endfor %}
+                                    has had limited leading roles in the last 3 months. 
+                                    Consider more responbsibilities for the individual or call for a performance evaluation. 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>          
         </div>
     </div>
 
@@ -26,9 +93,7 @@
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
-        // parse("/data/mediumos", "#vis1")
-        // parse("/data/studentprof", "#vis2")
-        parse("/data/person_class_bar", "#vis_team_1")
+        parse("/data/team_leadinst_line", "#vis_team_1")
     </script>
 {% endblock %}
 
