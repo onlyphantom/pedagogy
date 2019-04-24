@@ -7,7 +7,12 @@
     <div class="jumbotron white">
         <h2><i class="material-icons md-dark">insert_chart</i> Team Analytics </h2>
         <div class="row">
-            <div class="col-md-12 col-lg-7 col-sm-12" id="vis_team_1"></div>
+            <div class="col-md-12 col-lg-7 col-sm-12">
+                <div id="vis_team_1"></div>
+                <div class="mt-4">
+                    {{ instructorstats['delta_12m'] | safe }}
+                </div>
+            </div>
             <div class="col-md-12 col-lg-5 col-sm-12">
                 <table class="table table-bordered leadinst_table">
                     <caption>Last updated {{ instructorstats.updatewhen }}</caption>
@@ -67,24 +72,17 @@
                         <tr>
                             <th scope="row">Recommendations</th>
                             <td colspan="2">
-                                    <!-- Move into separate template and inherit from -->
-                                    {% if instructorstats['testing']|length == 1 %}
-                                        {% for inst in instructorstats['testing'] %}
-                                            {{ inst }}
-                                        {% endfor %}
-                                    {% else %}
-                                        {% set comma = joiner(", ") %}
-                                        {% for inst in instructorstats['testing'] %}
-                                            {{ comma() }}{{ inst }}
-                                        {% endfor %}
-                                    {% endif %}
-                                    had limited leading roles in the last 3 months. 
-                                    Consider more responsibilities for the individual(s) or call for a performance evaluation. 
+                                <!-- Move into separate template and inherit from -->
+                                {% include "sub/recommendations.html" %}
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>          
+            </div>
+            
+            <div class="col-md-12 col-lg-7 col-sm-12">
+                
+            </div>
         </div>
     </div>
 
@@ -101,6 +99,8 @@
             }).catch(console.error);
         }
         parse("/data/team_leadinst_line", "#vis_team_1")
+    
+        document.querySelector('table.table_12m > thead').setAttribute('class', 'thead-light');
     </script>
 {% endblock %}
 
