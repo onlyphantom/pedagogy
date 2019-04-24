@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, g
 from flask_login import current_user, login_user, logout_user, login_required
-from app import app, db
+from app import app, db, cache
 from app.analytics import factory_homepage, factory_accomplishment, factory_analytics
 from app.users import User
 from app.models import Employee, Workshop, Response
@@ -29,7 +29,8 @@ def accomplishment():
     if g.employee is None:
         flash('Not registered as a Product team member yet. Check back later!')
         return redirect(url_for('index'))
-    personstats = factory_accomplishment(u=g.employee)
+    cache.clear()
+    personstats = factory_accomplishment(u=g.employee.id)
     return render_template('accomplishment.html', personstats=personstats)
 
 @app.route('/explorer')

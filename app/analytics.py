@@ -358,7 +358,7 @@ def team_leadinst_line():
         color=alt.condition(
             alt.datum.diff > 0,
             alt.value("black"),
-            alt.value("#fd7777")
+            alt.value("#dc3545")
         )
     )
 
@@ -369,8 +369,7 @@ def team_leadinst_line():
                         scale=alt.Scale(range=['#375d7b','black']),
                         legend=alt.Legend(orient='bottom-right', 
                                         title=None,
-                                        offset=4, 
-                                        zindex=0)
+                                        offset=4)
                     ),
         tooltip=['workshop_period:O', 'wh_count']
     )
@@ -384,7 +383,7 @@ def team_leadinst_line():
         color=alt.condition(
             alt.datum.diff > 0,
             alt.value("black"),
-            alt.value("#fd7777")
+            alt.value("#dc3545")
         )
     ).transform_filter(
         filter={"field":'workshop_period',
@@ -431,24 +430,45 @@ def factory_homepage():
     }
     return stats
 
+@cache.cached(timeout=60*60, key_prefix='fa_stats')
 def factory_analytics():
     dat = df.copy()
+    yearago = datetime.datetime.now() - datetime.timedelta(weeks=52)
     sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
     threemonths = datetime.datetime.now() - datetime.timedelta(weeks=13)
-    dat = dat.loc[(dat.workshop_start >= sixmonths) &
-            (dat.active == 1) & (dat.name != 'Capstone'), :]
-    dat['workshop_period'] = dat.loc[:, 'workshop_start'].apply(lambda x: 'Last 3 months' if (x >= threemonths) else '3 months ago')
-    dat = dat.loc[:,['name','workshop_period','workshop_hours']].groupby(['name','workshop_period']).count().reset_index()
-    dat.columns = ['name', 'workshop_period', 'wh_count']
-    dat['diff'] = dat.groupby('name').diff().fillna(method='bfill', limit=1)
-    df_sum = pd.DataFrame(dat.groupby('name').wh_count.sum())
+    amonth = datetime.datetime.now() - datetime.timedelta(days=30)
+
+    dat_6m = dat.loc[(dat.workshop_start >= sixmonths) &
+            (dat.active == 1) & (dat.name != 'Capstone'), :]    
+    dat_6m['workshop_period'] = dat_6m.loc[:, 'workshop_start'].apply(lambda x: 'Last 3 months' if (x >= threemonths) else '3 months ago')
+    dat_6m = dat_6m.loc[:,['name','workshop_period','workshop_hours']].groupby(['name','workshop_period']).count().reset_index()
+    dat_6m.columns = ['name', 'workshop_period', 'wh_count']
+    dat_6m['diff'] = dat_6m.groupby('name').diff().fillna(method='bfill', limit=1)
+    df_sum = pd.DataFrame(dat_6m.groupby('name').wh_count.sum())
     max_wh = df_sum.wh_count.max()
     min_wh = df_sum.wh_count.min()
-    max_diff = dat['diff'].max()
-    min_diff = dat['diff'].min()
+    max_diff = dat_6m['diff'].max()
+    min_diff = dat_6m['diff'].min()
+
+    dat_12m = dat.loc[(dat.workshop_start >= yearago) &
+            (dat.active == 1) & (dat.name != 'Capstone'), :]
+    dat_12m['workshop_period'] = dat_12m.loc[:, 'workshop_start'].apply(
+        lambda x: 'Past 90 Days' if (x >= threemonths) 
+            else '3 - 6 months' if (x >= sixmonths)
+            else '6 - 12 months'
+    )
+    dat_12m = dat_12m.loc[:,['name','workshop_period','workshop_hours']].groupby(['name','workshop_period']).count().reset_index()
+    dat_12m.columns = ['name', 'workshop_period', 'wh_count']
+    dat_12m = dat_12m.pivot(index='name', columns='workshop_period', values='wh_count').fillna(0)
+    dat_12m = dat_12m.reindex(['6 - 12 months', '3 - 6 months', 'Past 90 Days'], axis=1)
+    dat_12m['delta'] = dat_12m.iloc[:,2] - dat_12m.iloc[:,1]
+    dat_12m = dat_12m.sort_values(by=['Past 90 Days', 'delta'], ascending=False)
+    dat_12m.columns.name = None
+    dat_12m.index.name= None
     def gettimenow():
         import arrow
         return arrow.get(arrow.utcnow()).humanize()
+    
     instructorstats = {
         'max_wh': max_wh,
         'min_wh': min_wh,
@@ -456,21 +476,26 @@ def factory_analytics():
         'min_6mths': [i for i in df_sum[df_sum.wh_count == min_wh].index],
         'max_diff_n': max_diff,
         'min_diff_n': min_diff,
-        'max_diff': [i for i in dat[dat['diff']==max_diff].name.unique()],
-        'min_diff': [i for i in dat[dat['diff']==min_diff].name.unique()],
+        'max_diff': [i for i in dat_6m[dat_6m['diff']==max_diff].name.unique()],
+        'min_diff': [i for i in dat_6m[dat_6m['diff']==min_diff].name.unique()],
         'testing': ['Steven Surya', 'Steven Christian'],
+        'delta_12m': dat_12m.to_html(classes=['table table-bordered table-hover leadinst_table table_12m']),
         'updatewhen': gettimenow(),
     }
     return instructorstats
 
-
+# @cache.memoize(50)
 def factory_accomplishment(u):
     workshops = Workshop.query.filter_by(
-        workshop_instructor=u.id).order_by(Workshop.workshop_start.desc())
+        workshop_instructor=u).order_by(Workshop.workshop_start.desc())
     grped = dict()
     totalstud = 0
     totalhours = 0
-
+    
+    def gettimenow():
+        import arrow
+        return arrow.get(arrow.utcnow()).humanize()
+   
     for gr in workshops:
         category = gr.workshop_category
         if category not in grped:
@@ -491,7 +516,8 @@ def factory_accomplishment(u):
                     per_page=20, page=1, error_out=True)
 
     stats = {
-            'joindate': u.join_date,
+            # 'joindate': u.join_date,
+            'joindate': "a while ago",
             'workshops': workshops.limit(5),
             'responses': responses,
             'grped': grped,
@@ -504,8 +530,8 @@ def factory_accomplishment(u):
             'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
                 'name').sum().sort_values(
                     by='workshop_hours', 
-                    ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
-
+                    ascending=False).head(10).rename_axis(None).to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm']),
+            'updatewhen': gettimenow(),
         }
     
     return stats

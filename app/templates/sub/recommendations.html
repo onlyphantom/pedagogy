@@ -1,0 +1,28 @@
+{% if instructorstats['min_diff']|length == 1 %}
+{% for inst in instructorstats['min_diff'] %}
+    {{ inst }}
+{% endfor %}
+{% else %}
+{% set comma = joiner(", ") %}
+{% for inst in instructorstats['min_diff'] %}
+    {{ comma() }}{{ inst }}
+{% endfor %}
+{% endif %}
+had limited leading roles in the last 3 months. 
+Consider increasing the number of opportunities for the individual(s) or call for a performance evaluation. 
+
+<hr>
+{% if instructorstats['max_6mths']|length == 1 %}
+{% for inst in instructorstats['max_6mths'] %}
+    {{ inst }}
+{% endfor %}
+{% else %}
+{% set comma = joiner(", ") %}
+{% for inst in instructorstats['max_6mths'] %}
+    {{ comma() }}{{ inst }}
+{% endfor %}
+{% endif %}
+led the team with {{ instructorstats['max_wh'] }} lead instructor assignments.
+Consider greater responsibilities for the individual(s). Diversification greatly enhances
+personal growth by adding a level of robustness to the person's skill exposure.
+
