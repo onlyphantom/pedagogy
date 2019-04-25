@@ -1,5 +1,4 @@
 import os
-import pymysql
 
 secretkey = os.environ.get('SECRET_KEY')
 # database configuration
@@ -13,16 +12,12 @@ adminsemail = [
     'samuel@algorit.ma',
     'tiara@algorit.ma']
 
-conn = pymysql.connect(
-    host=host,
-    port=int(3306),
-    user=user,
-    passwd=password,
-    db=database)
 # create the configuration class
 class Config():
     SECRET_KEY = secretkey or 'l3arn2t3ach'
     SQLALCHEMY_DATABASE_URI = dburl
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    # 'mysql+pymysql://Samuel:tirab33@localhost/assistants'
     FLASK_DEBUG = 1
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
