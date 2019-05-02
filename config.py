@@ -6,9 +6,7 @@ host = os.getenv('MYSQL_HOST')
 user = os.getenv('MYSQL_USER')
 password = os.getenv('MYSQL_PASSWORD')
 database = os.getenv('MYSQL_DATABASE')
-dburl = 'mysql+pymysql://{usr}:{pw}@{host}/{db}'.format(
-    usr=user, pw=password, host=host, db=database
-)
+dburl = f'mysql+pymysql://{user}:{password}@{host}/{database}'
 
 adminsemail = [
     'samuel@algorit.ma',
@@ -32,5 +30,5 @@ class Config():
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = adminsemail
     CACHE_TYPE = 'simple'
-    CACHE_DEFAULT_TIMEOUT = 1 # 24 hours = 86400
+    CACHE_DEFAULT_TIMEOUT = 86400 # 24 hours = 86400
 
