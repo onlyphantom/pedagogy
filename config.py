@@ -1,4 +1,7 @@
 import os
+import pymysql
+import sqlite3
+from dotenv import load_dotenv
 
 secretkey = os.environ.get('SECRET_KEY')
 # database configuration
@@ -7,10 +10,25 @@ user = os.getenv('MYSQL_USER')
 password = os.getenv('MYSQL_PASSWORD')
 database = os.getenv('MYSQL_DATABASE')
 dburl = f'mysql+pymysql://{user}:{password}@{host}/{database}'
+# create conditional connection
+if(os.getenv('FLASK_ENV') == 'development'):
+    conn = sqlite3.connect('test.db')
+else:
+    conn = pymysql.connect(
+        host=host,
+        port=int(3306),
+        user=user,
+        passwd=password,
+        db=database)
 
 adminsemail = [
     'samuel@algorit.ma',
     'tiara@algorit.ma']
+
+dotenv_path = '.env'  # Address of your .env file
+load_dotenv(dotenv_path)
+
+
 
 # create the configuration class
 class Config():
@@ -32,3 +50,9 @@ class Config():
     CACHE_TYPE = 'simple'
     CACHE_DEFAULT_TIMEOUT = 86400 # 24 hours = 86400
 
+class Development(Config):
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///../test.db'
+    DEBUG = True
+
+class Production(Config):
+    SQLALCHEMY_DATABASE_URI = dburl

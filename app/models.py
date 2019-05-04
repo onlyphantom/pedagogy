@@ -12,6 +12,7 @@ ta_assignment = db.Table(
 )
 
 class Employee(db.Model):
+    __tablename__ = 'employee'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), db.ForeignKey('user.email'))
     name = db.Column(db.String(64), unique=True)
@@ -32,6 +33,7 @@ class Employee(db.Model):
         return '{}'.format(self.name)
 
 class Workshop(db.Model):
+    __tablename__ = 'workshop'
     id = db.Column(db.Integer, primary_key=True)
     workshop_name = db.Column(db.String(64))
     workshop_category = db.Column(db.Enum(
@@ -56,6 +58,7 @@ class Workshop(db.Model):
         return past
 
 class Response(db.Model):
+    __tablename__ = 'response'
     id = db.Column(db.Integer, primary_key=True)
     workshop_id = db.Column(db.Integer, db.ForeignKey('workshop.id'), nullable=False)
     difficulty = db.Column(db.Integer)

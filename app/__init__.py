@@ -6,12 +6,26 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-from config import Config
+from config import Production, Development, host, user, password, database
 import logging
 from logging.handlers import SMTPHandler
+import pymysql
+import sqlite3
+import os
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(Development)
+
+# create conditional connection
+if(os.getenv('FLASK_ENV') == 'development'):
+    conn = sqlite3.connect('test.db')
+else:
+    conn = pymysql.connect(
+        host=host,
+        port=int(3306),
+        user=user,
+        passwd=password,
+        db=database)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

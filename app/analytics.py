@@ -1,22 +1,21 @@
 from flask import g
 from flask_login import current_user
-from app import app, cache
+from app import app, cache, conn
 from app.models import Employee, Workshop, Response
 import altair as alt
 from altair import expr, datum
 import pandas as pd
 import datetime as datetime
-import pymysql
-from config import host, user, password, database
+
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
-    conn = pymysql.connect(
-        host=host,
-        port=int(3306),
-        user=user,
-        passwd=password,
-        db=database)
+    #conn = pymysql.connect(
+    #    host=host,
+    #    port=int(3306),
+    #    user=user,
+    #    passwd=password,
+    #    db=database)
 
     return pd.read_sql_query(
     "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, \
@@ -261,12 +260,12 @@ def person_vs_area():
 @app.route('/data/instructor_breakdown')
 @cache.cached(timeout=86400*7, key_prefix='ib')
 def instructor_breakdown():
-    conn = pymysql.connect(
-        host=host,
-        port=int(3306),
-        user=user,
-        passwd=password,
-        db=database)
+    #conn = pymysql.connect(
+    #    host=host,
+    #    port=int(3306),
+    #    user=user,
+    #    passwd=password,
+    #    db=database)
     # Getting Responses Data
     q = """ SELECT response.*, workshop_category, name
             FROM response
