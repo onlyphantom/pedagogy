@@ -22,7 +22,7 @@ def getdb():
         workshop_start, workshop_hours, class_size, e.name, e.active, e.university \
         FROM workshop \
         LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
-        conn, index_col='id')
+        conn, index_col='id', parse_dates='workshop_start')
 
 df = getdb()
 
