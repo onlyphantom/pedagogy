@@ -5,8 +5,19 @@ from app.models import Employee, Workshop, Response
 import altair as alt
 from altair import expr, datum
 import pandas as pd
+import numpy as np
+import string
+import urllib
+import re
 import datetime as datetime
 
+from nltk.sentiment.vader import SentimentIntensityAnalyzer #sentiment analyzer
+from nltk.tokenize import sent_tokenize, word_tokenize #tokenization
+from nltk.stem import WordNetLemmatizer #lemmatization
+from nltk.corpus import stopwords #stopwords
+from textblob import TextBlob #postagging
+import nltk
+# nltk.download('vader_lexicon')
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
@@ -33,6 +44,69 @@ def getuserdb():
             df['this_user'] = df['workshop_instructor'] == employee.id
             return df
 
+def getresponse():
+    responses = pd.read_sql_query("SELECT e.id, e.name as instructor, w.workshop_category, w.workshop_start as timestamp, comments\
+                        FROM response\
+                        LEFT JOIN workshop w ON w.id = response.workshop_id\
+                        LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
+
+    responses['comments'] = responses['comments'].astype(str)
+    responses['month_year'] = responses['timestamp'].dt.to_period('M').astype(str)
+    return responses
+
+def lemmatize_with_postag(sentence):
+    sent = TextBlob(sentence)
+    tag_dict = {"J": 'a', 
+                "N": 'n', 
+                "V": 'v', 
+                "R": 'r'}
+    words_and_tags = [(w, tag_dict.get(pos[0], 'n')) for w, pos in sent.tags]    
+    lemmatized_list = [wd.lemmatize(tag) for wd, tag in words_and_tags]
+    #return lemmatized_list
+    return " ".join(lemmatized_list)
+
+def get_score(sent):
+    analyser = SentimentIntensityAnalyzer()
+    score = analyser.polarity_scores(sent)
+  
+    if score['neg'] != 0 or score['pos'] != 0:
+        if score['neg'] > score['pos']:
+            return 'negative'
+        else:
+            return 'positive'
+    else:
+        return 'neutral'
+
+def presentiment(responses):
+    #stopwords
+    
+    stopwords_id = []
+    words = urllib.request.urlopen("http://static.hikaruyuuki.com/wp-content/uploads/stopword_list_tala.txt")
+    for word in words: stopwords_id.append(word.strip().decode('utf-8'))
+
+    stopwords_id = set(stopwords_id)
+    stopwords_en = set(stopwords.words('english'))
+
+
+    responses['comments'].replace(['','None'], np.nan, inplace=True)
+    responses.dropna(inplace=True)
+    responses['comments'] = responses['comments'].apply(lambda x: x.lower())
+    responses['comments'] = responses['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
+    responses['comments'] = responses['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
+    responses['comments'] = responses['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
+    responses['comments'] = responses['comments'].apply(lambda x: word_tokenize(x))
+    responses['comments'] = responses['comments'].apply(lambda x: [word for word in x if (word not in stopwords_en) or (word not in stopwords_id)])
+    responses['comments'] = responses['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
+    
+    responses['score'] = ''
+    responses['score'] = responses['comments'].apply(lambda x: get_score(x))
+
+    return responses
+
+response = getresponse()
+response = presentiment(response)
+domain = ['negative', 'neutral', 'positive']
+colors = ['#e41749', 'orange', 'steelblue']
 # ================ ================ ================
 # ================ Global Section ================
 #
@@ -171,6 +245,24 @@ def category_bars():
 #
 # ===================================================
 # ===================================================
+
+@app.route('/data/person_sentiment')
+def person_sentiment():
+    emp = getuserdb()
+    dat = emp.loc[emp.this_user == True,:].copy()
+    emp_id = dat.iloc[0]['workshop_instructor']
+
+    responses = response.copy()
+    person_percent = responses[responses.id==emp_id].score.value_counts().to_frame().apply(lambda x: x/x.sum()*100).reset_index()
+
+    chart = alt.Chart(person_percent).mark_bar().encode(
+        y=alt.Y('index', axis=alt.Axis(title='Sentiment')),
+        x=alt.X('score', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
+        color=alt.Color('index', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
+        tooltip='score'
+    )
+
+    return chart.to_json()
 
 @app.route('/data/person_contrib_area')
 def person_contrib_area():
@@ -352,6 +444,20 @@ def instructor_breakdown():
 #
 # ===================================================
 # ===================================================
+
+@app.route('/data/team_sentiment')
+def team_sentiment():
+    responses = response.copy()
+    all_score = responses.score.value_counts().to_frame().apply(lambda x: x/x.sum()*100).reset_index()
+    
+    chart = alt.Chart(all_score).mark_bar().encode(
+        y=alt.Y('index', axis=alt.Axis(title='Sentiment')),
+        x=alt.X('score', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
+        color=alt.Color('index', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
+        tooltip='score'
+    )
+    return chart.to_json()
+
 @app.route('/data/team_leadinst_line')
 def team_leadinst_line():
     dat = df.copy()

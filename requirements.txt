@@ -38,13 +38,14 @@ Mako==1.0.7
 MarkupSafe==1.0
 mccabe==0.6.1
 mistune==0.8.4
-mkl-fft==1.0.6
-mkl-random==1.0.1
+mkl-fft>=1.0.6
+mkl-random>=1.0.1
 # nb-conda==2.2.1
 # nb-conda-kernels==2.2.0
 # nbconvert==5.3.1
 # nbformat==4.4.0
 # notebook==5.7.4
+nltk==3.4.1
 numpy==1.15.1
 pandas==0.24.2
 pandocfilters==1.4.2
@@ -69,6 +70,7 @@ six==1.11.0
 SQLAlchemy==1.2.11
 terminado==0.8.1
 testpath==0.4.2
+textblob>=0.15.2
 toolz==0.9.0
 tornado==5.1.1
 traitlets==4.3.2

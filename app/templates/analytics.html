@@ -78,6 +78,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <div id="vis_team_2"></div>
             </div>
             
             <div class="col-md-12 col-lg-7 col-sm-12">
@@ -99,8 +100,8 @@
             }).catch(console.error);
         }
         parse("/data/team_leadinst_line", "#vis_team_1")
+        parse("/data/team_sentiment", "#vis_team_2")
     
         document.querySelector('table.table_12m > thead').setAttribute('class', 'thead-light');
     </script>
 {% endblock %}
-
