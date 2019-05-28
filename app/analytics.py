@@ -77,17 +77,7 @@ def get_score(sent):
     else:
         return 'neutral'
 
-def presentiment(responses):
-    #stopwords
-    
-    stopwords_id = []
-    words = urllib.request.urlopen("http://static.hikaruyuuki.com/wp-content/uploads/stopword_list_tala.txt")
-    for word in words: stopwords_id.append(word.strip().decode('utf-8'))
-
-    stopwords_id = set(stopwords_id)
-    stopwords_en = set(stopwords.words('english'))
-
-
+def presentiment(responses, all_stopwords):
     responses['comments'].replace(['','None'], np.nan, inplace=True)
     responses.dropna(inplace=True)
     responses['comments'] = responses['comments'].apply(lambda x: x.lower())
@@ -95,7 +85,7 @@ def presentiment(responses):
     responses['comments'] = responses['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
     responses['comments'] = responses['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
     responses['comments'] = responses['comments'].apply(lambda x: word_tokenize(x))
-    responses['comments'] = responses['comments'].apply(lambda x: [word for word in x if (word not in stopwords_en) or (word not in stopwords_id)])
+    responses['comments'] = responses['comments'].apply(lambda x: [word for word in x if word not in all_stopwords])
     responses['comments'] = responses['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
     
     responses['score'] = ''
@@ -103,10 +93,17 @@ def presentiment(responses):
 
     return responses
 
+stopwords_en = set(stopwords.words('english'))
+stopwords_id = []
+
+words = urllib.request.urlopen("http://static.hikaruyuuki.com/wp-content/uploads/stopword_list_tala.txt")
+for word in words: stopwords_id.append(word.strip().decode('utf-8'))
+all_stopwords = set(stopwords_id).union(stopwords_en)
+
 response = getresponse()
-response = presentiment(response)
+response = presentiment(response, all_stopwords)
 domain = ['negative', 'neutral', 'positive']
-colors = ['#e41749', 'orange', 'steelblue']
+colors = ['#8f9fb3', '#d1d8e2', '#7dbbd2cc']
 # ================ ================ ================
 # ================ Global Section ================
 #
@@ -253,13 +250,47 @@ def person_sentiment():
     emp_id = dat.iloc[0]['workshop_instructor']
 
     responses = response.copy()
-    person_percent = responses[responses.id==emp_id].score.value_counts().to_frame().apply(lambda x: x/x.sum()*100).reset_index()
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    person = responses[(responses.id==emp_id) & (responses.timestamp >= sixmonths)]
 
-    chart = alt.Chart(person_percent).mark_bar().encode(
-        y=alt.Y('index', axis=alt.Axis(title='Sentiment')),
-        x=alt.X('score', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        color=alt.Color('index', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip='score'
+    monyear_percent = pd.crosstab(person['month_year'],person['score']).apply(lambda x: round((x/x.sum()*100),2), axis=1).reset_index().melt(id_vars='month_year')
+
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                        fields=['month_year'], empty='none')
+
+    line = alt.Chart(monyear_percent).mark_line(point=True).encode(
+        x=alt.X('month_year:T', axis=alt.Axis(title="Sentiment Analysis")),
+        y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
+        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment"))
+    )
+
+    selectors = alt.Chart(monyear_percent).mark_point().encode(
+        x='month_year:T',
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    points = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
+
+    text = line.mark_text(align='left', dx=5, dy=-5).encode(
+        text=alt.condition(nearest, 'value:Q', alt.value(' '))
+    )
+
+    rules = alt.Chart(monyear_percent).mark_rule(color='gray').encode(
+        x='month_year:T',
+    ).transform_filter(
+        nearest
+    )
+
+    chart = alt.layer(
+        line, selectors, points, rules, text
+    ).properties(
+        width=700, height=250
+    ).configure_axis( 
+        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
     )
 
     return chart.to_json()
@@ -444,20 +475,6 @@ def instructor_breakdown():
 #
 # ===================================================
 # ===================================================
-
-@app.route('/data/team_sentiment')
-def team_sentiment():
-    responses = response.copy()
-    all_score = responses.score.value_counts().to_frame().apply(lambda x: x/x.sum()*100).reset_index()
-    
-    chart = alt.Chart(all_score).mark_bar().encode(
-        y=alt.Y('index', axis=alt.Axis(title='Sentiment')),
-        x=alt.X('score', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        color=alt.Color('index', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip='score'
-    )
-    return chart.to_json()
-
 @app.route('/data/team_leadinst_line')
 def team_leadinst_line():
     dat = df.copy()
