@@ -11,14 +11,6 @@ import urllib
 import re
 import datetime as datetime
 
-from nltk.sentiment.vader import SentimentIntensityAnalyzer #sentiment analyzer
-from nltk.tokenize import sent_tokenize, word_tokenize #tokenization
-from nltk.stem import WordNetLemmatizer #lemmatization
-from nltk.corpus import stopwords #stopwords
-from textblob import TextBlob #postagging
-import nltk
-# nltk.download('vader_lexicon')
-
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
     #conn = pymysql.connect(
@@ -43,6 +35,22 @@ def getuserdb():
         if employee is not None:
             df['this_user'] = df['workshop_instructor'] == employee.id
             return df
+
+# ================ ================ ================
+# ====== Preprocessing Sentiment Section ===========
+#
+# ===================================================
+# ===================================================
+
+from nltk.sentiment.vader import SentimentIntensityAnalyzer #sentiment analyzer
+from nltk.tokenize import sent_tokenize, word_tokenize #tokenization
+from nltk.stem import WordNetLemmatizer #lemmatization
+from nltk.corpus import stopwords #stopwords
+from textblob import TextBlob #postagging
+import nltk
+from pathlib import Path
+nltk.data.path.append(str(Path().absolute()) + "/nltk_data");
+
 
 def getresponse():
     responses = pd.read_sql_query("SELECT e.id, e.name as instructor, w.workshop_category, w.workshop_start as timestamp, comments\
@@ -243,7 +251,7 @@ def category_bars():
 # ===================================================
 # ===================================================
 
-@app.route('/data/person_sentiment')
+@app.route('/data/per_sentiment')
 def person_sentiment():
     emp = getuserdb()
     dat = emp.loc[emp.this_user == True,:].copy()
