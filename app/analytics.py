@@ -251,7 +251,7 @@ def category_bars():
 # ===================================================
 # ===================================================
 
-@app.route('/data/per_sentiment')
+@app.route('/data/person_sentiment')
 def person_sentiment():
     emp = getuserdb()
     dat = emp.loc[emp.this_user == True,:].copy()
