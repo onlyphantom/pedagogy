@@ -49,7 +49,10 @@ from nltk.corpus import stopwords #stopwords
 from textblob import TextBlob #postagging
 import nltk
 from pathlib import Path
-nltk.data.path.append(str(Path().absolute()) + "/nltk_data");
+nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
+
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 
 def getresponse():
@@ -112,6 +115,82 @@ response = getresponse()
 response = presentiment(response, all_stopwords)
 domain = ['negative', 'neutral', 'positive']
 colors = ['#8f9fb3', '#d1d8e2', '#7dbbd2cc']
+
+@app.route('/data/person_sentiment')
+def person_sentiment():
+    emp = getuserdb()
+    dat = emp.loc[emp.this_user == True,:].copy()
+    emp_id = dat.iloc[0]['workshop_instructor']
+
+    responses = response.copy()
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    person = responses[(responses.id==emp_id) & (responses.timestamp >= sixmonths)]
+
+    monyear_percent = pd.crosstab(person['month_year'],person['score']).apply(lambda x: round((x/x.sum()*100),2), axis=1).reset_index().melt(id_vars='month_year')
+
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                        fields=['month_year'], empty='none')
+
+    line = alt.Chart(monyear_percent).mark_line(point=True).encode(
+        x=alt.X('month_year:T', axis=alt.Axis(title="Sentiment Analysis")),
+        y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
+        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment"))
+    )
+
+    selectors = alt.Chart(monyear_percent).mark_point().encode(
+        x='month_year:T',
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    points = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
+
+    text = line.mark_text(align='left', dx=5, dy=-5).encode(
+        text=alt.condition(nearest, 'value:Q', alt.value(' '))
+    )
+
+    rules = alt.Chart(monyear_percent).mark_rule(color='gray').encode(
+        x='month_year:T',
+    ).transform_filter(
+        nearest
+    )
+
+    chart = alt.layer(
+        line, selectors, points, rules, text
+    ).properties(
+        width=700, height=0
+    ).configure_axis( 
+        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
+    )
+
+    return chart.to_json()
+
+def word_cloud(response, stopwords):
+    # emp = getuserdb()
+    # dat = emp.loc[emp.this_user == True,:].copy()
+    # emp_id = dat.iloc[0]['workshop_instructor']
+
+    wd_list = response[response.id==2].comments
+    all_words = ' '.join([text for text in wd_list])
+    wordcloud = WordCloud(
+        background_color="rgba(255, 255, 255, 0)", mode="RGBA",
+        stopwords=stopwords,
+        width=1600,
+        height=800,
+        random_state=21,
+        colormap='Dark2',
+        max_words=50,
+        max_font_size=200).generate(all_words)
+    plt.figure(figsize=(22,20))
+    plt.axis('off')
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.savefig(str(Path().absolute())+'\\app\\static\\assets\\'+'wordclouds.png', transparent=True)
+
+word_cloud(response, all_stopwords)
+
 # ================ ================ ================
 # ================ Global Section ================
 #
@@ -250,58 +329,6 @@ def category_bars():
 #
 # ===================================================
 # ===================================================
-
-@app.route('/data/person_sentiment')
-def person_sentiment():
-    emp = getuserdb()
-    dat = emp.loc[emp.this_user == True,:].copy()
-    emp_id = dat.iloc[0]['workshop_instructor']
-
-    responses = response.copy()
-    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
-    person = responses[(responses.id==emp_id) & (responses.timestamp >= sixmonths)]
-
-    monyear_percent = pd.crosstab(person['month_year'],person['score']).apply(lambda x: round((x/x.sum()*100),2), axis=1).reset_index().melt(id_vars='month_year')
-
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                        fields=['month_year'], empty='none')
-
-    line = alt.Chart(monyear_percent).mark_line(point=True).encode(
-        x=alt.X('month_year:T', axis=alt.Axis(title="Sentiment Analysis")),
-        y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment"))
-    )
-
-    selectors = alt.Chart(monyear_percent).mark_point().encode(
-        x='month_year:T',
-        opacity=alt.value(0),
-    ).add_selection(
-        nearest
-    )
-
-    points = line.mark_point().encode(
-        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
-    )
-
-    text = line.mark_text(align='left', dx=5, dy=-5).encode(
-        text=alt.condition(nearest, 'value:Q', alt.value(' '))
-    )
-
-    rules = alt.Chart(monyear_percent).mark_rule(color='gray').encode(
-        x='month_year:T',
-    ).transform_filter(
-        nearest
-    )
-
-    chart = alt.layer(
-        line, selectors, points, rules, text
-    ).properties(
-        width=700, height=250
-    ).configure_axis( 
-        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
-    )
-
-    return chart.to_json()
 
 @app.route('/data/person_contrib_area')
 def person_contrib_area():
