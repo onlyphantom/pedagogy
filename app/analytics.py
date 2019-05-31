@@ -36,8 +36,8 @@ def getuserdb():
             df['this_user'] = df['workshop_instructor'] == employee.id
             return df
 
-# ================ ================ ================
-# ====== Preprocessing Sentiment Section ===========
+# ================ ================ =================
+# ========== Sentiment Analysis Section =============
 #
 # ===================================================
 # ===================================================
@@ -54,15 +54,14 @@ nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-
 def getresponse():
-    responses = pd.read_sql_query("SELECT e.id, e.name as instructor, w.workshop_category, w.workshop_start as timestamp, comments\
+    responses = pd.read_sql_query("SELECT e.id, e.name as instructor, w.workshop_name, w.workshop_start as time_stamp, comments\
                         FROM response\
                         LEFT JOIN workshop w ON w.id = response.workshop_id\
-                        LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
+                        LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='time_stamp')
 
     responses['comments'] = responses['comments'].astype(str)
-    responses['month_year'] = responses['timestamp'].dt.to_period('M').astype(str)
+    responses['month_year'] = responses['time_stamp'].dt.to_period('M').astype(str)
     return responses
 
 def lemmatize_with_postag(sentence):
@@ -77,8 +76,12 @@ def lemmatize_with_postag(sentence):
     return " ".join(lemmatized_list)
 
 def get_score(sent):
+    neg_id = [line.rstrip('\n') for line in open(str(Path().absolute())+"\\nltk_data\\neg_id.txt")]
+    pos_id = [line.rstrip('\n') for line in open(str(Path().absolute())+"\\nltk_data\\pos_id.txt")]
+
     analyser = SentimentIntensityAnalyzer()
     score = analyser.polarity_scores(sent)
+    sent_list = sent.split()
   
     if score['neg'] != 0 or score['pos'] != 0:
         if score['neg'] > score['pos']:
@@ -86,6 +89,10 @@ def get_score(sent):
         else:
             return 'positive'
     else:
+        if (any(elem in sent_list for elem in pos_id)) and not(any(elem in sent_list for elem in neg_id)):
+            return 'positive'
+        elif not(any(elem in sent_list for elem in pos_id)) and (any(elem in sent_list for elem in neg_id)):
+            return 'negative'
         return 'neutral'
 
 def presentiment(responses, all_stopwords):
@@ -124,60 +131,26 @@ def person_sentiment():
 
     responses = response.copy()
     sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
-    person = responses[(responses.id==emp_id) & (responses.timestamp >= sixmonths)]
+    person = responses[(responses.id==emp_id) & (responses.time_stamp >= sixmonths)]
 
-    monyear_percent = pd.crosstab(person['month_year'],person['score']).apply(lambda x: round((x/x.sum()*100),2), axis=1).reset_index().melt(id_vars='month_year')
+    monyear_percent = pd.crosstab([person['time_stamp'],person['workshop_name']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['time_stamp','workshop_name'])
 
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                        fields=['month_year'], empty='none')
-
-    line = alt.Chart(monyear_percent).mark_line(point=True).encode(
-        x=alt.X('month_year:T', axis=alt.Axis(title="Sentiment Analysis")),
+    chart = alt.Chart(monyear_percent).mark_bar().encode(
         y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment"))
+        x=alt.X('workshop_name:N',  sort=alt.EncodingSortField(field="time_stamp:T", order='ascending'), axis=alt.Axis(title='Workshop Name')),
+        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
+        tooltip=[alt.Tooltip('value:Q', title="Percent"), alt.Tooltip('time_stamp:T', title="Date"), alt.Tooltip('workshop_name:N', title="Workshop Name")]
+    ).properties(width=500, height=300).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6', 
+        grid=False
     )
 
-    selectors = alt.Chart(monyear_percent).mark_point().encode(
-        x='month_year:T',
-        opacity=alt.value(0),
-    ).add_selection(
-        nearest
-    )
-
-    points = line.mark_point().encode(
-        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
-    )
-
-    text = line.mark_text(align='left', dx=5, dy=-5).encode(
-        text=alt.condition(nearest, 'value:Q', alt.value(' '))
-    )
-
-    rules = alt.Chart(monyear_percent).mark_rule(color='gray').encode(
-        x='month_year:T',
-    ).transform_filter(
-        nearest
-    )
-
-    chart = alt.layer(
-        line, selectors, points, rules, text
-    ).properties(
-        width=700, height=0
-    ).configure_axis( 
-        labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
-    )
-
-    return chart.to_json()
-
-def word_cloud(response, stopwords):
-    # emp = getuserdb()
-    # dat = emp.loc[emp.this_user == True,:].copy()
-    # emp_id = dat.iloc[0]['workshop_instructor']
-
-    wd_list = response[response.id==2].comments
+    wd_list = responses[responses.id==emp_id].comments
     all_words = ' '.join([text for text in wd_list])
     wordcloud = WordCloud(
         background_color="rgba(255, 255, 255, 0)", mode="RGBA",
-        stopwords=stopwords,
+        stopwords=all_stopwords,
         width=1600,
         height=800,
         random_state=21,
@@ -189,7 +162,7 @@ def word_cloud(response, stopwords):
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.savefig(str(Path().absolute())+'\\app\\static\\assets\\'+'wordclouds.png', transparent=True)
 
-word_cloud(response, all_stopwords)
+    return chart.to_json()
 
 # ================ ================ ================
 # ================ Global Section ================
