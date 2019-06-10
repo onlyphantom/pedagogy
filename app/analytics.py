@@ -75,10 +75,23 @@ def lemmatize_with_postag(sentence):
     #return lemmatized_list
     return " ".join(lemmatized_list)
 
-def get_score(sent):
-    neg_id = [line.rstrip('\n') for line in open(str(Path().absolute())+"\\nltk_data\\neg_id.txt")]
-    pos_id = [line.rstrip('\n') for line in open(str(Path().absolute())+"\\nltk_data\\pos_id.txt")]
+def check_id(sent):
+    with open(str(Path().absolute())+"\\nltk_data\\neg_id.txt") as f: dataneg = f.readlines()  
+    with open(str(Path().absolute())+"\\nltk_data\\pos_id.txt") as f: datapos = f.readlines()   
+    score = 0
+    
+    for word in sent:
+        for line in datapos:
+            if word in line:
+                score += float(line.split()[-1])
+                break
+        for line in dataneg:
+            if word in line:
+                score += float(line.split()[-1])
+                break
+    return score
 
+def get_score(sent):
     analyser = SentimentIntensityAnalyzer()
     score = analyser.polarity_scores(sent)
     sent_list = sent.split()
@@ -89,9 +102,9 @@ def get_score(sent):
         else:
             return 'positive'
     else:
-        if (any(elem in sent_list for elem in pos_id)) and not(any(elem in sent_list for elem in neg_id)):
+        if check_id(sent_list) > 0:
             return 'positive'
-        elif not(any(elem in sent_list for elem in pos_id)) and (any(elem in sent_list for elem in neg_id)):
+        elif check_id(sent_list) < 0:
             return 'negative'
         return 'neutral'
 
@@ -135,12 +148,12 @@ def person_sentiment():
 
     monyear_percent = pd.crosstab([person['time_stamp'],person['workshop_name']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['time_stamp','workshop_name'])
 
-    chart = alt.Chart(monyear_percent).mark_bar().encode(
+    chart = alt.Chart(monyear_percent, title='Sentiment for The Last 6 Months').mark_bar().encode(
         y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        x=alt.X('workshop_name:N',  sort=alt.EncodingSortField(field="time_stamp:T", order='ascending'), axis=alt.Axis(title='Workshop Name')),
+        x=alt.X('workshop_name:N',sort=alt.EncodingSortField(field="time_stamp:T", order='ascending'), axis=alt.Axis(title='Workshop Name')),
         color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip=[alt.Tooltip('value:Q', title="Percent"), alt.Tooltip('time_stamp:T', title="Date"), alt.Tooltip('workshop_name:N', title="Workshop Name")]
-    ).properties(width=500, height=300).configure_axis(
+        tooltip=[alt.Tooltip('value:Q', title="Percent"), alt.Tooltip('score', title="Sentiment"),alt.Tooltip('workshop_name:N', title="Workshop Name")]
+    ).properties(width=800, height=300).configure_axis(
         labelColor='#bbc6cbe6',
         titleColor='#bbc6cbe6', 
         grid=False
