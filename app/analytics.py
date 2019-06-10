@@ -84,11 +84,10 @@ def check_id(sent):
         for line in datapos:
             if word in line:
                 score += float(line.split()[-1])
-                break
         for line in dataneg:
             if word in line:
                 score += float(line.split()[-1])
-                break
+                
     return score
 
 def get_score(sent):
@@ -148,11 +147,12 @@ def person_sentiment():
 
     monyear_percent = pd.crosstab([person['time_stamp'],person['workshop_name']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['time_stamp','workshop_name'])
 
-    chart = alt.Chart(monyear_percent, title='Sentiment for The Last 6 Months').mark_bar().encode(
+    chart = alt.Chart(monyear_percent, title='Sentiment for The Last 6 Months').mark_line(point=True).encode(
         y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
         x=alt.X('workshop_name:N',sort=alt.EncodingSortField(field="time_stamp:T", order='ascending'), axis=alt.Axis(title='Workshop Name')),
         color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip=[alt.Tooltip('value:Q', title="Percent"), alt.Tooltip('score', title="Sentiment"),alt.Tooltip('workshop_name:N', title="Workshop Name")]
+        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score', title="Sentiment")],
+        order="time_stamp:T"
     ).properties(width=800, height=300).configure_axis(
         labelColor='#bbc6cbe6',
         titleColor='#bbc6cbe6', 

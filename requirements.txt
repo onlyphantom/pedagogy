@@ -1,6 +1,6 @@
 # pip freeze > requirements.txt
 alembic==0.9.9
-altair==2.2.2
+altair==3.1.0
 appnope==0.1.0
 arrow==0.12.1
 asn1crypto==0.24.0
