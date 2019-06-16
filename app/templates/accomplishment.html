@@ -148,19 +148,13 @@
     <div class="col-md-12 col-lg-12 col-sm-12">
         <div>
             <h4><i class="material-icons md-light">rate_review</i> Most Recent Reviews</h4>
-            <div class="card-columns">
-                {% for review in personstats['qualitative'].items %}
-                {% include "sub/single_response.html" %}
+            <div class="card-group">
+                {% for index, review in personstats['reviews'].iterrows() %}
+                    <div class="col-sm-4">
+                        {% include "sub/single_response.html" %}
+                    </div>
                 {% endfor %}
             </div>
-            <!-- {% for page in personstats['qualitative'].iter_pages() %}
-                    {% if page  %}
-                        <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
-                    {% else %}
-                        ...
-                    {% endif %}
-                    
-                {% endfor %} -->
         </div>
     </div>
 </div>

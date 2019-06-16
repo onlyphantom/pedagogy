@@ -1,23 +1,66 @@
 <div class="card response-card">
-    <p class="card-text">{{ review['comments'] }}</p>
-    <ul>
-        {% if review['difficulty'] >= 4%}
-            <li><i class="material-icons">check</i>Lecture wasn't too difficult</li>
+    <div class="row" style="text-transform: capitalize;">
+        <div class="col-sm-6">
+            <h5 class="card-text">{{ review['workshop_name'] }}</h5>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-text">{{ review['overall'] }}</h5>
+                    <h6 class="card-text">Ratings</h6>
+                </div>
+                {% if review['sentiment'] == 'negative'%}
+                    <div class="col-md-6" style="color: #FFA07A">
+                        <h5 class="card-text" >{{ review['value'] }}%</h5>
+                        <h6 class="card-text">{{ review['sentiment'] }}</h6>
+                    </div>
+                {% elif review['sentiment'] == 'neutral'%}
+                    <div class="col-md-6" style="color: #FFDEAD">
+                        <h5 class="card-text">{{ review['value'] }}%</h5>
+                        <h6 class="card-text">{{ review['sentiment'] }}</h6>
+                    </div>
+                {% else %}
+                    <div class="col-md-6" style="color: #E0FFFF">
+                        <h5 class="card-text">{{ review['value'] }}%</h5>
+                        <h6 class="card-text">{{ review['sentiment'] }}</h6>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <h6>Sentiment:</h6>
+    <div class="row" style="text-align: center">
+        <div class="col-sm-12">
+            <div class="card-group">
+                {% for idx, data in personstats['monyear_percent'].iterrows() %}
+                    {% if data['workshop_id'] == review['workshop_id'] %}
+                        <div class="card response-card" style="background-color: #FFFFF0">
+                            {% if data['score'] == 'negative'%}
+                                <h6 class="card-text" style="color: #e41749">{{ data['value'] }}%</h6>
+                                <p class="card-text" style="color: #e41749">Negative</p>
+                            {% elif data['score'] == 'neutral'%}
+                                <h6 class="card-text" style="color: orange">{{ data['value'] }}%</h6>
+                                <p class="card-text" style="color: orange">Neutral</p>
+                            {% else %}
+                                <h6 class="card-text" style="color: steelblue">{{ data['value'] }}%</h6>
+                                <p class="card-text" style="color: steelblue">Positive</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <h6>Reviews:</h6>
+    {% for comments in personstats['qualitative'].items %}
+        {% if (comments['workshop_id'] == review['workshop_id'])%}
+            <p class="card-text">{{comments['comments']}}</p>
+            <footer class="blockquote-footer">
+                <small>Student from {{ comments['workshop']}}</small>
+            </footer>
+            <hr/>
         {% endif %}
-        {% if review['difficulty'] >= 4%}
-            <li><i class="material-icons">check</i>Training was knowledgeable</li>
-        {% endif %}
-        {% if review['objectives'] >= 4 %}
-            <li><i class="material-icons">check</i>Training objectives were met</li>
-        {% endif %}
-        {% if review['timeliness'] >= 4 %}
-            <li><i class="material-icons">check</i>Time allocated was sufficient</li>
-        {% endif %}
-        {% if review['satisfaction_score'] >= 4 %}
-            <li><i class="material-icons">check</i>Great Overall Experience </li>
-        {% endif %}
-    </ul>
-    <footer class="blockquote-footer">
-        <small>Student from {{ review['workshop'] }}</small>
-    </footer>
+    {% endfor %}
 </div>

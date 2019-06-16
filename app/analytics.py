@@ -54,15 +54,30 @@ nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-def getresponse():
-    responses = pd.read_sql_query("SELECT e.id, e.name as instructor, w.workshop_name, w.workshop_start as time_stamp, comments\
-                        FROM response\
-                        LEFT JOIN workshop w ON w.id = response.workshop_id\
-                        LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='time_stamp')
+def get_response():
+    responses = pd.read_sql_query("SELECT  response.*, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
+                              FROM response\
+                              LEFT JOIN workshop w ON w.id = response.workshop_id\
+                              LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
 
     responses['comments'] = responses['comments'].astype(str)
-    responses['month_year'] = responses['time_stamp'].dt.to_period('M').astype(str)
+    responses[responses.columns[2:9]] = responses[responses.columns[2:9]].astype(float)
+
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    responses = responses[responses.timestamp >= sixmonths]
     return responses
+
+def get_sentiment_data(responses):
+    
+    return responses[['workshop_id','workshop_name','employee_id','timestamp','comments']].copy()
+
+def get_reviews_data(responses):
+    column_reviews = responses.columns[1:9]
+    reviews = responses[column_reviews].copy()
+    reviews['employee_id'] = responses['employee_id'].copy()
+    reviews['timestamp'] = responses['timestamp'].copy()
+
+    return reviews
 
 def lemmatize_with_postag(sentence):
     sent = TextBlob(sentence)
@@ -72,15 +87,15 @@ def lemmatize_with_postag(sentence):
                 "R": 'r'}
     words_and_tags = [(w, tag_dict.get(pos[0], 'n')) for w, pos in sent.tags]    
     lemmatized_list = [wd.lemmatize(tag) for wd, tag in words_and_tags]
-    #return lemmatized_list
+    
     return " ".join(lemmatized_list)
 
-def check_id(sent):
+def check_id(sentence):
     with open(str(Path().absolute())+"\\nltk_data\\neg_id.txt") as f: dataneg = f.readlines()  
     with open(str(Path().absolute())+"\\nltk_data\\pos_id.txt") as f: datapos = f.readlines()   
     score = 0
     
-    for word in sent:
+    for word in sentence:
         for line in datapos:
             if word in line:
                 score += float(line.split()[-1])
@@ -90,10 +105,10 @@ def check_id(sent):
                 
     return score
 
-def get_score(sent):
+def get_score(sentence):
     analyser = SentimentIntensityAnalyzer()
-    score = analyser.polarity_scores(sent)
-    sent_list = sent.split()
+    score = analyser.polarity_scores(sentence)
+    sentence_list = sentence.split()
   
     if score['neg'] != 0 or score['pos'] != 0:
         if score['neg'] > score['pos']:
@@ -101,27 +116,33 @@ def get_score(sent):
         else:
             return 'positive'
     else:
-        if check_id(sent_list) > 0:
+        if check_id(sentence_list) > 0:
             return 'positive'
-        elif check_id(sent_list) < 0:
+        elif check_id(sentence_list) < 0:
             return 'negative'
         return 'neutral'
 
-def presentiment(responses, all_stopwords):
-    responses['comments'].replace(['','None'], np.nan, inplace=True)
-    responses.dropna(inplace=True)
-    responses['comments'] = responses['comments'].apply(lambda x: x.lower())
-    responses['comments'] = responses['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
-    responses['comments'] = responses['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
-    responses['comments'] = responses['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
-    responses['comments'] = responses['comments'].apply(lambda x: word_tokenize(x))
-    responses['comments'] = responses['comments'].apply(lambda x: [word for word in x if word not in all_stopwords])
-    responses['comments'] = responses['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
+def presentiment(sentiment, all_stopwords):
+    sentiment['comments'].replace(['','None'], np.nan, inplace=True)
+    sentiment.dropna(inplace=True)
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: x.lower())
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: word_tokenize(x))
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: [word for word in x if word not in all_stopwords])
+    sentiment['comments'] = sentiment['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
     
-    responses['score'] = ''
-    responses['score'] = responses['comments'].apply(lambda x: get_score(x))
+    sentiment['score'] = ''
+    sentiment['score'] = sentiment['comments'].apply(lambda x: get_score(x))
 
-    return responses
+    return sentiment
+
+def prereviews(reviews):
+    reviews.fillna(3, inplace=True)
+    reviews['overall'] = round(reviews[reviews.columns[1:8]].sum(axis=1)/7,1)
+
+    return reviews
 
 stopwords_en = set(stopwords.words('english'))
 stopwords_id = []
@@ -130,36 +151,68 @@ words = urllib.request.urlopen("http://static.hikaruyuuki.com/wp-content/uploads
 for word in words: stopwords_id.append(word.strip().decode('utf-8'))
 all_stopwords = set(stopwords_id).union(stopwords_en)
 
-response = getresponse()
-response = presentiment(response, all_stopwords)
+response = get_response()
+
+sentiment = get_sentiment_data(response)
+sentiment = presentiment(sentiment, all_stopwords)
+
+reviews = get_reviews_data(response)
+reviews = prereviews(reviews)
+
 domain = ['negative', 'neutral', 'positive']
 colors = ['#8f9fb3', '#d1d8e2', '#7dbbd2cc']
 
-@app.route('/data/person_sentiment')
-def person_sentiment():
+def get_params():
     emp = getuserdb()
     dat = emp.loc[emp.this_user == True,:].copy()
     emp_id = dat.iloc[0]['workshop_instructor']
-
-    responses = response.copy()
     sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
-    person = responses[(responses.id==emp_id) & (responses.time_stamp >= sixmonths)]
+    
+    return emp_id, sixmonths
 
-    monyear_percent = pd.crosstab([person['time_stamp'],person['workshop_name']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['time_stamp','workshop_name'])
+def get_overall_sentiment():
+    emp_id, sixmonths = get_params()
+    person = sentiment[sentiment.employee_id==emp_id].copy()
 
-    chart = alt.Chart(monyear_percent, title='Sentiment for The Last 6 Months').mark_line(point=True).encode(
+    return pd.crosstab([person['timestamp'],person['workshop_name'],person['workshop_id']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['timestamp','workshop_name','workshop_id'])
+
+def get_overall_reviews(monyear_percent):
+    emp_id, sixmonths = get_params()
+    
+    filter_idx = monyear_percent.groupby(['workshop_id'])['value'].transform(max) == monyear_percent['value']
+    al_reviews = monyear_percent[filter_idx]
+    al_reviews.sort_values(by=['score'], inplace=True)
+    al_reviews.drop_duplicates(subset='workshop_id', keep="first", inplace=True)
+
+    person_reviews = reviews[(reviews.employee_id==emp_id) & (reviews.timestamp >= sixmonths)]
+    person_reviews['overall'] = round(reviews[reviews.columns   [1:8]].sum(axis=1)/7,1)
+
+    sm_reviews = person_reviews[['overall', 'workshop_id']].groupby(['workshop_id']).mean().round(1)
+    sm_reviews.reset_index(inplace=True)
+
+    sm_reviews['workshop_name'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['workshop_name'])
+    sm_reviews['sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['score'])
+    sm_reviews['value'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['value'])
+    
+    return sm_reviews
+
+@app.route('/data/person_sentiment')
+def vis_overall_sentiment():
+    monyear_percent = get_overall_sentiment()
+
+    chart = alt.Chart(monyear_percent, title='Sentiment in The Last 6 Months').mark_line(point=True).encode(
         y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        x=alt.X('workshop_name:N',sort=alt.EncodingSortField(field="time_stamp:T", order='ascending'), axis=alt.Axis(title='Workshop Name')),
+        x=alt.X('timestamp:T', axis=alt.Axis(title='Date')),
         color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score', title="Sentiment")],
-        order="time_stamp:T"
+        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score', title="Sentiment"), alt.Tooltip('workshop_name:N', title="Workshop")],
+        # order="time_stamp:T"
     ).properties(width=800, height=300).configure_axis(
         labelColor='#bbc6cbe6',
-        titleColor='#bbc6cbe6', 
+        titleColor='#bbc6cbe6',
         grid=False
     )
 
-    wd_list = responses[responses.id==emp_id].comments
+    wd_list = sentiment.comments
     all_words = ' '.join([text for text in wd_list])
     wordcloud = WordCloud(
         background_color="rgba(255, 255, 255, 0)", mode="RGBA",
@@ -167,8 +220,8 @@ def person_sentiment():
         width=1600,
         height=800,
         random_state=21,
-        colormap='Dark2',
-        max_words=50,
+        colormap='Greys_r',
+        max_words=6,
         max_font_size=200).generate(all_words)
     plt.figure(figsize=(22,20))
     plt.axis('off')
@@ -670,7 +723,9 @@ def factory_accomplishment(u):
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
                 Workshop.workshop_start.desc()).paginate(
-                    per_page=20, page=1, error_out=True)
+                    per_page=90, page=1, error_out=True)
+
+    monyear_percent = get_overall_sentiment()
 
     stats = {
             # 'joindate': u.join_date,
@@ -684,6 +739,8 @@ def factory_accomplishment(u):
             'fullstar': fullstar,
             'responsecount': len(responses),
             'qualitative': qualitative,
+            'monyear_percent': monyear_percent,
+            'reviews': get_overall_reviews(monyear_percent), 
             'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
                 'name').sum().sort_values(
                     by='workshop_hours', 
