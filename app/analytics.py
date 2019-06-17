@@ -54,13 +54,13 @@ nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
 import matplotlib.pyplot as plt
 
 def get_response():
-    responses = pd.read_sql_query("SELECT  response.*, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
+    responses = pd.read_sql_query("SELECT response.workshop_id, response.satisfaction_score, response.comments, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
                               FROM response\
                               LEFT JOIN workshop w ON w.id = response.workshop_id\
                               LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
 
     responses.loc[:,'comments'] = responses['comments'].astype(str)
-    responses[responses.columns[2:9]] = responses[responses.columns[2:9]].astype(float)
+    responses.loc[:,'satisfaction_score'] = responses['satisfaction_score'].astype(float)
 
     sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
     responses = responses[responses.timestamp >= sixmonths]
@@ -71,10 +71,7 @@ def get_sentiment_data(responses):
     return responses[['workshop_id','workshop_name','employee_id','timestamp','comments']].copy()
 
 def get_reviews_data(responses):
-    column_reviews = responses.columns[1:9]
-    reviews = responses[column_reviews].copy()
-    reviews.loc[:,'employee_id'] = responses['employee_id'].copy()
-    reviews.loc[:,'timestamp'] = responses['timestamp'].copy()
+    reviews = responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
 
     return reviews
 
@@ -139,7 +136,6 @@ def presentiment(sentiment, all_stopwords):
 
 def prereviews(reviews):
     reviews.fillna(3, inplace=True)
-    reviews.loc[:,'overall'] = round(reviews[reviews.columns[1:8]].sum(axis=1)/7,1)
 
     return reviews
 
@@ -159,7 +155,7 @@ reviews = get_reviews_data(response)
 reviews = prereviews(reviews)
 
 domain = ['negative', 'neutral', 'positive']
-colors = ['#8f9fb3', '#d1d8e2', '#7dbbd2cc']
+colors = ['#e41749', 'orange', 'steelblue']
 
 def get_params():
     emp = getuserdb()
@@ -184,9 +180,8 @@ def get_overall_reviews(monyear_percent):
     al_reviews.drop_duplicates(subset='workshop_id', keep="first", inplace=True)
 
     person_reviews = reviews[(reviews.employee_id==emp_id) & (reviews.timestamp >= sixmonths)]
-    person_reviews.loc[:,'overall'] = round(reviews[reviews.columns[1:8]].sum(axis=1)/7,1)
 
-    sm_reviews = person_reviews[['overall', 'workshop_id']].groupby(['workshop_id']).mean().round(1)
+    sm_reviews = person_reviews[['satisfaction_score', 'workshop_id']].groupby(['workshop_id']).mean().round(1)
     sm_reviews.reset_index(inplace=True)
 
     sm_reviews.loc[:,'workshop_name'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['workshop_name'])
@@ -706,7 +701,9 @@ def factory_accomplishment(u):
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
                 Workshop.workshop_start.desc()).paginate(
-                    per_page=90, page=1, error_out=True)
+                    per_page=30, page=1, error_out=True)
+
+    comments = pd.read_sql_query("SELECT workshop_id, comments FROM response", conn)
 
     monyear_percent = get_overall_sentiment()
 
@@ -723,7 +720,8 @@ def factory_accomplishment(u):
             'responsecount': len(responses),
             'qualitative': qualitative,
             'monyear_percent': monyear_percent,
-            'reviews': get_overall_reviews(monyear_percent), 
+            'comments': comments,
+            'reviews': get_overall_reviews(monyear_percent),
             'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
                 'name').sum().sort_values(
                     by='workshop_hours', 

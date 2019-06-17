@@ -6,7 +6,7 @@
         <div class="col-sm-6">
             <div class="row">
                 <div class="col-md-6">
-                    <h5 class="card-text">{{ review['overall'] }}</h5>
+                    <h5 class="card-text">{{ review['satisfaction_score'] }}</h5>
                     <h6 class="card-text">Ratings</h6>
                 </div>
                 {% if review['sentiment'] == 'negative'%}
@@ -29,22 +29,23 @@
         </div>
     </div>
     <hr/>
-    <h6>Sentiment:</h6>
-    <div class="row" style="text-align: center">
+    
+    <div class="row" style="text-align: center; color: #FFFFF0">
         <div class="col-sm-12">
+            <h6>Sentiment Score:</h6>
             <div class="card-group">
                 {% for idx, data in personstats['monyear_percent'].iterrows() %}
                     {% if data['workshop_id'] == review['workshop_id'] %}
                         {% if data['score'] == 'negative'%}
-                            <div class="card response-card" style="background-color: #e41749; color: #FFFFF0">
+                            <div class="card response-card" style="background-color: #e41749;">
                                 <p class="card-text">{{ data['value'] }}%</p>
                             </div>
                         {% elif data['score'] == 'neutral'%}
-                            <div class="card response-card" style="background-color: orange; color: #FFFFF0">
+                            <div class="card response-card" style="background-color: orange;">
                                 <p class="card-text">{{ data['value'] }}%</p>
                             </div>
                         {% else %}
-                            <div class="card response-card" style="background-color: steelblue; color: #FFFFF0">
+                            <div class="card response-card" style="background-color: steelblue;">
                                 <p class="card-text">{{ data['value'] }}%</p>
                             </div>
                         {% endif %}
@@ -54,14 +55,18 @@
         </div>
     </div>
     <hr/>
-    <h6>Reviews:</h6>
-    {% for comments in personstats['qualitative'].items %}
-        {% if (comments['workshop_id'] == review['workshop_id'])%}
-            <p class="card-text">{{comments['comments']}}</p>
-            <footer class="blockquote-footer">
-                <small>Student from {{ comments['workshop']}}</small>
-            </footer>
-            <hr/>
-        {% endif %}
-    {% endfor %}
+    <a class="btn btn-light btn-sm" data-toggle="collapse" href="#reviews{{review['workshop_id']}}" role="button" aria-expanded="false" aria-controls="reviews{{review['workshop_id']}}">
+        More Reviews
+    </a>
+    <div class="collapse" id="reviews{{review['workshop_id']}}">
+        {% for idx, comments in personstats['comments'].iterrows() %}
+            {% if (comments['workshop_id'] == review['workshop_id'] and comments['comments'] != '')%}
+                <hr/>
+                <p class="card-text">{{comments['comments']}}</p>
+                <footer class="blockquote-footer">
+                    <small>Student from {{ comments['workshop']}}</small>
+                </footer>
+            {% endif %}
+        {% endfor %}
+    </div>
 </div>
