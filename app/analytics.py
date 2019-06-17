@@ -51,7 +51,6 @@ import nltk
 from pathlib import Path
 nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
 
-from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
 def get_response():
@@ -60,7 +59,7 @@ def get_response():
                               LEFT JOIN workshop w ON w.id = response.workshop_id\
                               LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
 
-    responses['comments'] = responses['comments'].astype(str)
+    responses.loc[:,'comments'] = responses['comments'].astype(str)
     responses[responses.columns[2:9]] = responses[responses.columns[2:9]].astype(float)
 
     sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
@@ -74,8 +73,8 @@ def get_sentiment_data(responses):
 def get_reviews_data(responses):
     column_reviews = responses.columns[1:9]
     reviews = responses[column_reviews].copy()
-    reviews['employee_id'] = responses['employee_id'].copy()
-    reviews['timestamp'] = responses['timestamp'].copy()
+    reviews.loc[:,'employee_id'] = responses['employee_id'].copy()
+    reviews.loc[:,'timestamp'] = responses['timestamp'].copy()
 
     return reviews
 
@@ -91,8 +90,8 @@ def lemmatize_with_postag(sentence):
     return " ".join(lemmatized_list)
 
 def check_id(sentence):
-    with open(str(Path().absolute())+"\\nltk_data\\neg_id.txt") as f: dataneg = f.readlines()  
-    with open(str(Path().absolute())+"\\nltk_data\\pos_id.txt") as f: datapos = f.readlines()   
+    with open(str(Path().absolute())+"/nltk_data/neg_id.txt") as f: dataneg = f.readlines()  
+    with open(str(Path().absolute())+"/nltk_data/pos_id.txt") as f: datapos = f.readlines()   
     score = 0
     
     for word in sentence:
@@ -125,22 +124,22 @@ def get_score(sentence):
 def presentiment(sentiment, all_stopwords):
     sentiment['comments'].replace(['','None'], np.nan, inplace=True)
     sentiment.dropna(inplace=True)
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: x.lower())
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: word_tokenize(x))
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: [word for word in x if word not in all_stopwords])
-    sentiment['comments'] = sentiment['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.lower())
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: word_tokenize(x))
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: [word for word in x if word not in all_stopwords])
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
     
-    sentiment['score'] = ''
-    sentiment['score'] = sentiment['comments'].apply(lambda x: get_score(x))
+    sentiment.loc[:,'score'] = ''
+    sentiment.loc[:,'score'] = sentiment['comments'].apply(lambda x: get_score(x))
 
     return sentiment
 
 def prereviews(reviews):
     reviews.fillna(3, inplace=True)
-    reviews['overall'] = round(reviews[reviews.columns[1:8]].sum(axis=1)/7,1)
+    reviews.loc[:,'overall'] = round(reviews[reviews.columns[1:8]].sum(axis=1)/7,1)
 
     return reviews
 
@@ -180,19 +179,19 @@ def get_overall_reviews(monyear_percent):
     emp_id, sixmonths = get_params()
     
     filter_idx = monyear_percent.groupby(['workshop_id'])['value'].transform(max) == monyear_percent['value']
-    al_reviews = monyear_percent[filter_idx]
-    al_reviews.sort_values(by=['score'], inplace=True)
+    al_reviews = monyear_percent[filter_idx].copy()
+    al_reviews.sort_values('score', inplace=True)
     al_reviews.drop_duplicates(subset='workshop_id', keep="first", inplace=True)
 
     person_reviews = reviews[(reviews.employee_id==emp_id) & (reviews.timestamp >= sixmonths)]
-    person_reviews['overall'] = round(reviews[reviews.columns   [1:8]].sum(axis=1)/7,1)
+    person_reviews.loc[:,'overall'] = round(reviews[reviews.columns[1:8]].sum(axis=1)/7,1)
 
     sm_reviews = person_reviews[['overall', 'workshop_id']].groupby(['workshop_id']).mean().round(1)
     sm_reviews.reset_index(inplace=True)
 
-    sm_reviews['workshop_name'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['workshop_name'])
-    sm_reviews['sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['score'])
-    sm_reviews['value'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['value'])
+    sm_reviews.loc[:,'workshop_name'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['workshop_name'])
+    sm_reviews.loc[:,'sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['score'])
+    sm_reviews.loc[:,'value'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['value'])
     
     return sm_reviews
 
@@ -211,22 +210,6 @@ def vis_overall_sentiment():
         titleColor='#bbc6cbe6',
         grid=False
     )
-
-    wd_list = sentiment.comments
-    all_words = ' '.join([text for text in wd_list])
-    wordcloud = WordCloud(
-        background_color="rgba(255, 255, 255, 0)", mode="RGBA",
-        stopwords=all_stopwords,
-        width=1600,
-        height=800,
-        random_state=21,
-        colormap='Greys_r',
-        max_words=6,
-        max_font_size=200).generate(all_words)
-    plt.figure(figsize=(22,20))
-    plt.axis('off')
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.savefig(str(Path().absolute())+'\\app\\static\\assets\\'+'wordclouds.png', transparent=True)
 
     return chart.to_json()
 

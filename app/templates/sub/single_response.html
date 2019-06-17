@@ -35,18 +35,19 @@
             <div class="card-group">
                 {% for idx, data in personstats['monyear_percent'].iterrows() %}
                     {% if data['workshop_id'] == review['workshop_id'] %}
-                        <div class="card response-card" style="background-color: #FFFFF0">
-                            {% if data['score'] == 'negative'%}
-                                <h6 class="card-text" style="color: #e41749">{{ data['value'] }}%</h6>
-                                <p class="card-text" style="color: #e41749">Negative</p>
-                            {% elif data['score'] == 'neutral'%}
-                                <h6 class="card-text" style="color: orange">{{ data['value'] }}%</h6>
-                                <p class="card-text" style="color: orange">Neutral</p>
-                            {% else %}
-                                <h6 class="card-text" style="color: steelblue">{{ data['value'] }}%</h6>
-                                <p class="card-text" style="color: steelblue">Positive</p>
-                            {% endif %}
-                        </div>
+                        {% if data['score'] == 'negative'%}
+                            <div class="card response-card" style="background-color: #e41749; color: #FFFFF0">
+                                <p class="card-text">{{ data['value'] }}%</p>
+                            </div>
+                        {% elif data['score'] == 'neutral'%}
+                            <div class="card response-card" style="background-color: orange; color: #FFFFF0">
+                                <p class="card-text">{{ data['value'] }}%</p>
+                            </div>
+                        {% else %}
+                            <div class="card response-card" style="background-color: steelblue; color: #FFFFF0">
+                                <p class="card-text">{{ data['value'] }}%</p>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
             </div>
