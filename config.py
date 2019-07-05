@@ -11,7 +11,7 @@ database = os.getenv('MYSQL_DATABASE')
 dburl = f'mysql+pymysql://{user}:{password}@{host}/{database}'
 # create conditional connection
 if(os.getenv('FLASK_ENV') == 'development'):
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('test.db', check_same_thread=False)
 else:
     conn = pymysql.connect(
         host=host,

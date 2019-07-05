@@ -1,15 +1,15 @@
-from flask import g
-from flask_login import current_user
-from app import app, cache, conn
 from app.models import Employee, Workshop, Response
-import altair as alt
+from app import app, cache, conn
+from flask_login import current_user
+from flask import g
+
 from altair import expr, datum
+from joblib import load
+import datetime as datetime
+import altair as alt
 import pandas as pd
 import numpy as np
-import string
-import urllib
-import re
-import datetime as datetime
+import string, urllib, re, pickle
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
@@ -71,66 +71,22 @@ def get_sentiment_data(responses):
     return responses[['workshop_id','workshop_name','employee_id','timestamp','comments']].copy()
 
 def get_reviews_data(responses):
-    reviews = responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
 
-    return reviews
+    return responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
 
-def lemmatize_with_postag(sentence):
-    sent = TextBlob(sentence)
-    tag_dict = {"J": 'a', 
-                "N": 'n', 
-                "V": 'v', 
-                "R": 'r'}
-    words_and_tags = [(w, tag_dict.get(pos[0], 'n')) for w, pos in sent.tags]    
-    lemmatized_list = [wd.lemmatize(tag) for wd, tag in words_and_tags]
-    
-    return " ".join(lemmatized_list)
+def process_sentiment(sentiment):
+    model_saya = load(str(Path().absolute())+'/model/sentiment/sentiment.joblib')
+    vector_saya = pickle.load(open(str(Path().absolute())+"/model/sentiment/word_vector.pickle", "rb"))
 
-def check_id(sentence):
-    with open(str(Path().absolute())+"/nltk_data/neg_id.txt") as f: dataneg = f.readlines()  
-    with open(str(Path().absolute())+"/nltk_data/pos_id.txt") as f: datapos = f.readlines()   
-    score = 0
-    
-    for word in sentence:
-        for line in datapos:
-            if word in line:
-                score += float(line.split()[-1])
-        for line in dataneg:
-            if word in line:
-                score += float(line.split()[-1])
-                
-    return score
-
-def get_score(sentence):
-    analyser = SentimentIntensityAnalyzer()
-    score = analyser.polarity_scores(sentence)
-    sentence_list = sentence.split()
-  
-    if score['neg'] != 0 or score['pos'] != 0:
-        if score['neg'] > score['pos']:
-            return 'negative'
-        else:
-            return 'positive'
-    else:
-        if check_id(sentence_list) > 0:
-            return 'positive'
-        elif check_id(sentence_list) < 0:
-            return 'negative'
-        return 'neutral'
-
-def presentiment(sentiment, all_stopwords):
     sentiment['comments'].replace(['','None'], np.nan, inplace=True)
     sentiment.dropna(inplace=True)
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.lower())
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: word_tokenize(x))
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: [word for word in x if word not in all_stopwords])
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: lemmatize_with_postag(' '.join(x)))
     
     sentiment.loc[:,'score'] = ''
-    sentiment.loc[:,'score'] = sentiment['comments'].apply(lambda x: get_score(x))
+    sentiment.loc[:,'score'] = model_saya.predict(vector_saya.transform(sentiment['comments']))
 
     return sentiment
 
@@ -149,13 +105,13 @@ all_stopwords = set(stopwords_id).union(stopwords_en)
 response = get_response()
 
 sentiment = get_sentiment_data(response)
-sentiment = presentiment(sentiment, all_stopwords)
+sentiment = process_sentiment(sentiment)
 
 reviews = get_reviews_data(response)
 reviews = prereviews(reviews)
 
-domain = ['negative', 'neutral', 'positive']
-colors = ['#e41749', 'orange', 'steelblue']
+domain = ['negative', 'positive']
+colors = ['#7dbbd2cc', '#bbc6cbe6']
 
 def get_params():
     emp = getuserdb()
@@ -176,7 +132,7 @@ def get_overall_reviews(monyear_percent):
     
     filter_idx = monyear_percent.groupby(['workshop_id'])['value'].transform(max) == monyear_percent['value']
     al_reviews = monyear_percent[filter_idx].copy()
-    al_reviews.sort_values('score', inplace=True)
+    al_reviews.sort_values('score', ascending=False, inplace=True)
     al_reviews.drop_duplicates(subset='workshop_id', keep="first", inplace=True)
 
     person_reviews = reviews[(reviews.employee_id==emp_id) & (reviews.timestamp >= sixmonths)]
@@ -194,17 +150,15 @@ def get_overall_reviews(monyear_percent):
 def vis_overall_sentiment():
     monyear_percent = get_overall_sentiment()
 
-    chart = alt.Chart(monyear_percent, title='Sentiment in The Last 6 Months').mark_line(point=True).encode(
-        y=alt.Y('value:Q', scale=alt.Scale(domain=(0, 100)), axis=alt.Axis(title='Percentage (%)')),
-        x=alt.X('timestamp:T', axis=alt.Axis(title='Date')),
+    chart = alt.Chart(monyear_percent).mark_bar().encode(
+        y=alt.Y('value:Q', axis=alt.Axis(title='Percentage (%)')),
+        x=alt.X('workshop_name:N', axis=alt.Axis(title='Workshop Name')),
         color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score', title="Sentiment"), alt.Tooltip('workshop_name:N', title="Workshop")],
-        # order="time_stamp:T"
-    ).properties(width=800, height=300).configure_axis(
-        labelColor='#bbc6cbe6',
-        titleColor='#bbc6cbe6',
-        grid=False
-    )
+        order="timestamp:T",
+        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score:N', title="Sentiment")]
+        ).properties(
+            width=800, height=300
+        ).configure_axis(grid=False)
 
     return chart.to_json()
 
@@ -703,7 +657,7 @@ def factory_accomplishment(u):
                 Workshop.workshop_start.desc()).paginate(
                     per_page=30, page=1, error_out=True)
 
-    comments = pd.read_sql_query("SELECT workshop_id, comments FROM response", conn)
+    # comments = pd.read_sql_query("SELECT workshop_id, comments FROM response", conn)
 
     monyear_percent = get_overall_sentiment()
 
@@ -720,7 +674,7 @@ def factory_accomplishment(u):
             'responsecount': len(responses),
             'qualitative': qualitative,
             'monyear_percent': monyear_percent,
-            'comments': comments,
+            # 'comments': comments,
             'reviews': get_overall_reviews(monyear_percent),
             'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
                 'name').sum().sort_values(
