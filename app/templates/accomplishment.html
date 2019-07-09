@@ -143,12 +143,21 @@
     <div class="col-md-12 col-lg-12 col-sm-12">
         <div>
             <h4><i class="material-icons md-light">rate_review</i> Most Recent Reviews</h4>
-            <div class="card-group">
+            <div class="row">
                 {% for index, review in personstats['reviews'].iterrows() %}
-                    <div class="col-sm-4">
+                    {% if index == 0%}
+                        <div class="col-sm-8">
+                            {% include "sub/single_response.html" %}
+                        </div>
+                    {% else %}
+                        {% if index == 1 %}
+                            <div class="col-sm-4">
+                        {% endif %}
                         {% include "sub/single_response.html" %}
-                    </div>
+                        
+                    {% endif %}
                 {% endfor %}
+                </div>
             </div>
         </div>
     </div>

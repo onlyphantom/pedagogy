@@ -42,16 +42,12 @@ def getuserdb():
 # ===================================================
 # ===================================================
 
-from nltk.sentiment.vader import SentimentIntensityAnalyzer #sentiment analyzer
-from nltk.tokenize import sent_tokenize, word_tokenize #tokenization
-from nltk.stem import WordNetLemmatizer #lemmatization
+from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords #stopwords
-from textblob import TextBlob #postagging
 import nltk
+
 from pathlib import Path
 nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
-
-import matplotlib.pyplot as plt
 
 def get_response():
     responses = pd.read_sql_query("SELECT response.workshop_id, response.satisfaction_score, response.comments, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
@@ -74,9 +70,9 @@ def get_reviews_data(responses):
 
     return responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
 
-def process_sentiment(sentiment):
-    model_saya = load(str(Path().absolute())+'/model/sentiment/sentiment.joblib')
-    vector_saya = pickle.load(open(str(Path().absolute())+"/model/sentiment/word_vector.pickle", "rb"))
+def process_sentiment(sentiment, all_stopwords):
+    my_model = load(str(Path().absolute())+'/model/sentiment/model.joblib')
+    word_vector = load(str(Path().absolute())+'/model/sentiment/vector.joblib')
 
     sentiment['comments'].replace(['','None'], np.nan, inplace=True)
     sentiment.dropna(inplace=True)
@@ -84,9 +80,10 @@ def process_sentiment(sentiment):
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
     sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
+    # word_vector.fit(pd.read_csv(str(Path().absolute())+'/model/sentiment/train.csv'))
     
     sentiment.loc[:,'score'] = ''
-    sentiment.loc[:,'score'] = model_saya.predict(vector_saya.transform(sentiment['comments']))
+    sentiment.loc[:,'score'] = my_model.predict(word_vector.transform(sentiment['comments']))
 
     return sentiment
 
@@ -95,17 +92,15 @@ def prereviews(reviews):
 
     return reviews
 
-stopwords_en = set(stopwords.words('english'))
-stopwords_id = []
 
-words = urllib.request.urlopen("http://static.hikaruyuuki.com/wp-content/uploads/stopword_list_tala.txt")
-for word in words: stopwords_id.append(word.strip().decode('utf-8'))
+stopwords_en = set(stopwords.words('english'))
+stopwords_id = set(stopwords.words('indonesian'))
 all_stopwords = set(stopwords_id).union(stopwords_en)
 
 response = get_response()
 
 sentiment = get_sentiment_data(response)
-sentiment = process_sentiment(sentiment)
+sentiment = process_sentiment(sentiment, all_stopwords)
 
 reviews = get_reviews_data(response)
 reviews = prereviews(reviews)

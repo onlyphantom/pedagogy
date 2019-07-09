@@ -170,6 +170,21 @@ ul.timeline > li:before {
     margin-right: 2%;
 }
 
+.response-card > .collapse > ul {
+    list-style: none;
+}
+.response-card > .collapse > ul {
+    list-style: none;
+    padding-left: 5%;
+    font-size: 0.8em;
+    color: white;
+}
+
+.response-card > .collapse > ul > li > i.material-icons {
+    font-size: 0.8em;
+    margin-right: 2%;
+}
+
 .card.response-card {
     background: #7893a8;
 }
