@@ -11,6 +11,9 @@ import pandas as pd
 import numpy as np
 import string, urllib, re, pickle
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from pathlib import Path
+
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
     #conn = pymysql.connect(
@@ -42,13 +45,6 @@ def getuserdb():
 # ===================================================
 # ===================================================
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk.corpus import stopwords #stopwords
-import nltk
-
-from pathlib import Path
-nltk.data.path.append(str(Path().absolute()) + "/nltk_data")
-
 def get_response():
     responses = pd.read_sql_query("SELECT response.workshop_id, response.satisfaction_score, response.comments, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
                               FROM response\
@@ -70,7 +66,7 @@ def get_reviews_data(responses):
 
     return responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
 
-def process_sentiment(sentiment, all_stopwords):
+def process_sentiment(sentiment):
     my_model = load(str(Path().absolute())+'/model/sentiment/model.joblib')
     word_vector = load(str(Path().absolute())+'/model/sentiment/vector.joblib')
 
@@ -92,15 +88,10 @@ def prereviews(reviews):
 
     return reviews
 
-
-stopwords_en = set(stopwords.words('english'))
-stopwords_id = set(stopwords.words('indonesian'))
-all_stopwords = set(stopwords_id).union(stopwords_en)
-
 response = get_response()
 
 sentiment = get_sentiment_data(response)
-sentiment = process_sentiment(sentiment, all_stopwords)
+sentiment = process_sentiment(sentiment)
 
 reviews = get_reviews_data(response)
 reviews = prereviews(reviews)
