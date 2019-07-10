@@ -13,7 +13,7 @@ from sqlalchemy import func
 def before_request():
     g.employee = None
     if current_user.is_authenticated:
-        current_user.last_seen = datetime.utcnow()
+        # current_user.last_seen = datetime.utcnow()
         g.employee = Employee.query.filter_by(email=current_user.email).first()
 
 @app.route('/')

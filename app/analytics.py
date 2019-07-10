@@ -1,29 +1,34 @@
-from flask import g
-from flask_login import current_user
-from app import app, cache
 from app.models import Employee, Workshop, Response
-import altair as alt
+from app import app, cache, conn
+from flask_login import current_user
+from flask import g
+
 from altair import expr, datum
-import pandas as pd
+from joblib import load
 import datetime as datetime
-import pymysql
-from config import host, user, password, database
+import altair as alt
+import pandas as pd
+import numpy as np
+import string, urllib, re, pickle
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from pathlib import Path
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
-    conn = pymysql.connect(
-        host=host,
-        port=int(3306),
-        user=user,
-        passwd=password,
-        db=database)
+    #conn = pymysql.connect(
+    #    host=host,
+    #    port=int(3306),
+    #    user=user,
+    #    passwd=password,
+    #    db=database)
 
     return pd.read_sql_query(
     "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, \
         workshop_start, workshop_hours, class_size, e.name, e.active, e.university \
         FROM workshop \
         LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
-        conn, index_col='id')
+        conn, index_col='id', parse_dates='workshop_start')
 
 df = getdb()
 
@@ -33,6 +38,115 @@ def getuserdb():
         if employee is not None:
             df['this_user'] = df['workshop_instructor'] == employee.id
             return df
+
+# ================ ================ =================
+# ========== Sentiment Analysis Section =============
+#
+# ===================================================
+# ===================================================
+
+def get_response():
+    responses = pd.read_sql_query("SELECT response.workshop_id, response.satisfaction_score, response.comments, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
+                              FROM response\
+                              LEFT JOIN workshop w ON w.id = response.workshop_id\
+                              LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
+
+    responses.loc[:,'comments'] = responses['comments'].astype(str)
+    responses.loc[:,'satisfaction_score'] = responses['satisfaction_score'].astype(float)
+
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    responses = responses[responses.timestamp >= sixmonths]
+    return responses
+
+def get_sentiment_data(responses):
+    
+    return responses[['workshop_id','workshop_name','employee_id','timestamp','comments']].copy()
+
+def get_reviews_data(responses):
+
+    return responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
+
+def process_sentiment(sentiment):
+    my_model = load(str(Path().absolute())+'/model/sentiment/model.joblib')
+    word_vector = load(str(Path().absolute())+'/model/sentiment/vector.joblib')
+
+    sentiment['comments'].replace(['','None'], np.nan, inplace=True)
+    sentiment.dropna(inplace=True)
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.lower())
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
+    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
+    # word_vector.fit(pd.read_csv(str(Path().absolute())+'/model/sentiment/train.csv'))
+    
+    sentiment.loc[:,'score'] = ''
+    sentiment.loc[:,'score'] = my_model.predict(word_vector.transform(sentiment['comments']))
+
+    return sentiment
+
+def prereviews(reviews):
+    reviews.fillna(3, inplace=True)
+
+    return reviews
+
+response = get_response()
+
+sentiment = get_sentiment_data(response)
+sentiment = process_sentiment(sentiment)
+
+reviews = get_reviews_data(response)
+reviews = prereviews(reviews)
+
+domain = ['negative', 'positive']
+colors = ['#7dbbd2cc', '#bbc6cbe6']
+
+def get_params():
+    emp = getuserdb()
+    dat = emp.loc[emp.this_user == True,:].copy()
+    emp_id = dat.iloc[0]['workshop_instructor']
+    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
+    
+    return emp_id, sixmonths
+
+def get_overall_sentiment():
+    emp_id, sixmonths = get_params()
+    person = sentiment[sentiment.employee_id==emp_id].copy()
+
+    return pd.crosstab([person['timestamp'],person['workshop_name'],person['workshop_id']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['timestamp','workshop_name','workshop_id'])
+
+def get_overall_reviews(monyear_percent):
+    emp_id, sixmonths = get_params()
+    
+    filter_idx = monyear_percent.groupby(['workshop_id'])['value'].transform(max) == monyear_percent['value']
+    al_reviews = monyear_percent[filter_idx].copy()
+    al_reviews.sort_values('score', ascending=False, inplace=True)
+    al_reviews.drop_duplicates(subset='workshop_id', keep="first", inplace=True)
+
+    person_reviews = reviews[(reviews.employee_id==emp_id) & (reviews.timestamp >= sixmonths)]
+
+    sm_reviews = person_reviews[['satisfaction_score', 'workshop_id']].groupby(['workshop_id']).mean().round(1)
+    sm_reviews.reset_index(inplace=True)
+
+    sm_reviews.loc[:,'workshop_name'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['workshop_name'])
+    sm_reviews.loc[:,'sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['score'])
+    sm_reviews.loc[:,'value'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['value'])
+    
+    return sm_reviews
+
+@app.route('/data/person_sentiment')
+def vis_overall_sentiment():
+    monyear_percent = get_overall_sentiment()
+
+    chart = alt.Chart(monyear_percent).mark_bar().encode(
+        y=alt.Y('value:Q', axis=alt.Axis(title='Percentage (%)')),
+        x=alt.X('workshop_name:N', axis=alt.Axis(title='Workshop Name')),
+        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
+        order="timestamp:T",
+        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score:N', title="Sentiment")]
+        ).properties(
+            width=800, height=300
+        ).configure_axis(grid=False)
+
+    return chart.to_json()
 
 # ================ ================ ================
 # ================ Global Section ================
@@ -261,12 +375,12 @@ def person_vs_area():
 @app.route('/data/instructor_breakdown')
 @cache.cached(timeout=86400*7, key_prefix='ib')
 def instructor_breakdown():
-    conn = pymysql.connect(
-        host=host,
-        port=int(3306),
-        user=user,
-        passwd=password,
-        db=database)
+    #conn = pymysql.connect(
+    #    host=host,
+    #    port=int(3306),
+    #    user=user,
+    #    passwd=password,
+    #    db=database)
     # Getting Responses Data
     q = """ SELECT response.*, workshop_category, name
             FROM response
@@ -527,7 +641,11 @@ def factory_accomplishment(u):
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
                 Workshop.workshop_start.desc()).paginate(
-                    per_page=20, page=1, error_out=True)
+                    per_page=30, page=1, error_out=True)
+
+    # comments = pd.read_sql_query("SELECT workshop_id, comments FROM response", conn)
+
+    monyear_percent = get_overall_sentiment()
 
     stats = {
             # 'joindate': u.join_date,
@@ -541,6 +659,9 @@ def factory_accomplishment(u):
             'fullstar': fullstar,
             'responsecount': len(responses),
             'qualitative': qualitative,
+            'monyear_percent': monyear_percent,
+            # 'comments': comments,
+            'reviews': get_overall_reviews(monyear_percent),
             'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
                 'name').sum().sort_values(
                     by='workshop_hours', 

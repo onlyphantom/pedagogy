@@ -1,23 +1,80 @@
 <div class="card response-card">
-    <p class="card-text">{{ review['comments'] }}</p>
-    <ul>
-        {% if review['difficulty'] >= 4%}
-            <li><i class="material-icons">check</i>Lecture wasn't too difficult</li>
-        {% endif %}
-        {% if review['difficulty'] >= 4%}
-            <li><i class="material-icons">check</i>Training was knowledgeable</li>
-        {% endif %}
-        {% if review['objectives'] >= 4 %}
-            <li><i class="material-icons">check</i>Training objectives were met</li>
-        {% endif %}
-        {% if review['timeliness'] >= 4 %}
-            <li><i class="material-icons">check</i>Time allocated was sufficient</li>
-        {% endif %}
-        {% if review['satisfaction_score'] >= 4 %}
-            <li><i class="material-icons">check</i>Great Overall Experience </li>
-        {% endif %}
-    </ul>
-    <footer class="blockquote-footer">
-        <small>Student from {{ review['workshop'] }}</small>
-    </footer>
+    <div class="row" style="text-transform: capitalize;">
+        <div class="col-sm-4">
+            <h5 class="card-text">{{ review['workshop_name'] }}</h5>
+        </div>
+        <div class="col-sm-8">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="card-text">{{ review['satisfaction_score'] }}</h5>
+                    <h6 class="card-text">Ratings</h6>
+                </div>
+                {% if review['value'] == 50.0 %}
+                    <div class="col-md-8" style="color: whitesmoke">
+                        <i class="material-icons">  </i>
+                        <h5 class="card-text">Mixed</h5>
+                    </div>
+                {% else %}
+                    {% if review['sentiment'] == 'negative'%}
+                        <div class="col-md-8" style="color: #FFDEAD">
+                            {% if review['value'] > 80 %}
+                                <h6 class="card-text"> Overwhelmingly </h6>
+                            {% elif review['value'] > 50 %}
+                                <h6 class="card-text"> Mostly </h6>
+                            {% endif  %}
+                            <h5 class="card-text">{{ review['sentiment'] }}</h5>
+                        </div> 
+                    {% else %}
+                        <div class="col-md-8" style="color: #E0FFFF">
+                            {% if review['value'] > 80 %}
+                                <h6 class="card-text"> Overwhelmingly </h6>
+                            {% elif review['value'] > 50 %}
+                                <h6 class="card-text"> Mostly </h6>
+                            {% endif  %}
+                            <h5 class="card-text">{{ review['sentiment'] }}</h5>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if index != 0%}
+    <hr/>
+    <a class="btn btn-light btn-sm" data-toggle="collapse" href="#reviews{{review['workshop_id']}}" role="button" aria-expanded="false" aria-controls="reviews{{review['workshop_id']}}">
+        Workshop Reviews
+    </a>
+    <div class="collapse" id="reviews{{review['workshop_id']}}">
+    {% endif %}
+    
+        {% for comments in personstats['qualitative'].items %}
+            {% if (comments['workshop_id'] == review['workshop_id'] and comments['comments'] != '')%}
+                <hr/>
+                <p class="card-text">{{comments['comments']}}</p>
+                <ul>
+                    {% if comments['difficulty'] >= 4%}
+                        <li><i class="material-icons">check</i>Lecture wasn't too difficult</li>
+                    {% endif %}
+                    {% if comments['difficulty'] >= 4%}
+                        <li><i class="material-icons">check</i>Training was knowledgeable</li>
+                    {% endif %}
+                    {% if comments['objectives'] >= 4 %}
+                        <li><i class="material-icons">check</i>Training objectives were met</li>
+                    {% endif %}
+                    {% if comments['timeliness'] >= 4 %}
+                        <li><i class="material-icons">check</i>Time allocated was sufficient</li>
+                    {% endif %}
+                    {% if comments['satisfaction_score'] >= 4 %}
+                        <li><i class="material-icons">check</i>Great Overall Experience </li>
+                    {% endif %}
+                </ul>
+                <footer class="blockquote-footer">
+                    <small>Student from {{ comments['workshop']}}</small>
+                </footer>
+            {% endif %}
+        {% endfor %}
+
+    {% if index != 0%}
+    </div>
+    {% endif %}
 </div>

@@ -2,157 +2,184 @@
 
 {% block content %}
 <!-- {% cache 43200 %} -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.3.1/vega.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.6.0/vega-lite.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.3.1/vega.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.6.0/vega-lite.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.20.0/vega-embed.min.js"></script>
 
-    <div class="jumbotron lightaqua">
-        <div class="row">
-            <div class="col-md-6 col-lg-3 col-sm-6">
-                <h4 class="display-4 text-center">{{ personstats['totalws'] }} </h4>
-                <p class="text-center">Lead Instructor Assignment</p>
-            </div>
-            <div class="col-md-6 col-lg-3 col-sm-6">
-                <h4 class="display-4 text-center">{{ personstats['totalstud'] }} </h4>
-                <p class="text-center">Number of Students</p>
-            </div>
-            <div class="col-md-6 col-lg-3 col-sm-6">
-                <h4 class="display-4 text-center">{{ personstats['totalhours'] }}</h4>
-                <p class="text-center">Total Number of Hours</p> 
-            </div>
-            <div class="col-md-6 col-lg-3 col-sm-6">
-                <h4 class="display-4 text-center">{{ personstats['fullstar'] }} </h4>
-                <p class="text-center">Ecstatic Ratings</p>
-            </div>
+<div class="jumbotron lightaqua">
+    
+    <div class="row">
+        <div class="col-md-6 col-lg-3 col-sm-6">
+            <h4 class="display-4 text-center">{{ personstats['totalws'] }} </h4>
+            <p class="text-center">Lead Instructor Assignment</p>
         </div>
-    </div> 
-    <div class="row mt-2">
-       <div class="col-md-12 col-lg-6 col-sm-12">
-            <div>
-                {% for gr in personstats['grped'] %}
-                <div class="statcards row">
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                        <h4 class="statcards-header">{{ gr }}</h4>
-                    </div>
-                    <div class="col-4 col-sm-4 col-md-4 col-lg-4">
-                        <span class="statcards-count"><i class="material-icons">school</i></span><span class="statcards-count-p">{{ personstats['grped'][gr]['count'] }}</span>
-                        <p class="statsupport">workshops</p> 
-                    </div>
-                    <div class="col-4 col-sm-4 col-md-4 col-lg-4">
-                        <span class="statcards-count"><i class="material-icons">people</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['students']) }}</span>
-                        <p class="statsupport">Students</p> 
-                    </div>
-                    <div class="col-4 col-sm-4 col-md-4 col-lg-4">
-                        <span class="statcards-count"><i class="material-icons">av_timer</i></span><span class="statcards-count-p">{{ (personstats['grped'][gr]['hours']) }}</span>
-                        <p class="statsupport">Hours</p> 
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        <div class="col-md-6 col-lg-3 col-sm-6">
+            <h4 class="display-4 text-center">{{ personstats['totalstud'] }} </h4>
+            <p class="text-center">Number of Students</p>
+        </div>
+        <div class="col-md-6 col-lg-3 col-sm-6">
+            <h4 class="display-4 text-center">{{ personstats['totalhours'] }}</h4>
+            <p class="text-center">Total Number of Hours</p>
+        </div>
+        <div class="col-md-6 col-lg-3 col-sm-6">
+            <h4 class="display-4 text-center">{{ personstats['fullstar'] }} </h4>
+            <p class="text-center">Ecstatic Ratings</p>
+        </div>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col-md-12 col-lg-6 col-sm-12">
+        <div>
+            {% for gr in personstats['grped'] %}
             <div class="statcards row">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                    <h4 class="statcards-header">Ratings</h4>
+                    <h4 class="statcards-header">{{ gr }}</h4>
                 </div>
                 <div class="col-4 col-sm-4 col-md-4 col-lg-4">
-                    <span class="statcards-count"><i class="material-icons">star</i></span><span class="statcards-count-p">{{ personstats['fullstar'] }}</span>
-                    <p class="statsupport">Ecstatic Ratings</p>  
+                    <span class="statcards-count"><i class="material-icons">school</i></span><span
+                        class="statcards-count-p">{{ personstats['grped'][gr]['count'] }}</span>
+                    <p class="statsupport">workshops</p>
                 </div>
                 <div class="col-4 col-sm-4 col-md-4 col-lg-4">
-                        <span class="statcards-count"><i class="material-icons">thumb_up</i></span><span class="statcards-count-p">{{ (personstats['fullstar']/personstats['responsecount']*100) | round(2) }}</span>
-                        <p class="statsupport">Ecstactic Ratings %</p> 
-                    </div>
+                    <span class="statcards-count"><i class="material-icons">people</i></span><span
+                        class="statcards-count-p">{{ (personstats['grped'][gr]['students']) }}</span>
+                    <p class="statsupport">Students</p>
+                </div>
                 <div class="col-4 col-sm-4 col-md-4 col-lg-4">
-                    <span class="statcards-count"><i class="material-icons">rate_review</i></span><span class="statcards-count-p">{{  personstats['responsecount'] }}</span>
-                    <p class="statsupport">All Ratings</p> 
+                    <span class="statcards-count"><i class="material-icons">av_timer</i></span><span
+                        class="statcards-count-p">{{ (personstats['grped'][gr]['hours']) }}</span>
+                    <p class="statsupport">Hours</p>
                 </div>
             </div>
-            
+            {% endfor %}
         </div>
-        <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
-            <div class="plot-area">
-                <div class="plot" id="vis_accomp_1"></div>
+        <div class="statcards row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                <h4 class="statcards-header">Ratings</h4>
             </div>
-       </div>
-    </div>  
-
-    <div class="row mt-4">
-        <div class="col-12 col-sm-12 col-md-12 col-lg-6">
-            <p class="lead">You joined the company on {{ personstats['joindate'] }}
-                 and were the lead instructor in {{ personstats['totalws'] }} workshops. These are the most recent workshops you've conducted.
-            </p>
-            <div class="jumbotron jumbo-mini"> 
-                <div>
-                        <div class="row">
-                            <div class="col-md-12 col-lg-12">
-                                <h4><i class="material-icons md-light">timeline</i> Most Recent Workshops</h4>
-                                <ul class="timeline">
-                                    {% for workshop in personstats['workshops'] %}
-                                    <li>
-                                        <b>{{ workshop.workshop_name }}</b>
-                                        <span class="float-right">{{ workshop.printtime() }}</span>
-                                        <ul class="timeline-sub">
-                                            <li><i class="material-icons">place</i> {{ workshop.workshop_venue }}</li>
-                                            <li><i class="material-icons">person_pin</i> {{ workshop.class_size }} students</li>
-                                            <li><i class="material-icons">timer</i> {{ workshop.workshop_hours }} hours</li>
-                                        </ul>
-                                            
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                </div>
-                <p class="float-right">
-                    <small>Last updated {{ personstats['updatewhen'] }}</small>
-                </p>
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4">
+                <span class="statcards-count"><i class="material-icons">star</i></span><span
+                    class="statcards-count-p">{{ personstats['fullstar'] }}</span>
+                <p class="statsupport">Ecstatic Ratings</p>
             </div>
-        </div>
-        <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
-                <div class="plot-area">
-                    <div class="plot" id="vis_accomp_2"></div>
-                    <div class="plot" id="vis_accomp_3"></div>
-                </div>
-
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4">
+                {% if personstats['responsecount'] > 0 %}
+                <span class="statcards-count"><i class="material-icons">thumb_up</i></span><span
+                    class="statcards-count-p">{{ (personstats['fullstar']/personstats['responsecount']*100) | round(2)  }}</span>
+                {% else %}
+                <span class="statcards-count"><i class="material-icons">thumb_up</i></span><span
+                    class="statcards-count-p">Not Yet</span>
+                {% endif %}
+                <p class="statsupport">Ecstactic Ratings %</p>
+            </div>
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4">
+                <span class="statcards-count"><i class="material-icons">rate_review</i></span><span
+                    class="statcards-count-p">{{  personstats['responsecount'] }}</span>
+                <p class="statsupport">All Ratings</p>
+            </div>
         </div>
 
     </div>
+    <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
+        <div class="plot-area">
+            <div class="plot" id="vis_accomp_1"></div>
+        </div>
+    </div>
+</div>
 
-    <div class="row mt-2">
-        <div class="col-md-12 col-lg-12 col-sm-12">
+<div class="row mt-4">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+        <p class="lead">You joined the company on {{ personstats['joindate'] }}
+            and were the lead instructor in {{ personstats['totalws'] }} workshops. These are the most recent workshops
+            you've conducted.
+        </p>
+        <div class="jumbotron jumbo-mini">
             <div>
-                <h4><i class="material-icons md-light">rate_review</i> Most Recent Reviews</h4>
-                <div class="card-columns">
-                {% for review in personstats['qualitative'].items %}
-                    {% include "sub/single_response.html" %}
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <h4><i class="material-icons md-light">timeline</i> Most Recent Workshops</h4>
+                        <ul class="timeline">
+                            {% for workshop in personstats['workshops'] %}
+                            <li>
+                                <b>{{ workshop.workshop_name }}</b>
+                                <span class="float-right">{{ workshop.printtime() }}</span>
+                                <ul class="timeline-sub">
+                                    <li><i class="material-icons">place</i> {{ workshop.workshop_venue }}</li>
+                                    <li><i class="material-icons">person_pin</i> {{ workshop.class_size }} students</li>
+                                    <li><i class="material-icons">timer</i> {{ workshop.workshop_hours }} hours</li>
+                                </ul>
+
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <p class="float-right">
+                <small>Last updated {{ personstats['updatewhen'] }}</small>
+            </p>
+        </div>
+    </div>
+    <div class="col-12 col-sm-10 col-md-10 col-lg-6 mt-2">
+        <div class="plot-area">
+            <div class="plot" id="vis_accomp_2"></div>
+            <div class="plot" id="vis_accomp_3"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12 col-lg-12 col-sm-12">
+        <h4><i class="material-icons md-light">rate_review</i> Sentiment Reviews</h4>
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div class="plot" id="vis_accomp_4" style="padding: 70px 0px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12 col-lg-12 col-sm-12">
+        <div>
+            <h4><i class="material-icons md-light">rate_review</i> Most Recent Reviews</h4>
+            <div class="row">
+                {% for index, review in personstats['reviews'].iterrows() %}
+                    {% if index == 0%}
+                        <div class="col-sm-8">
+                            {% include "sub/single_response.html" %}
+                        </div>
+                    {% else %}
+                        {% if index == 1 %}
+                            <div class="col-sm-4">
+                        {% endif %}
+                        {% include "sub/single_response.html" %}
+                        
+                    {% endif %}
                 {% endfor %}
                 </div>
-                <!-- {% for page in personstats['qualitative'].iter_pages() %}
-                    {% if page  %}
-                        <a href="{{ url_for('qualitative', id=current_user.id, page_num=page) }}">{{ page }}</a>
-                    {% else %}
-                        ...
-                    {% endif %}
-                    
-                {% endfor %} -->
             </div>
-    </div>    
-    
+        </div>
+    </div>
+</div>
+
     <script type="text/javascript">
         function parse(url, div) {
             var opt = {
-              mode: "vega-lite",
-              renderer: "svg",
-              actions: {export: false, source: false, editor: false}
-            }; 
-        //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
-    
-            vegaEmbed(div, url, opt).then(function(result) {
-              // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+                mode: "vega-lite",
+                renderer: "svg",
+                actions: { export: false, source: false, editor: false }
+            };
+            //var spec = "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json";
+
+            vegaEmbed(div, url, opt).then(function (result) {
+                // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
         parse("/data/person_contrib_area", "#vis_accomp_1")
         parse("/data/person_class_bar", "#vis_accomp_2")
         parse("/data/person_vs_area", "#vis_accomp_3")
+        parse("/data/person_sentiment", "#vis_accomp_4")
     </script>
-<!-- {% endcache %} -->
+    <!-- {% endcache %} -->
 {% endblock %}
