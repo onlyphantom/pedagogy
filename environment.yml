@@ -15,6 +15,7 @@ dependencies:
 - ipython_genutils=0.2.0=py36h241746c_0
 - jedi=0.13.1=py36_0
 - jinja2=2.10.1=py36_0
+- joblib=0.13.2=py36_0
 - jupyter_core=4.4.0=py36_0
 - libcxx=4.0.1=h579ed51_0
 - libcxxabi=4.0.1=hebd6815_0
@@ -22,7 +23,6 @@ dependencies:
 - libffi=3.2.1=h475c297_4
 - libgfortran=3.0.1=h93005f0_2
 - libsodium=1.0.16=h3efe00b_0
-- mkl=2019.0=118
 - ncurses=6.1=h0a44026_0
 - numpy=1.15.1=py36h6a91979_0
 - numpy-base=1.15.1=py36h8a80b8c_0
@@ -89,6 +89,7 @@ dependencies:
 - wheel=0.31.1=py36_1
 - wrapt=1.10.11=py36_0
 - wtforms=2.1=py36_0
+- autopep8=1.4.4=py_0
 - blas=1.0=mkl
 - bleach=3.1.0=py36_0
 - cryptography=2.4.2=py36ha12b0ac_0
@@ -97,7 +98,10 @@ dependencies:
 - libcurl=7.63.0=h051b688_1000
 - libiconv=1.15=hdd342a3_7
 - libssh2=1.8.0=ha12b0ac_4
+- llvm-openmp=4.0.1=hcfea43d_1
 - mistune=0.8.4=py36h1de35cc_0
+- mkl=2019.4=233
+- mkl-service=2.0.2=py36h1de35cc_0
 - nb_conda=2.2.1=py36_0
 - nb_conda_kernels=2.2.0=py36_0
 - nbconvert=5.3.1=py36_0
@@ -109,7 +113,10 @@ dependencies:
 - perl=5.26.2=h4e221da_0
 - pip=18.1=py36_0
 - prometheus_client=0.5.0=py36_0
+- pycodestyle=2.5.0=py36_0
 - python=3.6.8=haf84260_0
+- scikit-learn=0.21.2=py36h27c97d8_0
+- scipy=1.2.1=py36h1410ff5_0
 - send2trash=1.5.0=py36_0
 - sqlite=3.26.0=ha441bb4_0
 - terminado=0.8.1=py36_1
