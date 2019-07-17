@@ -54,6 +54,8 @@ def get_response():
     responses = responses[responses.timestamp >= sixmonths]
 
     responses = responses[responses['comments']!='-']
+    responses = responses.sort_values(by='timestamp', ascending=False).reset_index(drop=True)
+
     return responses
 
 def get_sentiment_data(responses):
@@ -82,8 +84,8 @@ def get_params():
 def get_overall_sentiment():
     emp_id = get_params()
     person = sentiment[sentiment.employee_id==emp_id].copy()
-
     monyear_percent = pd.crosstab([person['timestamp'],person['workshop_name'],person['workshop_id']],person['sentiment']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['timestamp','workshop_name','workshop_id'])
+    
     return monyear_percent.sort_values(by='timestamp', ascending=False).reset_index(drop=True)
 
 def get_overall_reviews(monyear_percent):
@@ -103,17 +105,17 @@ def get_overall_reviews(monyear_percent):
     sm_reviews.loc[:,'sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['sentiment'])
     sm_reviews.loc[:,'value'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['value'])
     
-    return sm_reviews
+    return sm_reviews.sort_values(by='timestamp', ascending=False).reset_index(drop=True)
 
 @app.route('/data/person_sentiment')
 def vis_overall_sentiment():
     monyear_percent = get_overall_sentiment()
 
     chart = alt.Chart(monyear_percent).mark_bar().encode(
+        x=alt.X('workshop_name:N', axis=alt.Axis(title='Date'), sort=['timestamp:T']),
         y=alt.Y('value:Q', axis=alt.Axis(title='Percentage (%)')),
-        x=alt.X('workshop_name:N', axis=alt.Axis(title='Workshop Name')),
         color=alt.Color('sentiment', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('sentiment:N', title="Sentiment")]
+        tooltip=[alt.Tooltip('timestamp:T', title="Workshop Name"), alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('sentiment:N', title="Sentiment")]
         ).properties(
             width=800, height=300
         ).configure_axis(grid=False)
