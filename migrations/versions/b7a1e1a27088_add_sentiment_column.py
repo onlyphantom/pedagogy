@@ -1,7 +1,7 @@
 """add sentiment column
 
 Revision ID: b7a1e1a27088
-Revises: 
+Revises: 429782854307
 Create Date: 2019-07-16 18:18:04.434145
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b7a1e1a27088'
-down_revision = None
+down_revision = '429782854307'
 branch_labels = None
 depends_on = None
 
