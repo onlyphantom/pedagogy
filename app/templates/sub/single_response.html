@@ -48,7 +48,7 @@
     {% endif %}
     
         {% for comments in personstats['qualitative'].items %}
-            {% if (comments['workshop_id'] == review['workshop_id'] and comments['comments'] != '')%}
+            {% if (comments['workshop_id'] == review['workshop_id'] and comments['comments'] != '-')%}
                 <hr/>
                 <p class="card-text">{{comments['comments']}}</p>
                 <ul>

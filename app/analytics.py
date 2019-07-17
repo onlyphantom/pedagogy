@@ -9,7 +9,7 @@ import datetime as datetime
 import altair as alt
 import pandas as pd
 import numpy as np
-import string, urllib, re, pickle
+import string, urllib, re
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from pathlib import Path
@@ -46,55 +46,28 @@ def getuserdb():
 # ===================================================
 
 def get_response():
-    responses = pd.read_sql_query("SELECT response.workshop_id, response.satisfaction_score, response.comments, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp\
-                              FROM response\
-                              LEFT JOIN workshop w ON w.id = response.workshop_id\
-                              LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
-
-    responses.loc[:,'comments'] = responses['comments'].astype(str)
-    responses.loc[:,'satisfaction_score'] = responses['satisfaction_score'].astype(float)
-
+    responses = pd.read_sql_query("SELECT response.workshop_id, response.satisfaction_score, response.comments, e.id as employee_id, w.workshop_name, w.workshop_start as timestamp, response.sentiment\
+                            FROM response\
+                            LEFT JOIN workshop w ON w.id = response.workshop_id\
+                            LEFT JOIN employee e ON e.id = w.workshop_instructor", conn, parse_dates='timestamp')
     sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
     responses = responses[responses.timestamp >= sixmonths]
+
+    responses = responses[responses['comments']!='-']
     return responses
 
 def get_sentiment_data(responses):
     
-    return responses[['workshop_id','workshop_name','employee_id','timestamp','comments']].copy()
+    return responses[['workshop_id','workshop_name','employee_id','timestamp','comments','sentiment']].copy()
 
 def get_reviews_data(responses):
 
-    return responses[['workshop_id', 'satisfaction_score', 'employee_id', 'timestamp']].copy()
-
-def process_sentiment(sentiment):
-    my_model = load(str(Path().absolute())+'/model/sentiment/model.joblib')
-    word_vector = load(str(Path().absolute())+'/model/sentiment/vector.joblib')
-
-    sentiment['comments'].replace(['','None'], np.nan, inplace=True)
-    sentiment.dropna(inplace=True)
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.lower())
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.punctuation)))
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: x.translate(str.maketrans("","", string.digits)))
-    sentiment.loc[:,'comments'] = sentiment['comments'].apply(lambda x: re.sub(' +', ' ',x).strip())
-    # word_vector.fit(pd.read_csv(str(Path().absolute())+'/model/sentiment/train.csv'))
-    
-    sentiment.loc[:,'score'] = ''
-    sentiment.loc[:,'score'] = my_model.predict(word_vector.transform(sentiment['comments']))
-
-    return sentiment
-
-def prereviews(reviews):
-    reviews.fillna(3, inplace=True)
-
-    return reviews
+    return responses[['workshop_id','satisfaction_score','employee_id','timestamp']].copy()
 
 response = get_response()
 
 sentiment = get_sentiment_data(response)
-sentiment = process_sentiment(sentiment)
-
 reviews = get_reviews_data(response)
-reviews = prereviews(reviews)
 
 domain = ['negative', 'positive']
 colors = ['#7dbbd2cc', '#bbc6cbe6']
@@ -103,31 +76,31 @@ def get_params():
     emp = getuserdb()
     dat = emp.loc[emp.this_user == True,:].copy()
     emp_id = dat.iloc[0]['workshop_instructor']
-    sixmonths = datetime.datetime.now() - datetime.timedelta(weeks=26)
     
-    return emp_id, sixmonths
+    return emp_id
 
 def get_overall_sentiment():
-    emp_id, sixmonths = get_params()
+    emp_id = get_params()
     person = sentiment[sentiment.employee_id==emp_id].copy()
 
-    return pd.crosstab([person['timestamp'],person['workshop_name'],person['workshop_id']],person['score']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['timestamp','workshop_name','workshop_id'])
+    monyear_percent = pd.crosstab([person['timestamp'],person['workshop_name'],person['workshop_id']],person['sentiment']).apply(lambda x: round(x/x.sum()*100,2), axis=1).reset_index().melt(id_vars=['timestamp','workshop_name','workshop_id'])
+    return monyear_percent.sort_values(by='timestamp', ascending=False).reset_index(drop=True)
 
 def get_overall_reviews(monyear_percent):
-    emp_id, sixmonths = get_params()
+    emp_id = get_params()
     
     filter_idx = monyear_percent.groupby(['workshop_id'])['value'].transform(max) == monyear_percent['value']
     al_reviews = monyear_percent[filter_idx].copy()
-    al_reviews.sort_values('score', ascending=False, inplace=True)
+    al_reviews.sort_values('sentiment', ascending=False, inplace=True)
     al_reviews.drop_duplicates(subset='workshop_id', keep="first", inplace=True)
 
-    person_reviews = reviews[(reviews.employee_id==emp_id) & (reviews.timestamp >= sixmonths)]
+    person_reviews = reviews[(reviews.employee_id==emp_id)]
 
-    sm_reviews = person_reviews[['satisfaction_score', 'workshop_id']].groupby(['workshop_id']).mean().round(1)
+    sm_reviews = person_reviews[['satisfaction_score', 'workshop_id', 'timestamp']].groupby(['workshop_id','timestamp']).mean().round(1)
     sm_reviews.reset_index(inplace=True)
 
     sm_reviews.loc[:,'workshop_name'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['workshop_name'])
-    sm_reviews.loc[:,'sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['score'])
+    sm_reviews.loc[:,'sentiment'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['sentiment'])
     sm_reviews.loc[:,'value'] = sm_reviews['workshop_id'].map(al_reviews.set_index('workshop_id')['value'])
     
     return sm_reviews
@@ -139,9 +112,8 @@ def vis_overall_sentiment():
     chart = alt.Chart(monyear_percent).mark_bar().encode(
         y=alt.Y('value:Q', axis=alt.Axis(title='Percentage (%)')),
         x=alt.X('workshop_name:N', axis=alt.Axis(title='Workshop Name')),
-        color=alt.Color('score', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
-        order="timestamp:T",
-        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('score:N', title="Sentiment")]
+        color=alt.Color('sentiment', scale=alt.Scale(domain=domain, range=colors), legend=alt.Legend(title="Sentiment")),
+        tooltip=[alt.Tooltip('value:Q', title="Percentage"), alt.Tooltip('sentiment:N', title="Sentiment")]
         ).properties(
             width=800, height=300
         ).configure_axis(grid=False)
@@ -641,9 +613,7 @@ def factory_accomplishment(u):
         Response.workshop_id.in_(w.id for w in workshops), Response.comments != '').join(
             Workshop, isouter=True).order_by(
                 Workshop.workshop_start.desc()).paginate(
-                    per_page=30, page=1, error_out=True)
-
-    # comments = pd.read_sql_query("SELECT workshop_id, comments FROM response", conn)
+                    per_page=100, page=1, error_out=True)
 
     monyear_percent = get_overall_sentiment()
 

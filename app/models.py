@@ -69,3 +69,4 @@ class Response(db.Model):
     venue_score = db.Column(db.Integer)
     satisfaction_score = db.Column(db.Integer)
     comments = db.Column(db.Text)
+    sentiment = db.Column(db.String(10), nullable=True)

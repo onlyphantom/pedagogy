@@ -6,6 +6,7 @@ from app.users import User
 from app.models import Employee, Workshop, Response
 from app.forms import LoginForm, RegistrationForm, SurveyForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.email import send_pw_reset_email
+from app.sentiment import preprocess_comments, predict_sentiment
 from datetime import datetime
 from sqlalchemy import func
 
@@ -142,7 +143,8 @@ def rate(workshop_id):
             timeliness=form.time.data,
             venue_score=form.venue.data,
             satisfaction_score=form.satisfaction.data,
-            comments=form.comments.data
+            comments=preprocess_comments(form.comments.data),
+            sentiment=predict_sentiment(preprocess_comments(form.comments.data))
         )
         db.session.add(response)
         db.session.commit()

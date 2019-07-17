@@ -3,6 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Hidde
 from wtforms.fields.html5 import IntegerRangeField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.users import User
+from joblib import load
 
 class LoginForm(FlaskForm):
     email = StringField('Work Email', validators=[DataRequired(), Email()])
