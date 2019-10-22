@@ -20,7 +20,7 @@ class Config():
     # 'mysql+pymysql://Samuel:tirab33@localhost/assistants'
     FLASK_DEBUG = 1
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_ECHO = True
     SQLALCHEMY_RECORD_QUERIES = False
     # mail server configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER')

@@ -8,6 +8,7 @@ import pandas as pd
 import datetime as datetime
 import pymysql
 from config import host, user, password, database
+from sqlalchemy import func
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
@@ -422,8 +423,17 @@ def team_leadinst_line():
 #
 # ===================================================
 # ===================================================
-@cache.cached(timeout=43200, key_prefix='gt_stats')
+# @cache.cached(timeout=43200, key_prefix='gt_stats')
 def factory_homepage():
+
+    print('topten')
+    total_hours = func.sum(Workshop.workshop_hours).label('total_hours')
+    topten = Employee.query.with_entities(Employee.email, Employee.name, total_hours).filter(
+        Employee.active == 1, Employee.name != 'Capstone').join(
+            Workshop, isouter=True).group_by(
+                Employee.name).order_by(total_hours.desc()).paginate(
+                    per_page=10, page=1, error_out=True)
+
     stats = {
         'students': df['class_size'].sum(),
         'workshops': df.shape[0],
@@ -431,16 +441,17 @@ def factory_homepage():
         # 'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
         'instructors': len(df['workshop_instructor'].unique()),
-        'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
-            'name').sum().sort_values(
-                by='class_size', 
-                ascending=False)
-                .head(10)
-                .rename_axis(None)
-                .rename(
-                    columns={'workshop_hours':'Total Hours',
-                          'class_size':'Total Students'})
-                .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
+        'topten': topten
+        # 'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
+        #     'name').sum().sort_values(
+        #         by='class_size', 
+        #         ascending=False)
+        #         .head(10)
+        #         .rename_axis(None)
+        #         .rename(
+        #             columns={'workshop_hours':'Total Hours',
+        #                   'class_size':'Total Students'})
+        #         .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
     }
     return stats
 

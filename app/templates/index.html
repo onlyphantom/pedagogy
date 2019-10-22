@@ -28,8 +28,30 @@
         <hr class="mt-4 col-md-12">
         <small>This project is under active development. <br/> Feature request or report a bug <a href="https://github.com/onlyphantom/pedagogy/issues" style="color:#b0e4ff">on the project's repo.</a></small>         
     </div>
-    <div class="row">
-            <div class="col-md-10 col-lg-5 col-sm-10">
+    <div class="row mt-2">
+        <div class="col-md-12 col-sm-12 col-lg-12">
+            <h4>Registered Instructors</h4>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <!-- <div class="card-columns" width="100%"> -->
+            {% for person in stats['topten'].items %}
+            <div class="column-card">    
+                <div class="card instructor-card">
+                    <img src="/static/img/instructors/{{ person.email }}.jpg" class="card-img-top" alt="instructor1", height="">
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>{{person.name}}</strong>
+                            <br>
+                            Clocked {{person.total_hours}} Hours of Training
+                        </p>
+                    </div>
+                </div>
+            </div>  
+            {% endfor %}
+        <!-- </div> -->
+        
+            <!-- <div class="col-md-10 col-lg-5 col-sm-10">
                 <h2>Leaderboard</h2>
                 <div class="mt-4">
                     {{ stats['topten'] | safe }}
@@ -39,7 +61,8 @@
                 <div class="plot-area">
                     <div class="plot" id="vis_home_1"></div>
                 </div>
-            </div>
+            </div> -->
+            
     </div>
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">

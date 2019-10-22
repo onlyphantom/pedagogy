@@ -176,7 +176,27 @@ ul.timeline > li:before {
 
 p.card-text {
     color: white;
-    font-weight: bolder;
+    font-weight: normal;
+}
+
+.card.instructor-card {
+    background-color: #7a94a8;
+}
+
+.column-card {
+    float: left;
+    width: 20%;
+    padding: 0 10px;
+    padding-bottom: 10px;
+  }
+
+/* Responsive columns */
+@media screen and (max-width: 600px) {
+    .column-card {
+        width: 100%;
+        display: block;
+        margin-bottom: 10px;
+    }
 }
 
 .blockquote-footer {
