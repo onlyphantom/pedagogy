@@ -1,7 +1,6 @@
 import os
 import pymysql
 import sqlite3
-from dotenv import load_dotenv
 
 secretkey = os.environ.get('SECRET_KEY')
 # database configuration
@@ -24,11 +23,6 @@ else:
 adminsemail = [
     'samuel@algorit.ma',
     'tiara@algorit.ma']
-
-dotenv_path = '.env'  # Address of your .env file
-load_dotenv(dotenv_path)
-
-
 
 # create the configuration class
 class Config():
