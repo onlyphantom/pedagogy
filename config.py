@@ -47,6 +47,7 @@ class Config():
 class Development(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../test.db'
     DEBUG = True
+    SQLALCHEMY_ECHO = True
 
 class Production(Config):
     SQLALCHEMY_DATABASE_URI = dburl
