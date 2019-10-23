@@ -3,7 +3,7 @@ from flask_login import current_user
 from app import app, cache, conn
 from app.models import Employee, Workshop, Response
 import altair as alt
-from altair import expr, datum
+from altair import expr, datum, Scale
 import pandas as pd
 import datetime as datetime
 import pymysql
@@ -48,34 +48,40 @@ def getuserdb():
 @cache.cached(timeout=86400, key_prefix='accum_g')
 def accum_global():
     dat = df.copy()
-    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Corporate'}, ignore_index=True)
-    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Academy'}, ignore_index=True)
-    dat['workshop_category'] = dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 'Corporate') else 'Public').astype('category')
-    dat = dat.loc[:,['workshop_start', 'workshop_category', 'workshop_hours', 'class_size']]\
-        .set_index('workshop_start')\
-        .groupby('workshop_category')\
-        .resample('W').sum().reset_index()
 
-    dat['workshop hours']=dat.groupby(['workshop_category'])['workshop_hours'].cumsum()
-    dat['students']=dat.groupby(['workshop_category'])['class_size'].cumsum()
-    dat = dat.melt(id_vars=['workshop_start', 'workshop_category'],value_vars=['workshop hours', 'students'])
+    dat['workshop_start'] = pd.to_datetime(dat['workshop_start']).dt.floor('D')
+    idx = pd.date_range(dat['workshop_start'].min(), dat['workshop_start'].max())
+    dat = dat[dat.workshop_category.isin(['Academy', 'Corporate'])]
+    cum_size = dat.groupby(['workshop_category', 'workshop_start'])['class_size'].sum()
+    dat = cum_size.reindex(pd.MultiIndex.from_product([cum_size.index.levels[0], idx], names=['category', 'date']), fill_value=0).reset_index()
+    dat['cumulative'] = dat.groupby('category').cumsum()
 
-    chart = alt.Chart(dat).mark_area().encode(
-        column=alt.Column('workshop_category', title=None, sort="descending", 
-                          header=alt.Header(
-                              labelColor='#ffffff', 
-                              titleAnchor="start")),
-        x=alt.X("workshop_start", title="Date"),
-        y=alt.Y("value:Q", title="Cumulative"),
-        color=alt.Color("variable", 
+    brush = alt.selection(type='interval', encodings=['x'])
+
+    # Create a stacked chart area
+    upper = alt.Chart(dat).mark_area().encode(
+        x=alt.X("date", title="Date", scale={'domain': brush.ref()}),
+        y=alt.Y("cumulative:Q", title="Cumulative"),
+        color=alt.Color("category", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
-            legend=None
-        ),
-        tooltip=['variable', 'value:Q']
-    ).properties(width=350).configure_axis(
-        labelColor='#bbc6cbe6',
-        titleColor='#bbc6cbe6', 
+                legend=alt.Legend(title='Workshop Category')
+        )
+    )
+    lower = alt.Chart().mark_area(color='#75b3cacc').encode(
+            x=alt.X("date", axis=alt.Axis(title=''), scale={
+                'domain':brush.ref()
+            }),
+            y=alt.Y("cumulative", axis=alt.Axis(title=''))
+        ).properties(
+        height=30
+    ).add_selection(
+        brush
+    )
+
+    chart = alt.vconcat(upper,lower, data=dat).configure_view(
+        strokeWidth=0
+    ).configure_axis(
         grid=False
     )
 
