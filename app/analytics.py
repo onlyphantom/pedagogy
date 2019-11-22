@@ -21,7 +21,7 @@ def getdb():
 
     return pd.read_sql_query(
     "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, \
-        workshop_start, workshop_hours, class_size, e.name, e.active, e.university \
+        workshop_start, workshop_hours, class_size, e.name, e.email, e.active, e.university \
         FROM workshop \
         LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
         conn, index_col='id')
@@ -159,6 +159,118 @@ def punchcode():
         labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
     )
     return chart.to_json()
+
+@app.route('/data/calendar_heatmap')
+@cache.cached(timeout=86400, key_prefix='cal_heatmap')
+def calendar_heatmap():
+    dat = df.copy()
+    dat = dat[dat.name!='Capstone']
+    dat['workshop_start'] = pd.to_datetime(dat['workshop_start'])
+    dat['weekly'] = dat.workshop_start.dt.to_period('W')
+    dat = dat[dat.workshop_category.isin(['Academy', 'Corporate'])].groupby(['weekly', 'name', 'workshop_category'])['workshop_hours'].sum() 
+
+    # Set visualization as 'This year in a glimpse'
+    start_week = pd.Period(datetime.datetime.now().year -1, 'W-SUN')
+    end_week = pd.Period(datetime.datetime.now().year, 'W-SUN')
+
+    # Create academy workshop hour value
+    aca = dat.unstack(fill_value=0).unstack(fill_value=0).xs('Academy', axis=1).\
+    reindex(pd.PeriodIndex(start=start_week, end=end_week, freq='W'), fill_value=0).\
+    reset_index().melt(id_vars='index')
+    aca['index'] = aca['index'].dt.to_timestamp(how='S')
+
+    # Create corporate workshop hour value
+    cor = dat.unstack(fill_value=0).unstack(fill_value=0).xs('Corporate', axis=1).\
+    reindex(pd.PeriodIndex(start=start_week, end=end_week, freq='W'), fill_value=0).\
+    reset_index().melt(id_vars='index')
+    cor['index'] = cor['index'].dt.to_timestamp(how='S')
+
+    # Set color domain and range
+    domain = [int(cor.value.min()), int(cor.value.max())]
+    range_ = ['#6b8391', '#343a40']
+
+    ## Create academy calendar
+    base_aca = alt.Chart(aca).encode(
+        alt.X('index', axis=alt.Axis(title=''), scale=alt.Scale(padding=20)),
+        alt.Y('name', axis=alt.Axis(title=''), scale=alt.Scale(padding=20)),
+    )
+
+    # Configure heatmap
+    heatmap_aca = base_aca.mark_square(size=300).encode(
+        color=alt.condition(
+            alt.datum.value > 1,
+            alt.Color('value:Q',
+                    scale=alt.Scale(
+                        domain=domain,
+                        range=range_),
+                        legend=None),
+            alt.value(None)
+        )
+    ).properties(
+        width=1000,
+        height=500,
+        title='Academy Workshops Contribution'
+    )
+
+    # Configure text
+    textaca = heatmap_aca.mark_text(baseline='middle', fontSize=10).encode(
+        text='value:Q',
+        color=alt.condition(
+            alt.datum.value > 1,
+            alt.value('white'),
+            alt.value(None)
+        )
+    )
+
+
+    ## Create corporate calendar
+    base_cor = alt.Chart(cor).encode(
+        alt.X('index', axis=alt.Axis(title='Date'), scale=alt.Scale(padding=20)),
+        alt.Y('name', axis=alt.Axis(title=''), scale=alt.Scale(padding=20)),
+    )
+
+    # Configure heatmap
+    heatmap_cor = base_cor.mark_square(size=300).encode(
+        color=alt.condition(
+            alt.datum.value > 1,
+            alt.Color('value:Q',
+                    scale=alt.Scale(
+                        domain=domain,
+                        range=range_),
+                        legend=None),
+            alt.value(None)
+        )
+    ).properties(
+        width=1000,
+        height=500,
+        title='Corporate Workshops Contribution'
+    )
+
+    # Configure text
+    textcor = heatmap_cor.mark_text(baseline='middle', fontSize=10).encode(
+        text='value:Q',
+        color=alt.condition(
+            alt.datum.value > 1,
+            alt.value('white'),
+            alt.value(None)
+        )
+    )
+
+    # Draw the chart
+    chart = alt.vconcat(heatmap_aca + textaca, heatmap_cor + textcor).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6',
+        grid=False
+    ).resolve_scale(
+        color='independent'
+    ).configure_title(
+        fontSize=20,
+        anchor='start',
+        color='#bbc6cbe6'
+    )
+
+    return chart.to_json()
+
 
 @app.route('/data/category_bars')
 @cache.cached(timeout=86400, key_prefix='c_b')
@@ -432,9 +544,9 @@ def team_leadinst_line():
 # @cache.cached(timeout=43200, key_prefix='gt_stats')
 def factory_homepage():
 
-    print('topten')
     total_hours = func.sum(Workshop.workshop_hours).label('total_hours')
-    topten = Employee.query.with_entities(Employee.email, Employee.name, total_hours).filter(
+    total_students = func.sum(Workshop.class_size).label('total_students')
+    topten = Employee.query.with_entities(Employee.email, Employee.name, total_hours, total_students).filter(
         Employee.active == 1, Employee.name != 'Capstone').join(
             Workshop, isouter=True).group_by(
                 Employee.name).order_by(total_hours.desc()).paginate(
@@ -446,6 +558,7 @@ def factory_homepage():
         'studenthours': sum(df['workshop_hours']),
         # 'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
+        'registered': df[df['name'] != 'Capstone'].loc[:,['name','email']].drop_duplicates(),
         'instructors': len(df['workshop_instructor'].unique()),
         'topten': topten
         # 'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(

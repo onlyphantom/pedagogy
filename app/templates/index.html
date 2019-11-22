@@ -31,11 +31,56 @@
     <div class="row mt-2">
         <div class="col-md-12 col-sm-12 col-lg-12">
             <h4>Registered Instructors</h4>
+            <br>
+            {% for key, person in stats['registered'].iterrows() %}
+                <img src="/static/img/instructors/{{ person['email'] }}.jpg" class="icon" alt="{{ person['name'] }}">
+            {% endfor %}
+        </div>
+        
+    </div>
+    <br>
+    <div class="row mt-2">
+        <div class="col-md-8 col-sm-8 col-lg-8">
+            <!-- heatmap plot goes here -->
+            <div class="plot" id="cal_heatmap"></div>
+        </div>
+        <div class="col-md-4 col-sm-4 col-lg-4">
+            <h4>Leaderboard</h4>
+            <table style="width:100%">
+                <thead>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Total Hours
+                    </th>
+                    <th>
+                        Total Students
+                    </th>
+                </thead>
+                <tbody>
+                    {% for person in stats['topten'].items %}
+                    <tr>
+                        <td>
+                            {{ person.name }}
+                        </td>
+                        <td>
+                            Clocked {{ person.total_hours }} Hours of Training
+                        </td>
+                        <td>
+                            Teached a Total of {{ person.total_students }} Students
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-    <div class="row mt-2">
+    <br>
+        
+        
         <!-- <div class="card-columns" width="100%"> -->
-            {% for person in stats['topten'].items %}
+            <!-- {% for person in stats['topten'].items %}
             <div class="column-card">    
                 <div class="card instructor-card">
                     <img src="/static/img/instructors/{{ person.email }}.jpg" class="card-img-top" alt="{{ person.name }}">
@@ -48,7 +93,7 @@
                     </div>
                 </div>
             </div>  
-            {% endfor %}
+            {% endfor %} -->
         <!-- </div> -->
         
             <!-- <div class="col-md-10 col-lg-5 col-sm-10">
@@ -63,7 +108,6 @@
                 </div>
             </div> -->
             
-    </div>
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
             <div class="jumbotron jumbo-mini">
@@ -105,7 +149,7 @@
             }).catch(console.error);
         }
         parse("/data/accum_global", "#vis_home_jumbo")
-        // parse("/data/punchcode", "#vis_home_1")
+        parse("/data/calendar_heatmap", "#cal_heatmap")
         // parse("/data/accum_global", "#vis_home_2")
         // parse('/data/category_bars', '#vis_home_3')
     </script>

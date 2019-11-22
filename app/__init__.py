@@ -14,10 +14,10 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-app.config.from_object(Development)
 
 # create conditional connection
 if(os.getenv('FLASK_ENV') == 'development'):
+    app.config.from_object(Development)
     conn = sqlite3.connect('test.db')
 else:
     conn = pymysql.connect(
@@ -26,6 +26,7 @@ else:
         user=user,
         passwd=password,
         db=database)
+    app.config.from_object(Production)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
