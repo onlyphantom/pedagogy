@@ -33,18 +33,17 @@
             <h4>Registered Instructors</h4>
             <br>
             {% for key, person in stats['registered'].iterrows() %}
-                <img src="/static/img/instructors/{{ person['email'] }}.jpg" class="icon" alt="{{ person['name'] }}">
+                <img src="/static/img/instructors/{{ person['email'] }}.jpg" class="image", title="{{ person['name'] }}">
             {% endfor %}
         </div>
         
     </div>
     <br>
     <div class="row mt-2">
-        <div class="col-md-8 col-sm-8 col-lg-8">
-            <!-- heatmap plot goes here -->
-            <div class="plot" id="cal_heatmap"></div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <!-- manual offset -->
         </div>
-        <div class="col-md-4 col-sm-4 col-lg-4">
+        <div class="col-md-6 col-sm-6 col-lg-6">
             <h4>Leaderboard</h4>
             <table style="width:100%">
                 <thead>
@@ -52,10 +51,10 @@
                         Name
                     </th>
                     <th>
-                        Total Hours
+                        Total Training Hours
                     </th>
                     <th>
-                        Total Students
+                        Total Students Reached
                     </th>
                 </thead>
                 <tbody>
@@ -65,49 +64,35 @@
                             {{ person.name }}
                         </td>
                         <td>
-                            Clocked {{ person.total_hours }} Hours of Training
+                            {{ person.total_hours }} Hours
                         </td>
                         <td>
-                            Teached a Total of {{ person.total_students }} Students
+                            {{ person.total_students }} Students
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <!-- manual offset -->
+        </div>
+        <!-- <div class="col-md-8 col-sm-8 col-lg-8">
+             heatmap plot goes here 
+            <div class="plot" id="cal_heatmap"></div>
+        </div> -->
+        
+    </div>
+    <div>
+        <div class="row mt-2">
+            <div class="col-md-12 col-sm-12 col-lg-12">
+                <!-- heatmap plot goes here -->
+                <div class="plot" id="cal_heatmap"></div>
+            </div>
+        </div>
     </div>
     <br>
         
-        
-        <!-- <div class="card-columns" width="100%"> -->
-            <!-- {% for person in stats['topten'].items %}
-            <div class="column-card">    
-                <div class="card instructor-card">
-                    <img src="/static/img/instructors/{{ person.email }}.jpg" class="card-img-top" alt="{{ person.name }}">
-                    <div class="card-body">
-                        <p class="card-text">
-                            <strong>{{person.name}}</strong>
-                            <br>
-                            Clocked {{person.total_hours}} Hours of Training
-                        </p>
-                    </div>
-                </div>
-            </div>  
-            {% endfor %} -->
-        <!-- </div> -->
-        
-            <!-- <div class="col-md-10 col-lg-5 col-sm-10">
-                <h2>Leaderboard</h2>
-                <div class="mt-4">
-                    {{ stats['topten'] | safe }}
-                </div>
-            </div>
-            <div class="col-md-10 col-lg-7 col-sm-10">
-                <div class="plot-area">
-                    <div class="plot" id="vis_home_1"></div>
-                </div>
-            </div> -->
-            
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
             <div class="jumbotron jumbo-mini">

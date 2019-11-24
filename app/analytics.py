@@ -167,11 +167,14 @@ def calendar_heatmap():
     dat = dat[dat.name!='Capstone']
     dat['workshop_start'] = pd.to_datetime(dat['workshop_start'])
     dat['weekly'] = dat.workshop_start.dt.to_period('W')
+    # Set visualization as 'This year in a glimpse'
+    start_week = pd.Period(datetime.datetime.now().year, 'W-SUN')
+    end_week = pd.Period(datetime.datetime.now().year+1, 'W-SUN')
+    dat = dat[(dat['weekly'] >= start_week) & (dat['weekly'] <= end_week)]
+
     dat = dat[dat.workshop_category.isin(['Academy', 'Corporate'])].groupby(['weekly', 'name', 'workshop_category'])['workshop_hours'].sum() 
 
-    # Set visualization as 'This year in a glimpse'
-    start_week = pd.Period(datetime.datetime.now().year -1, 'W-SUN')
-    end_week = pd.Period(datetime.datetime.now().year, 'W-SUN')
+
 
     # Create academy workshop hour value
     aca = dat.unstack(fill_value=0).unstack(fill_value=0).xs('Academy', axis=1).\
@@ -187,12 +190,18 @@ def calendar_heatmap():
 
     # Set color domain and range
     domain = [int(cor.value.min()), int(cor.value.max())]
-    range_ = ['#6b8391', '#343a40']
+    range_ = ['#adbac0', '#4d9dcc']
 
     ## Create academy calendar
     base_aca = alt.Chart(aca).encode(
-        alt.X('index', axis=alt.Axis(title=''), scale=alt.Scale(padding=20)),
-        alt.Y('name', axis=alt.Axis(title=''), scale=alt.Scale(padding=20)),
+        alt.X('index', axis=alt.Axis(title='Date'), scale=alt.Scale(padding=20)),
+        alt.Y('name', axis=alt.Axis(title=''), 
+        scale=alt.Scale(padding=20),
+        sort=alt.EncodingSortField(
+            field="value",  # The field to use for the sort
+            op="sum",  # The operation to run on the field prior to sorting
+            order="descending"  # The order to sort in
+        ))
     )
 
     # Configure heatmap
@@ -212,21 +221,19 @@ def calendar_heatmap():
         title='Academy Workshops Contribution'
     )
 
-    # Configure text
-    textaca = heatmap_aca.mark_text(baseline='middle', fontSize=10).encode(
-        text='value:Q',
-        color=alt.condition(
-            alt.datum.value > 1,
-            alt.value('white'),
-            alt.value(None)
-        )
-    )
-
-
     ## Create corporate calendar
     base_cor = alt.Chart(cor).encode(
         alt.X('index', axis=alt.Axis(title='Date'), scale=alt.Scale(padding=20)),
-        alt.Y('name', axis=alt.Axis(title=''), scale=alt.Scale(padding=20)),
+        alt.Y(
+            field='name', 
+            axis=alt.Axis(title=''), 
+            scale=alt.Scale(padding=20),
+            type='nominal',
+            sort=alt.EncodingSortField(
+                field="value",  # The field to use for the sort
+                op="sum",  # The operation to run on the field prior to sorting
+                order="descending"  # The order to sort in
+            ))
     )
 
     # Configure heatmap
@@ -237,7 +244,10 @@ def calendar_heatmap():
                     scale=alt.Scale(
                         domain=domain,
                         range=range_),
-                        legend=None),
+                        legend=alt.Legend(
+                            direction='vertical',
+                            title='Workshop Hours',
+                            titleColor='#bbc6cbe6')),
             alt.value(None)
         )
     ).properties(
@@ -246,27 +256,22 @@ def calendar_heatmap():
         title='Corporate Workshops Contribution'
     )
 
-    # Configure text
-    textcor = heatmap_cor.mark_text(baseline='middle', fontSize=10).encode(
-        text='value:Q',
-        color=alt.condition(
-            alt.datum.value > 1,
-            alt.value('white'),
-            alt.value(None)
-        )
-    )
-
     # Draw the chart
-    chart = alt.vconcat(heatmap_aca + textaca, heatmap_cor + textcor).configure_axis(
+    chart = alt.hconcat(heatmap_aca, heatmap_cor).configure_axis(
         labelColor='#bbc6cbe6',
         titleColor='#bbc6cbe6',
-        grid=False
-    ).resolve_scale(
-        color='independent'
+        grid=False,
+        labelFontSize=16,
+        titleFontSize=24
     ).configure_title(
-        fontSize=20,
+        fontSize=26,
         anchor='start',
         color='#bbc6cbe6'
+    ).configure_legend(
+        titleColor='#bbc6cbe6',
+        labelColor='#bbc6cbe6',
+        titleFontSize=16,
+        labelFontSize=16
     )
 
     return chart.to_json()
