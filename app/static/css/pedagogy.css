@@ -179,26 +179,6 @@ p.card-text {
     font-weight: normal;
 }
 
-.card.instructor-card {
-    background-color: #7a94a8;
-}
-
-.column-card {
-    float: left;
-    width: 10%;
-    padding: 0 10px;
-    padding-bottom: 10px;
-  }
-
-/* Responsive columns */
-@media screen and (max-width: 600px) {
-    .column-card {
-        width: 100%;
-        display: block;
-        margin-bottom: 10px;
-    }
-}
-
 .blockquote-footer {
     color: #273f52;
 }
@@ -358,7 +338,7 @@ th {
   padding: 1px;
   border: 1px solid #b5c1c7;
 }
-img.icon {
+img.image {
   width: 3%;
   height: auto;
   border-radius: 50%;
