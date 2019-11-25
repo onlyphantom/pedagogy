@@ -28,25 +28,77 @@
         <hr class="mt-4 col-md-12">
         <small>This project is under active development. <br/> Feature request or report a bug <a href="https://github.com/onlyphantom/pedagogy/issues" style="color:#b0e4ff">on the project's repo.</a></small>         
     </div>
-    <div class="row">
-            <div class="col-md-10 col-lg-5 col-sm-10">
-                <h2>Leaderboard</h2>
-                <div class="mt-4">
-                    {{ stats['topten'] | safe }}
-                </div>
-            </div>
-            <div class="col-md-10 col-lg-7 col-sm-10">
-                <div class="plot-area">
-                    <div class="plot" id="vis_home_1"></div>
-                </div>
-            </div>
+    <div class="row mt-2">
+        <div class="col-md-12 col-sm-12 col-lg-12">
+            <h4>Registered Instructors</h4>
+            <br>
+            {% for key, person in stats['registered'].iterrows() %}
+                <img src="/static/img/instructors/{{ person['email'] }}.jpg" class="image", title="{{ person['name'] }}">
+            {% endfor %}
+        </div>
+        
     </div>
+    <br>
+    <div class="row mt-2">
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <!-- manual offset -->
+        </div>
+        <div class="col-md-6 col-sm-6 col-lg-6">
+            <h4>Leaderboard</h4>
+            <table style="width:100%">
+                <thead>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Total Training Hours
+                    </th>
+                    <th>
+                        Total Students Reached
+                    </th>
+                </thead>
+                <tbody>
+                    {% for person in stats['topten'].items %}
+                    <tr>
+                        <td>
+                            {{ person.name }}
+                        </td>
+                        <td>
+                            {{ person.total_hours }} Hours
+                        </td>
+                        <td>
+                            {{ person.total_students }} Students
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <!-- manual offset -->
+        </div>
+        <!-- <div class="col-md-8 col-sm-8 col-lg-8">
+             heatmap plot goes here 
+            <div class="plot" id="cal_heatmap"></div>
+        </div> -->
+        
+    </div>
+    <div>
+        <div class="row mt-2">
+            <div class="col-md-12 col-sm-12 col-lg-12">
+                <!-- heatmap plot goes here -->
+                <div class="plot" id="cal_heatmap"></div>
+            </div>
+        </div>
+    </div>
+    <br>
+        
     <div class="row mt-2">
         <div class="col-md-10 col-lg-5 col-sm-10">
             <div class="jumbotron jumbo-mini">
-                <h2>Hours by Category</h2>
+                <!-- <h2>Hours by Category</h2>
                 <div class="plot" id="vis_home_3"></div>
-                <hr>
+                <hr> -->
                 <h2><i class="large material-icons">insert_chart_outlined</i> Personal Statistics</h2>
                 <p>Registered as an instructor on Pedagogy? <br>
                     Log in and view detailed performance statistics:</p>
@@ -81,10 +133,10 @@
               // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
             }).catch(console.error);
         }
-        parse("/data/accum_global_line", "#vis_home_jumbo")
-        parse("/data/punchcode", "#vis_home_1")
-        parse("/data/accum_global", "#vis_home_2")
-        parse('/data/category_bars', '#vis_home_3')
+        parse("/data/accum_global", "#vis_home_jumbo")
+        parse("/data/calendar_heatmap", "#cal_heatmap")
+        // parse("/data/accum_global", "#vis_home_2")
+        // parse('/data/category_bars', '#vis_home_3')
     </script>
 
 {% endblock %}

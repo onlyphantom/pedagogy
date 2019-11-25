@@ -3,10 +3,12 @@ from flask_login import current_user
 from app import app, cache, conn
 from app.models import Employee, Workshop, Response
 import altair as alt
-from altair import expr, datum
+from altair import expr, datum, Scale
 import pandas as pd
 import datetime as datetime
-
+import pymysql
+from config import host, user, password, database
+from sqlalchemy import func
 
 @cache.cached(timeout=60*60, key_prefix='hourly_db')
 def getdb():
@@ -19,7 +21,7 @@ def getdb():
 
     return pd.read_sql_query(
     "SELECT workshop.id, workshop_name, workshop_category, workshop_instructor, \
-        workshop_start, workshop_hours, class_size, e.name, e.active, e.university \
+        workshop_start, workshop_hours, class_size, e.name, e.email, e.active, e.university \
         FROM workshop \
         LEFT JOIN employee as e ON e.id = workshop.workshop_instructor",
         conn, index_col='id', parse_dates='workshop_start')
@@ -46,34 +48,40 @@ def getuserdb():
 @cache.cached(timeout=86400, key_prefix='accum_g')
 def accum_global():
     dat = df.copy()
-    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Corporate'}, ignore_index=True)
-    dat = dat.append({'workshop_start': datetime.datetime.now(), 'workshop_category': 'Academy'}, ignore_index=True)
-    dat['workshop_category'] = dat['workshop_category'].apply(lambda x: 'Corporate' if (x == 'Corporate') else 'Public').astype('category')
-    dat = dat.loc[:,['workshop_start', 'workshop_category', 'workshop_hours', 'class_size']]\
-        .set_index('workshop_start')\
-        .groupby('workshop_category')\
-        .resample('W').sum().reset_index()
 
-    dat['workshop hours']=dat.groupby(['workshop_category'])['workshop_hours'].cumsum()
-    dat['students']=dat.groupby(['workshop_category'])['class_size'].cumsum()
-    dat = dat.melt(id_vars=['workshop_start', 'workshop_category'],value_vars=['workshop hours', 'students'])
+    dat['workshop_start'] = pd.to_datetime(dat['workshop_start']).dt.floor('D')
+    idx = pd.date_range(dat['workshop_start'].min(), dat['workshop_start'].max())
+    dat = dat[dat.workshop_category.isin(['Academy', 'Corporate'])]
+    cum_size = dat.groupby(['workshop_category', 'workshop_start'])['class_size'].sum()
+    dat = cum_size.reindex(pd.MultiIndex.from_product([cum_size.index.levels[0], idx], names=['category', 'date']), fill_value=0).reset_index()
+    dat['cumulative'] = dat.groupby('category').cumsum()
 
-    chart = alt.Chart(dat).mark_area().encode(
-        column=alt.Column('workshop_category', title=None, sort="descending", 
-                          header=alt.Header(
-                              labelColor='#ffffff', 
-                              titleAnchor="start")),
-        x=alt.X("workshop_start", title="Date"),
-        y=alt.Y("value:Q", title="Cumulative"),
-        color=alt.Color("variable", 
+    brush = alt.selection(type='interval', encodings=['x'])
+
+    # Create a stacked chart area
+    upper = alt.Chart(dat).mark_area().encode(
+        x=alt.X("date", title="Date", scale={'domain': brush.ref()}),
+        y=alt.Y("cumulative:Q", title="Cumulative"),
+        color=alt.Color("category", 
             scale=alt.Scale(
                 range=['#7dbbd2cc', '#bbc6cbe6']),
-            legend=None
-        ),
-        tooltip=['variable', 'value:Q']
-    ).properties(width=350).configure_axis(
-        labelColor='#bbc6cbe6',
-        titleColor='#bbc6cbe6', 
+                legend=alt.Legend(title='Workshop Category')
+        )
+    )
+    lower = alt.Chart().mark_area(color='#75b3cacc').encode(
+            x=alt.X("date", axis=alt.Axis(title=''), scale={
+                'domain':brush.ref()
+            }),
+            y=alt.Y("cumulative", axis=alt.Axis(title=''))
+        ).properties(
+        height=30
+    ).add_selection(
+        brush
+    )
+
+    chart = alt.vconcat(upper,lower, data=dat).configure_view(
+        strokeWidth=0
+    ).configure_axis(
         grid=False
     )
 
@@ -151,6 +159,123 @@ def punchcode():
         labelColor='#bbc6cbe6', titleColor='#bbc6cbe6', grid=False
     )
     return chart.to_json()
+
+@app.route('/data/calendar_heatmap')
+@cache.cached(timeout=86400, key_prefix='cal_heatmap')
+def calendar_heatmap():
+    dat = df.copy()
+    dat = dat[dat.name!='Capstone']
+    dat['workshop_start'] = pd.to_datetime(dat['workshop_start'])
+    dat['weekly'] = dat.workshop_start.dt.to_period('W')
+    # Set visualization as 'This year in a glimpse'
+    start_week = pd.Period(datetime.datetime.now().year, 'W-SUN')
+    end_week = pd.Period(datetime.datetime.now().year+1, 'W-SUN')
+    dat = dat[(dat['weekly'] >= start_week) & (dat['weekly'] <= end_week)]
+
+    dat = dat[dat.workshop_category.isin(['Academy', 'Corporate'])].groupby(['weekly', 'name', 'workshop_category'])['workshop_hours'].sum() 
+
+
+
+    # Create academy workshop hour value
+    aca = dat.unstack(fill_value=0).unstack(fill_value=0).xs('Academy', axis=1).\
+    reindex(pd.PeriodIndex(start=start_week, end=end_week, freq='W'), fill_value=0).\
+    reset_index().melt(id_vars='index')
+    aca['index'] = aca['index'].dt.to_timestamp(how='S')
+
+    # Create corporate workshop hour value
+    cor = dat.unstack(fill_value=0).unstack(fill_value=0).xs('Corporate', axis=1).\
+    reindex(pd.PeriodIndex(start=start_week, end=end_week, freq='W'), fill_value=0).\
+    reset_index().melt(id_vars='index')
+    cor['index'] = cor['index'].dt.to_timestamp(how='S')
+
+    # Set color domain and range
+    domain = [int(cor.value.min()), int(cor.value.max())]
+    range_ = ['#adbac0', '#4d9dcc']
+
+    ## Create academy calendar
+    base_aca = alt.Chart(aca).encode(
+        alt.X('index', axis=alt.Axis(title='Date'), scale=alt.Scale(padding=20)),
+        alt.Y('name', axis=alt.Axis(title=''), 
+        scale=alt.Scale(padding=20),
+        sort=alt.EncodingSortField(
+            field="value",  # The field to use for the sort
+            op="sum",  # The operation to run on the field prior to sorting
+            order="descending"  # The order to sort in
+        ))
+    )
+
+    # Configure heatmap
+    heatmap_aca = base_aca.mark_square(size=300).encode(
+        color=alt.condition(
+            alt.datum.value > 1,
+            alt.Color('value:Q',
+                    scale=alt.Scale(
+                        domain=domain,
+                        range=range_),
+                        legend=None),
+            alt.value(None)
+        )
+    ).properties(
+        width=1000,
+        height=500,
+        title='Academy Workshops Contribution'
+    )
+
+    ## Create corporate calendar
+    base_cor = alt.Chart(cor).encode(
+        alt.X('index', axis=alt.Axis(title='Date'), scale=alt.Scale(padding=20)),
+        alt.Y(
+            field='name', 
+            axis=alt.Axis(title=''), 
+            scale=alt.Scale(padding=20),
+            type='nominal',
+            sort=alt.EncodingSortField(
+                field="value",  # The field to use for the sort
+                op="sum",  # The operation to run on the field prior to sorting
+                order="descending"  # The order to sort in
+            ))
+    )
+
+    # Configure heatmap
+    heatmap_cor = base_cor.mark_square(size=300).encode(
+        color=alt.condition(
+            alt.datum.value > 1,
+            alt.Color('value:Q',
+                    scale=alt.Scale(
+                        domain=domain,
+                        range=range_),
+                        legend=alt.Legend(
+                            direction='vertical',
+                            title='Workshop Hours',
+                            titleColor='#bbc6cbe6')),
+            alt.value(None)
+        )
+    ).properties(
+        width=1000,
+        height=500,
+        title='Corporate Workshops Contribution'
+    )
+
+    # Draw the chart
+    chart = alt.hconcat(heatmap_aca, heatmap_cor).configure_axis(
+        labelColor='#bbc6cbe6',
+        titleColor='#bbc6cbe6',
+        grid=False,
+        labelFontSize=16,
+        titleFontSize=24
+    ).configure_title(
+        fontSize=26,
+        anchor='start',
+        color='#bbc6cbe6'
+    ).configure_legend(
+        titleColor='#bbc6cbe6',
+        labelColor='#bbc6cbe6',
+        titleFontSize=16,
+        labelFontSize=16
+    )
+
+    return chart.to_json()
+
 
 @app.route('/data/category_bars')
 @cache.cached(timeout=86400, key_prefix='c_b')
@@ -421,25 +546,36 @@ def team_leadinst_line():
 #
 # ===================================================
 # ===================================================
-@cache.cached(timeout=43200, key_prefix='gt_stats')
+# @cache.cached(timeout=43200, key_prefix='gt_stats')
 def factory_homepage():
+
+    total_hours = func.sum(Workshop.workshop_hours).label('total_hours')
+    total_students = func.sum(Workshop.class_size).label('total_students')
+    topten = Employee.query.with_entities(Employee.email, Employee.name, total_hours, total_students).filter(
+        Employee.active == 1, Employee.name != 'Capstone').join(
+            Workshop, isouter=True).group_by(
+                Employee.name).order_by(total_hours.desc()).paginate(
+                    per_page=10, page=1, error_out=True)
+
     stats = {
         'students': df['class_size'].sum(),
         'workshops': df.shape[0],
         'studenthours': sum(df['workshop_hours']),
         # 'studenthours': sum(df['workshop_hours'] * df['class_size']),
         'companies': sum(df['workshop_category'] == 'Corporate'),
+        'registered': df[df['name'] != 'Capstone'].loc[:,['name','email']].drop_duplicates(),
         'instructors': len(df['workshop_instructor'].unique()),
-        'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
-            'name').sum().sort_values(
-                by='class_size', 
-                ascending=False)
-                .head(10)
-                .rename_axis(None)
-                .rename(
-                    columns={'workshop_hours':'Total Hours',
-                          'class_size':'Total Students'})
-                .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
+        'topten': topten
+        # 'topten': df[df.name != 'Capstone'].loc[:,['name','workshop_hours', 'class_size']].groupby(
+        #     'name').sum().sort_values(
+        #         by='class_size', 
+        #         ascending=False)
+        #         .head(10)
+        #         .rename_axis(None)
+        #         .rename(
+        #             columns={'workshop_hours':'Total Hours',
+        #                   'class_size':'Total Students'})
+        #         .to_html(classes=['table thead-light table-striped table-bordered table-hover table-sm'])
     }
     return stats
 

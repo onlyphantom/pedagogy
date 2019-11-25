@@ -17,6 +17,7 @@ app = Flask(__name__)
 
 # create conditional connection
 if(os.getenv('FLASK_ENV') == 'development'):
+    app.config.from_object(Development)
     conn = sqlite3.connect('test.db')
     app.config.from_object(Development)
 else:
