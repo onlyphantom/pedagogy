@@ -2,7 +2,7 @@
 alembic==0.9.9
 altair==2.2.2
 appnope==0.1.0
-arrow==0.12.1
+arrow==0.15.1
 asn1crypto==0.24.0
 astroid==2.0.2
 backcall==0.1.0
